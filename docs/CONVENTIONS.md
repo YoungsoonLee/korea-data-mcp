@@ -7,7 +7,7 @@ Every provider follows these conventions. Upstream APIs differ wildly, but agent
 ## 1. Providers
 
 - Implement the `hub.Provider` interface and add it to `All()` in `providers/providers.go`.
-- `ID` uses only lowercase letters and digits (`opendart`, `naver`, `datagokr`). It becomes the tool name prefix.
+- `ID` uses only lowercase letters and digits (`opendart`, `datagokr`, `ecos`). It becomes the tool name prefix.
 - API keys come from environment variables (`RequiredEnv`). A provider with missing keys is disabled automatically and shown in `hub_list_providers` with `missing_env`.
 - Set `ProviderInfo.DocsURL` to the page where users obtain a key.
 
@@ -21,12 +21,11 @@ Every provider follows these conventions. Upstream APIs differ wildly, but agent
 | Provider ID | Environment variables |
 |---|---|
 | `opendart` | `OPENDART_API_KEY` |
-| `naver` | `NAVER_CLIENT_ID`, `NAVER_CLIENT_SECRET` |
 | `datagokr` | `DATAGOKR_SERVICE_KEY` (the **Decoding key**: `httpx` encodes the query, so the Encoding key would be encoded twice and fail authentication) |
 
 ## 2. Tool names
 
-- Format: `<provider>_<verb>_<noun>` (snake_case). Examples: `opendart_search_disclosures`, `naver_search_news`
+- Format: `<provider>_<verb>_<noun>` (snake_case). Examples: `opendart_search_disclosures`, `opendart_get_financials`
 - Choose the verb from:
   - `search`: find a list of items by criteria
   - `get`: fetch a single item by ID

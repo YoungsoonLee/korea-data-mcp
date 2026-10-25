@@ -89,3 +89,24 @@ func TestCache(t *testing.T) {
 		t.Fatalf("expected 2 upstream calls, got %d", calls.Load())
 	}
 }
+
+func TestCacheCheckSkipsErrorBodies(t *testing.T) {
+	var calls atomic.Int32
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		calls.Add(1)
+		w.Write([]byte(`{"status":"020"}`)) // error reported inside HTTP 200
+	}))
+	defer srv.Close()
+
+	c := New(WithCache(time.Minute, 10), WithCacheCheck(func(b []byte) bool {
+		return !strings.Contains(string(b), `"020"`)
+	}))
+	for range 2 {
+		if _, err := c.Get(context.Background(), srv.URL, nil, nil); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if calls.Load() != 2 {
+		t.Fatalf("error body must not be cached, got %d upstream calls", calls.Load())
+	}
+}

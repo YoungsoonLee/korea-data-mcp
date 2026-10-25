@@ -2,7 +2,7 @@
 
 [English](README.md) | **한국어**
 
-한국 서비스(공공데이터, 전자공시, 네이버 등)를 **하나의 규격으로 통일된 MCP 서버**로 제공합니다.
+한국 서비스(공공데이터, 전자공시, 법령, 통계 등)를 **하나의 규격으로 통일된 MCP 서버**로 제공합니다.
 
 ## 실행
 
@@ -22,7 +22,6 @@ API 키는 환경변수로 설정합니다. 키가 없는 provider는 자동으�
 | 환경변수 | Provider | 발급처 |
 |---|---|---|
 | `OPENDART_API_KEY` | OpenDART (전자공시) | https://opendart.fss.or.kr → 인증키 신청 |
-| `NAVER_CLIENT_ID`, `NAVER_CLIENT_SECRET` | 네이버 검색 | https://developers.naver.com → 애플리케이션 등록 (검색 API 선택) |
 | `DATAGOKR_SERVICE_KEY` | 공공데이터포털 | https://www.data.go.kr → 활용신청 → 마이페이지 |
 
 > **공공데이터포털 주의**: 키가 Encoding과 Decoding 두 가지로 발급됩니다. **Decoding 키**를 넣으세요. Encoding 키를 넣으면 인코딩이 두 번 되어 `SERVICE_KEY_IS_NOT_REGISTERED_ERROR`가 납니다.
@@ -34,7 +33,7 @@ Claude Code:
 ```sh
 claude mcp add mcp-hub \
   -e OPENDART_API_KEY=... \
-  -e NAVER_CLIENT_ID=... -e NAVER_CLIENT_SECRET=... \
+  -e DATAGOKR_SERVICE_KEY=... \
   -- /path/to/mcp-hub
 ```
 
@@ -45,7 +44,7 @@ Claude Desktop 등 JSON 설정:
   "mcpServers": {
     "mcp-hub": {
       "command": "/path/to/mcp-hub",
-      "env": { "OPENDART_API_KEY": "...", "NAVER_CLIENT_ID": "...", "NAVER_CLIENT_SECRET": "..." }
+      "env": { "OPENDART_API_KEY": "...", "DATAGOKR_SERVICE_KEY": "..." }
     }
   }
 }
@@ -63,6 +62,21 @@ cp .env.example .env    # 값을 채운 뒤
 - 같은 변수가 셸 환경이나 클라이언트 설정에도 있으면 **그쪽이 우선**합니다.
 - `.env`는 `.gitignore`에 포함되어 있습니다. 커밋하지 마세요.
 
+## Tool 목록
+
+`hub_list_providers`를 호출하면 활성화된 provider와 빠진 키를 확인할 수 있습니다.
+
+**OpenDART** (`OPENDART_API_KEY`)
+
+| Tool | 기능 |
+|---|---|
+| `opendart_search_companies` | 한글·영문 회사명, 종목코드, 고유번호로 `corp_code` 찾기 |
+| `opendart_get_company` | 기업개황: 대표자, 시장, 법인·사업자등록번호, 주소, 결산월 |
+| `opendart_search_disclosures` | 회사, 기간, 공시 유형, 시장으로 공시 검색 |
+| `opendart_get_financials` | 연도·보고서별 주요계정과 전기 비교 |
+
+`corp_code`를 받는 OpenDART tool은 6자리 종목코드(예: `005930`)도 받습니다.
+
 ## 구조
 
 | 경로 | 역할 |
@@ -78,8 +92,7 @@ Provider를 추가할 때는 [docs/CONVENTIONS.ko.md](docs/CONVENTIONS.ko.md)를
 
 ## Provider 로드맵
 
-- [ ] OpenDART (전자공시)
-- [ ] 네이버 검색 (블로그, 뉴스, 쇼핑, 지역)
+- [x] OpenDART (전자공시): 구현 완료, 실제 API 검증 대기
 - [ ] 공공데이터포털 인기 API
 - [ ] 국가법령정보
 - [ ] 한국은행 ECOS, KOSIS

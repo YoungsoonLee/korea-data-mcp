@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<result>
+    <list>
+        <corp_code>00126380</corp_code>
+        <corp_name>삼성전자</corp_name>
+        <corp_eng_name>SAMSUNG ELECTRONICS CO,.LTD</corp_eng_name>
+        <stock_code>005930</stock_code>
+        <modify_date>20250102</modify_date>
+    </list>
+    <list>
+        <corp_code>00126186</corp_code>
+        <corp_name>삼성에스디에스</corp_name>
+        <corp_eng_name>Samsung SDS Co.,Ltd.</corp_eng_name>
+        <stock_code>018260</stock_code>
+        <modify_date>20250102</modify_date>
+    </list>
+    <list>
+        <corp_code>00999001</corp_code>
+        <corp_name>삼성전자서비스</corp_name>
+        <corp_eng_name>SAMSUNG ELECTRONICS SERVICE CO.,LTD</corp_eng_name>
+        <stock_code> </stock_code>
+        <modify_date>20240315</modify_date>
+    </list>
+    <list>
+        <corp_code>00999002</corp_code>
+        <corp_name>대성삼성</corp_name>
+        <corp_eng_name></corp_eng_name>
+        <stock_code> </stock_code>
+        <modify_date>20230101</modify_date>
+    </list>
+    <list>
+        <corp_code>00164779</corp_code>
+        <corp_name>에스케이하이닉스</corp_name>
+        <corp_eng_name>SK hynix Inc.</corp_eng_name>
+        <stock_code>000660</stock_code>
+        <modify_date>20250102</modify_date>
+    </list>
+</result>

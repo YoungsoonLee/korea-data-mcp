@@ -2,7 +2,7 @@
 
 **English** | [한국어](README.ko.md)
 
-Korean services (public data, corporate disclosures, Naver, and more) served as **MCP servers that all follow one consistent specification**.
+Korean services (public data, corporate disclosures, statutes, statistics, and more) served as **MCP servers that all follow one consistent specification**.
 
 ## Running
 
@@ -22,7 +22,6 @@ API keys are set through environment variables. A provider whose keys are missin
 | Environment variable | Provider | Where to get it |
 |---|---|---|
 | `OPENDART_API_KEY` | OpenDART (전자공시, corporate disclosures) | https://opendart.fss.or.kr → 인증키 신청 (request an API key) |
-| `NAVER_CLIENT_ID`, `NAVER_CLIENT_SECRET` | Naver Search | https://developers.naver.com → register an application (select the Search API) |
 | `DATAGOKR_SERVICE_KEY` | data.go.kr (공공데이터포털, Public Data Portal) | https://www.data.go.kr → 활용신청 (apply for use) → My Page |
 
 > **data.go.kr note**: The portal issues two keys, Encoding and Decoding. Use the **Decoding key**. The Encoding key gets URL-encoded twice and fails with `SERVICE_KEY_IS_NOT_REGISTERED_ERROR`.
@@ -34,7 +33,7 @@ Claude Code:
 ```sh
 claude mcp add mcp-hub \
   -e OPENDART_API_KEY=... \
-  -e NAVER_CLIENT_ID=... -e NAVER_CLIENT_SECRET=... \
+  -e DATAGOKR_SERVICE_KEY=... \
   -- /path/to/mcp-hub
 ```
 
@@ -45,7 +44,7 @@ Claude Desktop and other clients configured with JSON:
   "mcpServers": {
     "mcp-hub": {
       "command": "/path/to/mcp-hub",
-      "env": { "OPENDART_API_KEY": "...", "NAVER_CLIENT_ID": "...", "NAVER_CLIENT_SECRET": "..." }
+      "env": { "OPENDART_API_KEY": "...", "DATAGOKR_SERVICE_KEY": "..." }
     }
   }
 }
@@ -63,6 +62,21 @@ cp .env.example .env    # then fill in the values
 - If the same variable is also set (non-empty) in the shell or the client configuration, **that value takes precedence**.
 - `.env` is listed in `.gitignore`. Do not commit it.
 
+## Tools
+
+Call `hub_list_providers` to see which providers are enabled and which keys are missing.
+
+**OpenDART** (`OPENDART_API_KEY`)
+
+| Tool | What it does |
+|---|---|
+| `opendart_search_companies` | Find a company's `corp_code` by Korean/English name, stock code, or corp_code |
+| `opendart_get_company` | Company profile (기업개황): CEO, market, registration numbers, address, fiscal year-end |
+| `opendart_search_disclosures` | Search disclosures (공시) by company, date range, type, and market |
+| `opendart_get_financials` | Key financial accounts (주요계정) for a year and report, with prior-period comparisons |
+
+Every OpenDART tool that takes `corp_code` also accepts a 6-character stock code (e.g. `005930`).
+
 ## Layout
 
 | Path | Purpose |
@@ -78,8 +92,7 @@ When adding a provider, follow [docs/CONVENTIONS.md](docs/CONVENTIONS.md).
 
 ## Provider roadmap
 
-- [ ] OpenDART (전자공시, corporate disclosures)
-- [ ] Naver Search (blogs, news, shopping, local)
+- [x] OpenDART (전자공시, corporate disclosures): implemented, pending verification against the live API
 - [ ] Popular data.go.kr APIs
 - [ ] 국가법령정보 (Korean Law Information Center)
 - [ ] Bank of Korea ECOS, KOSIS (Korean Statistical Information Service)

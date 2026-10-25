@@ -30,6 +30,7 @@ type Client struct {
 	backoff    time.Duration
 	cache      *cache.Cache[[]byte]
 	cacheTTL   time.Duration
+	cacheable  func(body []byte) bool
 }
 
 type Option func(*Client)
@@ -44,6 +45,13 @@ func WithCache(ttl time.Duration, maxEntries int) Option {
 		c.cache = cache.New[[]byte](maxEntries)
 		c.cacheTTL = ttl
 	}
+}
+
+// WithCacheCheck limits caching to bodies for which ok returns true. Use it
+// for APIs that report errors inside HTTP 200 responses (OpenDART status,
+// data.go.kr resultCode), so a quota or maintenance error is not cached.
+func WithCacheCheck(ok func(body []byte) bool) Option {
+	return func(c *Client) { c.cacheable = ok }
 }
 
 func New(opts ...Option) *Client {
@@ -78,7 +86,7 @@ func (c *Client) Get(ctx context.Context, rawURL string, query url.Values, heade
 	if err != nil {
 		return nil, err
 	}
-	if c.cache != nil {
+	if c.cache != nil && (c.cacheable == nil || c.cacheable(body)) {
 		c.cache.Set(key, body, c.cacheTTL)
 	}
 	return body, nil

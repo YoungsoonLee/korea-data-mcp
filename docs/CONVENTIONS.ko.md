@@ -7,7 +7,7 @@
 ## 1. Provider
 
 - `hub.Provider` 인터페이스를 구현하고 `providers/providers.go`의 `All()`에 추가합니다.
-- `ID`는 소문자와 숫자만 씁니다(`opendart`, `naver`, `datagokr`). 이 값이 tool 이름의 prefix가 됩니다.
+- `ID`는 소문자와 숫자만 씁니다(`opendart`, `datagokr`, `ecos`). 이 값이 tool 이름의 prefix가 됩니다.
 - API 키는 환경변수로 받습니다(`RequiredEnv`). 키가 없으면 provider는 자동으로 비활성화되고, `hub_list_providers`에 `missing_env`로 표시됩니다.
 - `ProviderInfo.DocsURL`에는 키를 발급받는 페이지 주소를 넣습니다.
 
@@ -21,12 +21,11 @@
 | Provider ID | 환경변수 |
 |---|---|
 | `opendart` | `OPENDART_API_KEY` |
-| `naver` | `NAVER_CLIENT_ID`, `NAVER_CLIENT_SECRET` |
 | `datagokr` | `DATAGOKR_SERVICE_KEY` (**Decoding 키**. `httpx`가 query를 인코딩하므로 Encoding 키를 쓰면 두 번 인코딩되어 인증에 실패합니다) |
 
 ## 2. Tool 이름
 
-- 형식: `<provider>_<verb>_<noun>` (snake_case). 예: `opendart_search_disclosures`, `naver_search_news`
+- 형식: `<provider>_<verb>_<noun>` (snake_case). 예: `opendart_search_disclosures`, `opendart_get_financials`
 - 동사는 다음 중에서 고릅니다.
   - `search`: 조건으로 목록 검색
   - `get`: ID로 단건 조회
