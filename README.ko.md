@@ -2,7 +2,9 @@
 
 [English](README.md) | **한국어**
 
-한국 서비스(공공데이터, 전자공시, 법령, 통계 등)를 **하나의 규격으로 통일된 MCP 서버**로 제공합니다.
+**한국을 시작으로** 아시아의 공공·금융 데이터를 **하나의 규격으로 통일된 MCP 서버**로 제공합니다. 전 세계 어디서든 AI 에이전트가 데이터 소스마다 다른 특이한 동작을 신경 쓰지 않고 쓸 수 있게 하는 것이 목표입니다.
+
+OpenDART(전자공시) 같은 공식 API는 에러를 HTTP 200으로 돌려주고, 회사명 검색이 없으며, 금액을 `"1,234"`나 `"-"` 같은 문자열로 보냅니다. mcp-hub는 이런 부분을 모두 처리해서 영어 tool 설명, ISO 날짜, 표준 에러를 갖춘 깔끔한 타입의 결과를 돌려줍니다.
 
 ## 실행
 
@@ -77,6 +79,67 @@ cp .env.example .env    # 값을 채운 뒤
 
 `corp_code`를 받는 OpenDART tool은 6자리 종목코드(예: `005930`)도 받습니다.
 
+## 로컬에서 테스트하기
+
+### 1. 단위 테스트 (API 키 불필요)
+
+```sh
+go test -race ./...
+go test -race -v -run TestGetFinancials ./providers/opendart   # 특정 테스트만
+```
+
+provider마다 `testdata/`에 저장해 둔 실제 upstream 응답과 가짜 upstream 서버로 테스트하므로 네트워크나 키가 필요 없습니다.
+
+### 2. MCP Inspector (실제 API로 tool 호출)
+
+[MCP Inspector](https://github.com/modelcontextprotocol/inspector)는 MCP 공식 디버깅 UI입니다. Node.js가 필요합니다.
+
+```sh
+go build -o mcp-hub ./cmd/mcp-hub
+npx @modelcontextprotocol/inspector -- ./mcp-hub -env-file $PWD/.env
+```
+
+> `--`를 빼면 안 됩니다. 빼면 Inspector가 `-env-file`을 자기 옵션 `-e`로 읽어서 `Invalid parameter format: nv-file` 에러가 납니다.
+
+또는 인자 없이 `npx @modelcontextprotocol/inspector`를 실행하고 왼쪽 패널을 직접 채워도 됩니다. **Transport Type**은 `STDIO`, **Command**는 `mcp-hub`의 절대 경로, **Arguments**는 `-env-file /absolute/path/to/.env`입니다.
+
+그다음 순서는 이렇습니다.
+
+1. **Connect**를 누르고 **Tools** 탭에서 **List Tools**를 누릅니다.
+2. tool을 고르고 입력값을 넣은 뒤 **Execute Tool**을 누릅니다. 예를 들어 `opendart_get_company`의 `corp_code`에 `000660`(SK하이닉스)을 넣습니다.
+
+![MCP Inspector에서 opendart_get_company 호출](docs/images/inspector-call-tool.png)
+
+3. 결과는 **Results**와 **Structured Output**에 나옵니다.
+
+![MCP Inspector의 opendart_get_company 결과](docs/images/inspector-result.png)
+
+4. 다른 tool도 같은 방식으로 호출합니다. 예를 들어 `opendart_get_financials`에 `corp_code` `000660`, `year` `2025`를 넣으면 주요계정이 나옵니다. 금액은 원 단위 숫자, 날짜는 ISO 형식이고, 전기 대비 비교값도 함께 나옵니다.
+
+![MCP Inspector의 opendart_get_financials 결과](docs/images/inspector-financials.png)
+
+`corp_code`에는 회사명이 아니라 코드를 넣습니다. `005930`(삼성전자), `000660`(SK하이닉스), `035720`(카카오)을 쓰거나, 먼저 `opendart_search_companies`(`query`에 `삼성전자` 또는 `samsung electronics`)로 찾으세요. 회사명을 넣으면 hint가 담긴 `INVALID_ARGUMENT`가 나오므로, 에러 형식을 확인하는 용도로 써 볼 수 있습니다.
+
+처음 회사를 조회할 때는 몇 초 걸립니다. DART 전체 회사 목록(약 12만 개)을 받아 메모리 인덱스를 만들기 때문입니다. 이후 24시간 동안은 바로 응답합니다.
+
+### 3. Claude Code (실제 에이전트에서 사용)
+
+```sh
+claude mcp add mcp-hub -- /absolute/path/to/mcp-hub -env-file /absolute/path/to/.env
+```
+
+새 세션에서 `/mcp`로 연결 상태를 확인한 뒤 "삼성전자 2025년 상반기 매출이랑 최근 공시 알려줘"처럼 물어보세요. 에이전트가 tool 설명만 보고 올바른 tool과 인자를 고르는지 확인할 수 있습니다.
+
+### 4. HTTP 모드
+
+```sh
+./mcp-hub -http :8080 -env-file .env
+```
+
+Inspector에서 **Transport Type**을 `Streamable HTTP`로, URL을 `http://localhost:8080`으로 설정합니다.
+
+서버 로그는 stderr로 나옵니다. 디버그 로그를 보려면 `-v`를 붙이세요.
+
 ## 구조
 
 | 경로 | 역할 |
@@ -92,7 +155,8 @@ Provider를 추가할 때는 [docs/CONVENTIONS.ko.md](docs/CONVENTIONS.ko.md)를
 
 ## Provider 로드맵
 
-- [x] OpenDART (전자공시): 구현 완료, 실제 API 검증 대기
+- [x] OpenDART (전자공시): 실제 API 검증 완료
 - [ ] 공공데이터포털 인기 API
 - [ ] 국가법령정보
 - [ ] 한국은행 ECOS, KOSIS
+- [ ] 다음 지역: 일본 EDINET (전자공시)

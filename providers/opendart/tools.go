@@ -354,6 +354,7 @@ type financialsResponse struct {
 		ThstrmAddAmount string `json:"thstrm_add_amount"`
 		FrmtrmDt        string `json:"frmtrm_dt"`
 		FrmtrmAmount    string `json:"frmtrm_amount"`
+		FrmtrmAddAmount string `json:"frmtrm_add_amount"`
 		BfefrmtrmAmount string `json:"bfefrmtrm_amount"`
 		Currency        string `json:"currency"`
 	} `json:"list"`
@@ -371,14 +372,15 @@ type Financials struct {
 }
 
 type Account struct {
-	Name                    string `json:"name" jsonschema:"account name in Korean, e.g. 자산총계, 매출액, 영업이익, 당기순이익"`
-	StatementType           string `json:"statement_type" jsonschema:"balance_sheet or income_statement"`
-	CurrentPeriod           string `json:"current_period"`
-	CurrentAmount           *int64 `json:"current_amount"`
-	CurrentCumulativeAmount *int64 `json:"current_cumulative_amount,omitempty" jsonschema:"year-to-date amount, in quarterly and half-year reports"`
-	PriorPeriod             string `json:"prior_period,omitempty"`
-	PriorAmount             *int64 `json:"prior_amount"`
-	BeforePriorAmount       *int64 `json:"before_prior_amount,omitempty" jsonschema:"two periods back, annual reports only"`
+	Name                 string `json:"name" jsonschema:"account name in Korean, e.g. 자산총계, 매출액, 영업이익, 당기순이익"`
+	StatementType        string `json:"statement_type" jsonschema:"balance_sheet or income_statement"`
+	CurrentPeriod        string `json:"current_period"`
+	CurrentAmount        *int64 `json:"current_amount" jsonschema:"amount for current_period; year-to-date for income statement items in interim reports"`
+	CurrentQuarterAmount *int64 `json:"current_quarter_amount,omitempty" jsonschema:"latest three months only, for income statement items in interim reports"`
+	PriorPeriod          string `json:"prior_period,omitempty"`
+	PriorAmount          *int64 `json:"prior_amount" jsonschema:"amount for prior_period"`
+	PriorQuarterAmount   *int64 `json:"prior_quarter_amount,omitempty" jsonschema:"same three months of the prior year, for income statement items in interim reports"`
+	BeforePriorAmount    *int64 `json:"before_prior_amount,omitempty" jsonschema:"two periods back, annual reports only"`
 }
 
 var statementTypes = map[string]string{"BS": "balance_sheet", "IS": "income_statement"}
@@ -413,22 +415,38 @@ func (c *client) getFinancials(ctx context.Context, in getFinancialsInput) (Fina
 
 	out := Financials{CorpCode: code, Year: in.Year, Report: report, Statement: statement, Accounts: []Account{}}
 	other := 0
+	seen := map[[4]string]bool{}
 	for _, a := range r.List {
 		if a.FsDiv != fsDiv {
 			other++
 			continue
 		}
+		// DART repeats 당기순이익 with identical amounts at the top of the
+		// comprehensive income section; keep only the first.
+		k := [4]string{a.AccountNm, a.SjDiv, a.ThstrmAmount, a.ThstrmAddAmount}
+		if seen[k] {
+			continue
+		}
+		seen[k] = true
 		out.Currency, out.ReceiptNo = a.Currency, a.RceptNo
-		out.Accounts = append(out.Accounts, Account{
-			Name:                    a.AccountNm,
-			StatementType:           cmp.Or(statementTypes[a.SjDiv], a.SjDiv),
-			CurrentPeriod:           period(a.ThstrmDt),
-			CurrentAmount:           normalize.Int(a.ThstrmAmount),
-			CurrentCumulativeAmount: normalize.Int(a.ThstrmAddAmount),
-			PriorPeriod:             period(a.FrmtrmDt),
-			PriorAmount:             normalize.Int(a.FrmtrmAmount),
-			BeforePriorAmount:       normalize.Int(a.BfefrmtrmAmount),
-		})
+		acct := Account{
+			Name:              a.AccountNm,
+			StatementType:     cmp.Or(statementTypes[a.SjDiv], a.SjDiv),
+			CurrentPeriod:     period(a.ThstrmDt),
+			CurrentAmount:     normalize.Int(a.ThstrmAmount),
+			PriorPeriod:       period(a.FrmtrmDt),
+			PriorAmount:       normalize.Int(a.FrmtrmAmount),
+			BeforePriorAmount: normalize.Int(a.BfefrmtrmAmount),
+		}
+		// In interim reports DART labels income statement items with the
+		// year-to-date range ("2025.01.01 ~ 2025.06.30") but puts the latest
+		// quarter in *_amount and the year-to-date figure in *_add_amount.
+		// Report the amount that matches the period label.
+		if a.ThstrmAddAmount != "" {
+			acct.CurrentQuarterAmount, acct.CurrentAmount = acct.CurrentAmount, normalize.Int(a.ThstrmAddAmount)
+			acct.PriorQuarterAmount, acct.PriorAmount = acct.PriorAmount, normalize.Int(a.FrmtrmAddAmount)
+		}
+		out.Accounts = append(out.Accounts, acct)
 	}
 	if len(out.Accounts) == 0 {
 		e := hub.Errorf(hub.CodeNotFound, "no %s statements for %s %d %s", statement, code, in.Year, report)

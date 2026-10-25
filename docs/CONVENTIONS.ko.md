@@ -92,6 +92,8 @@
 
 - 직접 `http.Client`를 쓰지 말고 `httpx.Client`를 사용합니다. 타임아웃, 429/502/503/504 재시도(지수 backoff, Retry-After 반영), 상태 코드에서 에러 코드로의 매핑, 키 마스킹이 기본으로 들어 있습니다.
 - 자주 바뀌지 않는 데이터는 `httpx.WithCache(ttl, max)`로 캐싱해서 호출 한도를 아낍니다.
+- upstream이 에러를 HTTP 200 안에 담아 보내면(OpenDART `status`, data.go.kr `resultCode`) `httpx.WithCacheCheck`를 추가해서 그런 응답이 캐싱되지 않게 합니다.
+- curl은 되는데 Go에서 `tls: handshake failure`가 나면, 서버가 RSA 키 교환 암호 스위트만 지원하는 경우일 가능성이 높습니다. Go는 1.22부터 이 방식을 기본 목록에서 뺐습니다. `openssl s_client -connect host:443`로 확인하고 `httpx.WithLegacyRSATLS()`를 추가합니다(OpenDART가 이 경우입니다).
 
 ## 8. 테스트
 

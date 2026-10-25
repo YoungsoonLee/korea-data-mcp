@@ -2,30 +2,30 @@
   "status": "000",
   "message": "정상",
   "page_no": 1,
-  "page_count": 20,
-  "total_count": 2,
-  "total_page": 1,
+  "page_count": 5,
+  "total_count": 24,
+  "total_page": 5,
   "list": [
     {
-      "corp_cls": "Y",
-      "corp_name": "삼성전자",
       "corp_code": "00126380",
+      "corp_name": "삼성전자",
       "stock_code": "005930",
-      "report_nm": "[기재정정]분기보고서 (2025.09)",
-      "rcept_no": "20251114000123",
-      "flr_nm": "삼성전자",
-      "rcept_dt": "20251114",
-      "rm": "유연"
+      "corp_cls": "Y",
+      "report_nm": "주식등의대량보유상황보고서(일반)",
+      "rcept_no": "20261023000484",
+      "flr_nm": "삼성물산",
+      "rcept_dt": "20261023",
+      "rm": ""
     },
     {
-      "corp_cls": "Y",
-      "corp_name": "삼성전자",
       "corp_code": "00126380",
+      "corp_name": "삼성전자",
       "stock_code": "005930",
+      "corp_cls": "Y",
       "report_nm": "임원ㆍ주요주주특정증권등소유상황보고서",
-      "rcept_no": "20251110000456",
-      "flr_nm": "홍길동",
-      "rcept_dt": "20251110",
+      "rcept_no": "20261023000478",
+      "flr_nm": "서경헌",
+      "rcept_dt": "20261023",
       "rm": ""
     }
   ]

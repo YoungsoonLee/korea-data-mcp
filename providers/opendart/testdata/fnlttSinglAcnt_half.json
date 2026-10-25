@@ -1,0 +1,48 @@
+{
+  "status": "000",
+  "message": "정상",
+  "list": [
+    {
+      "rcept_no": "20250814003156",
+      "reprt_code": "11012",
+      "bsns_year": "2025",
+      "corp_code": "00126380",
+      "stock_code": "005930",
+      "fs_div": "CFS",
+      "fs_nm": "연결재무제표",
+      "sj_div": "BS",
+      "sj_nm": "재무상태표",
+      "account_nm": "자산총계",
+      "thstrm_nm": "제 57 기반기말",
+      "thstrm_dt": "2025.06.30 현재",
+      "thstrm_amount": "504,875,185,000,000",
+      "frmtrm_nm": "제 56 기말",
+      "frmtrm_dt": "2024.12.31 현재",
+      "frmtrm_amount": "514,531,948,000,000",
+      "ord": "5",
+      "currency": "KRW"
+    },
+    {
+      "rcept_no": "20250814003156",
+      "reprt_code": "11012",
+      "bsns_year": "2025",
+      "corp_code": "00126380",
+      "stock_code": "005930",
+      "fs_div": "CFS",
+      "fs_nm": "연결재무제표",
+      "sj_div": "IS",
+      "sj_nm": "손익계산서",
+      "account_nm": "매출액",
+      "thstrm_nm": "제 57 기반기",
+      "thstrm_dt": "2025.01.01 ~ 2025.06.30",
+      "thstrm_amount": "74,566,317,000,000",
+      "thstrm_add_amount": "153,706,820,000,000",
+      "frmtrm_nm": "제 56 기반기",
+      "frmtrm_dt": "2024.01.01 ~ 2024.06.30",
+      "frmtrm_add_amount": "145,983,903,000,000",
+      "frmtrm_amount": "74,068,302,000,000",
+      "ord": "23",
+      "currency": "KRW"
+    }
+  ]
+}

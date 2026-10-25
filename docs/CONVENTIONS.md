@@ -92,6 +92,8 @@ Every error is returned in the single `hub.Error` shape, placed in the tool resu
 
 - Use `httpx.Client` instead of `http.Client` directly. It includes timeouts, retries on 429/502/503/504 (exponential backoff, honoring Retry-After), mapping of status codes to error codes, and key redaction.
 - Cache data that changes rarely with `httpx.WithCache(ttl, max)` to save upstream quota.
+- If the upstream reports errors inside HTTP 200 (OpenDART `status`, data.go.kr `resultCode`), add `httpx.WithCacheCheck` so those responses are not cached.
+- If Go fails with `tls: handshake failure` while curl works, the server probably offers only RSA key exchange ciphers, which Go dropped from its defaults in 1.22. Check with `openssl s_client -connect host:443` and add `httpx.WithLegacyRSATLS()` (OpenDART needs it).
 
 ## 8. Tests
 

@@ -2,7 +2,9 @@
 
 **English** | [한국어](README.ko.md)
 
-Korean services (public data, corporate disclosures, statutes, statistics, and more) served as **MCP servers that all follow one consistent specification**.
+Asian public and financial data, **starting with Korea**, served as **MCP servers that all follow one consistent specification**, so AI agents anywhere can use it without dealing with each source's quirks.
+
+Official APIs such as OpenDART (Korean corporate disclosures) return errors inside HTTP 200, have no company-name search, and send amounts as strings like `"1,234"` or `"-"`. mcp-hub handles all of this and returns clean, typed results with English tool descriptions, ISO dates, and standard errors.
 
 ## Running
 
@@ -77,6 +79,67 @@ Call `hub_list_providers` to see which providers are enabled and which keys are 
 
 Every OpenDART tool that takes `corp_code` also accepts a 6-character stock code (e.g. `005930`).
 
+## Testing locally
+
+### 1. Unit tests (no API key needed)
+
+```sh
+go test -race ./...
+go test -race -v -run TestGetFinancials ./providers/opendart   # a single test
+```
+
+The tests use real upstream responses saved under each provider's `testdata/` and a fake upstream server, so they need no network or keys.
+
+### 2. MCP Inspector (call tools against the live API)
+
+[MCP Inspector](https://github.com/modelcontextprotocol/inspector) is the official MCP debugging UI. It requires Node.js.
+
+```sh
+go build -o mcp-hub ./cmd/mcp-hub
+npx @modelcontextprotocol/inspector -- ./mcp-hub -env-file $PWD/.env
+```
+
+> Keep the `--`. Without it, Inspector reads `-env-file` as its own `-e` option and fails with `Invalid parameter format: nv-file`.
+
+Alternatively, run `npx @modelcontextprotocol/inspector` with no arguments and fill in the left panel: **Transport Type** `STDIO`, **Command** the absolute path to `mcp-hub`, **Arguments** `-env-file /absolute/path/to/.env`.
+
+Then:
+
+1. Click **Connect**, open the **Tools** tab, and click **List Tools**.
+2. Pick a tool, fill in its inputs, and click **Execute Tool**. For example, `opendart_get_company` with `corp_code` = `000660` (SK hynix):
+
+![Calling opendart_get_company in MCP Inspector](docs/images/inspector-call-tool.png)
+
+3. The result appears under **Results** and **Structured Output**:
+
+![opendart_get_company result in MCP Inspector](docs/images/inspector-result.png)
+
+4. Try the other tools the same way. For example, `opendart_get_financials` with `corp_code` = `000660` and `year` = `2025` returns key accounts with amounts in KRW as plain numbers, ISO dates, and prior-period comparisons:
+
+![opendart_get_financials result in MCP Inspector](docs/images/inspector-financials.png)
+
+`corp_code` takes a code, not a company name. Use `005930` (Samsung Electronics), `000660` (SK hynix), or `035720` (Kakao), or find one first with `opendart_search_companies` (`query` = `삼성전자` or `samsung electronics`). Passing a name returns `INVALID_ARGUMENT` with a hint, which is a quick way to see the error format.
+
+The first company lookup takes a few seconds, because it downloads DART's full company list (about 120,000 entries) and builds an in-memory index. Later lookups are instant for 24 hours.
+
+### 3. Claude Code (use it from a real agent)
+
+```sh
+claude mcp add mcp-hub -- /absolute/path/to/mcp-hub -env-file /absolute/path/to/.env
+```
+
+Start a new session, check the connection with `/mcp`, and ask something like "What were Samsung Electronics' revenue in the first half of 2025 and its latest disclosures?". This shows whether an agent picks the right tools and arguments from the descriptions alone.
+
+### 4. HTTP mode
+
+```sh
+./mcp-hub -http :8080 -env-file .env
+```
+
+In Inspector, set **Transport Type** to `Streamable HTTP` and the URL to `http://localhost:8080`.
+
+Server logs go to stderr. Add `-v` for debug logs.
+
 ## Layout
 
 | Path | Purpose |
@@ -92,7 +155,8 @@ When adding a provider, follow [docs/CONVENTIONS.md](docs/CONVENTIONS.md).
 
 ## Provider roadmap
 
-- [x] OpenDART (전자공시, corporate disclosures): implemented, pending verification against the live API
+- [x] OpenDART (전자공시, corporate disclosures): verified against the live API
 - [ ] Popular data.go.kr APIs
 - [ ] 국가법령정보 (Korean Law Information Center)
 - [ ] Bank of Korea ECOS, KOSIS (Korean Statistical Information Service)
+- [ ] Next region: Japan EDINET (corporate disclosures)

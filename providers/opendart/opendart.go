@@ -47,9 +47,10 @@ func (p *Provider) Register(r *hub.Registrar) error {
 		key:  r.Env(envKey),
 		// Disclosures change during the day, so cache briefly, and only
 		// successful responses: DART reports errors inside HTTP 200.
-		api: httpx.New(httpx.WithCache(10*time.Minute, 1000), httpx.WithCacheCheck(cacheable)),
+		// opendart.fss.or.kr only negotiates RSA key exchange ciphers.
+		api: httpx.New(httpx.WithLegacyRSATLS(), httpx.WithCache(10*time.Minute, 1000), httpx.WithCacheCheck(cacheable)),
 		// corpCode.xml is a large zip; corpIndex keeps the parsed result instead.
-		raw: httpx.New(),
+		raw: httpx.New(httpx.WithLegacyRSATLS()),
 		now: p.now,
 	}
 	if c.now == nil {

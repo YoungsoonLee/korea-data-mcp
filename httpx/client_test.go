@@ -2,6 +2,7 @@ package httpx
 
 import (
 	"context"
+	"crypto/tls"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -108,5 +109,26 @@ func TestCacheCheckSkipsErrorBodies(t *testing.T) {
 	}
 	if calls.Load() != 2 {
 		t.Fatalf("error body must not be cached, got %d upstream calls", calls.Load())
+	}
+}
+
+func TestLegacyRSATLS(t *testing.T) {
+	srv := httptest.NewUnstartedServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("ok"))
+	}))
+	srv.TLS = &tls.Config{
+		MaxVersion:   tls.VersionTLS12,
+		CipherSuites: []uint16{tls.TLS_RSA_WITH_AES_128_GCM_SHA256},
+	}
+	srv.StartTLS()
+	defer srv.Close()
+
+	if _, err := New(WithHTTPClient(srv.Client()), WithRetries(0)).Get(context.Background(), srv.URL, nil, nil); err == nil {
+		t.Fatal("default client should fail the handshake with an RSA-only server")
+	}
+	c := New(WithHTTPClient(srv.Client()), WithLegacyRSATLS(), WithRetries(0))
+	b, err := c.Get(context.Background(), srv.URL, nil, nil)
+	if err != nil || string(b) != "ok" {
+		t.Fatalf("got %q, %v", b, err)
 	}
 }

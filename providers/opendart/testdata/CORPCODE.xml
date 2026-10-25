@@ -5,34 +5,34 @@
         <corp_name>삼성전자</corp_name>
         <corp_eng_name>SAMSUNG ELECTRONICS CO,.LTD</corp_eng_name>
         <stock_code>005930</stock_code>
-        <modify_date>20250102</modify_date>
+        <modify_date>20251201</modify_date>
+    </list>
+    <list>
+        <corp_code>00252074</corp_code>
+        <corp_name>삼성전자판매</corp_name>
+        <corp_eng_name>SAMSUNG ELECTRONICS SALES Co., Ltd.</corp_eng_name>
+        <stock_code> </stock_code>
+        <modify_date>20240124</modify_date>
     </list>
     <list>
         <corp_code>00126186</corp_code>
         <corp_name>삼성에스디에스</corp_name>
-        <corp_eng_name>Samsung SDS Co.,Ltd.</corp_eng_name>
+        <corp_eng_name>SAMSUNG SDS CO., LTD.</corp_eng_name>
         <stock_code>018260</stock_code>
-        <modify_date>20250102</modify_date>
+        <modify_date>20250320</modify_date>
     </list>
     <list>
-        <corp_code>00999001</corp_code>
-        <corp_name>삼성전자서비스</corp_name>
-        <corp_eng_name>SAMSUNG ELECTRONICS SERVICE CO.,LTD</corp_eng_name>
+        <corp_code>00436162</corp_code>
+        <corp_name>광주삼성의료센타</corp_name>
+        <corp_eng_name>GwangJuSamSungMedical</corp_eng_name>
         <stock_code> </stock_code>
-        <modify_date>20240315</modify_date>
-    </list>
-    <list>
-        <corp_code>00999002</corp_code>
-        <corp_name>대성삼성</corp_name>
-        <corp_eng_name></corp_eng_name>
-        <stock_code> </stock_code>
-        <modify_date>20230101</modify_date>
+        <modify_date>20170630</modify_date>
     </list>
     <list>
         <corp_code>00164779</corp_code>
-        <corp_name>에스케이하이닉스</corp_name>
+        <corp_name>SK하이닉스</corp_name>
         <corp_eng_name>SK hynix Inc.</corp_eng_name>
         <stock_code>000660</stock_code>
-        <modify_date>20250102</modify_date>
+        <modify_date>20240328</modify_date>
     </list>
 </result>

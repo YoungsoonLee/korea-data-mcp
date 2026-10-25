@@ -157,10 +157,10 @@ func TestSearchCompanies(t *testing.T) {
 		names = append(names, c.CorpName)
 	}
 	// exact match, then prefix (listed first), then substring
-	if strings.Join(names, ",") != "삼성전자,삼성전자서비스" {
+	if strings.Join(names, ",") != "삼성전자,삼성전자판매" {
 		t.Fatalf("order: %v", names)
 	}
-	if got.Items[0].CorpCode != "00126380" || !got.Items[0].Listed || got.Items[0].ModifiedDate != "2025-01-02" {
+	if got.Items[0].CorpCode != "00126380" || !got.Items[0].Listed || got.Items[0].ModifiedDate != "2025-12-01" {
 		t.Fatalf("item: %+v", got.Items[0])
 	}
 	if got.Items[1].StockCode != "" || got.Items[1].Listed {
@@ -227,7 +227,7 @@ func TestSearchDisclosures(t *testing.T) {
 		}
 	}
 	d := got.Items[0]
-	if d.ReceivedDate != "2025-11-14" || d.Market != "KOSPI" || d.URL != viewerURL+"20251114000123" || got.PageInfo.TotalCount != 2 {
+	if d.ReceivedDate != "2026-10-23" || d.Market != "KOSPI" || d.URL != viewerURL+"20261023000484" || got.PageInfo.TotalCount != 24 {
 		t.Fatalf("got %+v", got)
 	}
 
@@ -261,21 +261,55 @@ func TestGetFinancials(t *testing.T) {
 	if q := f.query("fnlttSinglAcnt.json"); q.Get("reprt_code") != "11011" || q.Get("bsns_year") != "2024" {
 		t.Fatalf("query: %v", q)
 	}
-	if got.Statement != "consolidated" || got.Currency != "KRW" || len(got.Accounts) != 2 || got.URL != viewerURL+"20250311001085" {
+	// 15 consolidated rows, one of them a duplicate 당기순이익(손실).
+	if got.Statement != "consolidated" || got.Currency != "KRW" || len(got.Accounts) != 14 || got.URL != viewerURL+"20250311001085" {
 		t.Fatalf("got %+v", got)
 	}
-	assets, ni := got.Accounts[0], got.Accounts[1]
+	assets, ni := account(t, got, "자산총계"), account(t, got, "당기순이익(손실)")
 	if assets.StatementType != "balance_sheet" || assets.CurrentPeriod != "2024-12-31" || *assets.CurrentAmount != 514531948000000 {
 		t.Fatalf("assets: %+v", assets)
 	}
-	if ni.StatementType != "income_statement" || ni.CurrentPeriod != "2024-01-01 ~ 2024-12-31" || *ni.PriorAmount != 15487100000000 || ni.BeforePriorAmount != nil {
+	if ni.StatementType != "income_statement" || ni.CurrentPeriod != "2024-01-01 ~ 2024-12-31" || *ni.PriorAmount != 15487100000000 || *ni.BeforePriorAmount != 55654077000000 || ni.CurrentQuarterAmount != nil {
 		t.Fatalf("net income: %+v", ni)
 	}
 
 	mustOK(t, call(t, cs, "opendart_get_financials", map[string]any{"corp_code": "00126380", "year": 2024, "statement": "separate"}, &got))
-	if len(got.Accounts) != 1 || *got.Accounts[0].CurrentAmount != 300000000000000 {
+	if len(got.Accounts) != 14 || *account(t, got, "자산총계").CurrentAmount != 324966127000000 {
 		t.Fatalf("separate: %+v", got)
 	}
+}
+
+func TestGetFinancialsInterim(t *testing.T) {
+	f, cs := setup(t, testKey)
+	b, err := os.ReadFile("testdata/fnlttSinglAcnt_half.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	f.set("fnlttSinglAcnt.json", string(b))
+	var got Financials
+	mustOK(t, call(t, cs, "opendart_get_financials", map[string]any{"corp_code": "005930", "year": 2025, "report": "half"}, &got))
+
+	assets := account(t, got, "자산총계")
+	if assets.CurrentPeriod != "2025-06-30" || *assets.CurrentAmount != 504875185000000 || assets.CurrentQuarterAmount != nil {
+		t.Fatalf("assets: %+v", assets)
+	}
+	// The period label is year-to-date, so current_amount must be too.
+	rev := account(t, got, "매출액")
+	if rev.CurrentPeriod != "2025-01-01 ~ 2025-06-30" || *rev.CurrentAmount != 153706820000000 || *rev.CurrentQuarterAmount != 74566317000000 ||
+		*rev.PriorAmount != 145983903000000 || *rev.PriorQuarterAmount != 74068302000000 {
+		t.Fatalf("revenue: %+v", rev)
+	}
+}
+
+func account(t *testing.T, f Financials, name string) Account {
+	t.Helper()
+	for _, a := range f.Accounts {
+		if a.Name == name {
+			return a
+		}
+	}
+	t.Fatalf("no account %q in %+v", name, f.Accounts)
+	return Account{}
 }
 
 func TestGetFinancialsErrors(t *testing.T) {

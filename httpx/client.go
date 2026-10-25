@@ -7,6 +7,7 @@ package httpx
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
 	"encoding/json"
 	"encoding/xml"
 	"errors"
@@ -52,6 +53,41 @@ func WithCache(ttl time.Duration, maxEntries int) Option {
 // data.go.kr resultCode), so a quota or maintenance error is not cached.
 func WithCacheCheck(ok func(body []byte) bool) Option {
 	return func(c *Client) { c.cacheable = ok }
+}
+
+// WithLegacyRSATLS additionally offers TLS 1.2 cipher suites with RSA key
+// exchange, which Go stopped offering by default in 1.22. Some Korean public
+// servers (OpenDART) negotiate only TLS_RSA_WITH_AES_128_GCM_SHA256 and fail
+// with "tls: handshake failure" otherwise. Apply it after WithHTTPClient.
+func WithLegacyRSATLS() Option {
+	return func(c *Client) {
+		hc := *c.http
+		t, ok := hc.Transport.(*http.Transport)
+		if !ok || t == nil {
+			t = http.DefaultTransport.(*http.Transport)
+		}
+		hc.Transport = withLegacyRSA(t)
+		c.http = &hc
+	}
+}
+
+func withLegacyRSA(t *http.Transport) *http.Transport {
+	t = t.Clone()
+	cfg := t.TLSClientConfig
+	if cfg == nil {
+		cfg = &tls.Config{}
+	}
+	cfg = cfg.Clone()
+	var suites []uint16
+	for _, s := range tls.CipherSuites() {
+		suites = append(suites, s.ID)
+	}
+	cfg.CipherSuites = append(suites,
+		tls.TLS_RSA_WITH_AES_128_GCM_SHA256,
+		tls.TLS_RSA_WITH_AES_256_GCM_SHA384,
+	)
+	t.TLSClientConfig = cfg
+	return t
 }
 
 func New(opts ...Option) *Client {
