@@ -32,6 +32,7 @@ type Client struct {
 	cache      *cache.Cache[[]byte]
 	cacheTTL   time.Duration
 	cacheable  func(body []byte) bool
+	errorBody  func(status int, body []byte) error
 }
 
 type Option func(*Client)
@@ -53,6 +54,14 @@ func WithCache(ttl time.Duration, maxEntries int) Option {
 // data.go.kr resultCode), so a quota or maintenance error is not cached.
 func WithCacheCheck(ok func(body []byte) bool) Option {
 	return func(c *Client) { c.cacheable = ok }
+}
+
+// WithErrorBody lets a provider classify non-2xx responses from their body.
+// If decode returns nil, the generic status code mapping applies. data.go.kr,
+// for example, answers an unregistered key with HTTP 403 and a body saying
+// so, which is UNAUTHENTICATED rather than PERMISSION_DENIED.
+func WithErrorBody(decode func(status int, body []byte) error) Option {
+	return func(c *Client) { c.errorBody = decode }
 }
 
 // WithLegacyRSATLS additionally offers TLS 1.2 cipher suites with RSA key
@@ -191,6 +200,11 @@ func (c *Client) do(ctx context.Context, method string, u *url.URL, header http.
 			return b, nil
 		}
 		err = statusError(resp, safe)
+		if c.errorBody != nil {
+			if e := c.errorBody(resp.StatusCode, b); e != nil {
+				err = e
+			}
+		}
 		if !hub.AsError(err).Retryable {
 			return nil, err
 		}

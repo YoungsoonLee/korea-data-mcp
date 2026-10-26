@@ -1,0 +1,9 @@
+{
+  "OpenAPI_ServiceResponse": {
+    "cmmMsgHeader": {
+      "errMsg": "HTTP_ERROR",
+      "returnAuthMsg": "HTTP 에러",
+      "returnReasonCode": "04"
+    }
+  }
+}

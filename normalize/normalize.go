@@ -10,13 +10,25 @@ import (
 	"time"
 )
 
+var shortYearDate = regexp.MustCompile(`^(\d{2})[./-](\d{1,2})[./-](\d{1,2})\.?$`)
+
 // Date converts "20251019", "2025.10.19", "2025.10.19.", "2025/10/19" or
-// "2025-10-19" to "2025-10-19". Unparseable input is returned trimmed, so no
-// data is lost; empty or placeholder input ("-") becomes "".
+// "2025-10-19" to "2025-10-19". Two-digit years ("75/06/11", "25.11.28") are
+// read as the latest such year not after the current one. Unparseable input
+// is returned trimmed, so no data is lost; empty or placeholder input ("-")
+// becomes "".
 func Date(s string) string {
 	s = strings.TrimSpace(s)
 	if isPlaceholder(s) {
 		return ""
+	}
+	if m := shortYearDate.FindStringSubmatch(s); m != nil {
+		yy, _ := strconv.Atoi(m[1])
+		y := 2000 + yy
+		if y > time.Now().Year() {
+			y -= 100
+		}
+		return Date(strconv.Itoa(y) + "-" + m[2] + "-" + m[3])
 	}
 	d := strings.TrimSuffix(s, ".")
 	d = strings.NewReplacer(".", "-", "/", "-", " ", "").Replace(d)
@@ -63,6 +75,22 @@ func Text(s string) string {
 	s = tagPattern.ReplaceAllString(s, "")
 	s = html.UnescapeString(s)
 	return strings.TrimSpace(spacePattern.ReplaceAllString(s, " "))
+}
+
+var companyForm = strings.NewReplacer(" ", "", ",", "", ".", "",
+	"(주)", "", "㈜", "", "주식회사", "",
+	"(유)", "", "(유한)", "", "유한회사", "", "(합자)", "", "(자)", "", "(합명)", "")
+
+// StripCompanyForm removes spacing, punctuation and corporate-form markers
+// ((주), ㈜, 주식회사, (유), 유한회사, (합자), ...), so "삼성 전자(주)"
+// becomes "삼성전자".
+func StripCompanyForm(s string) string {
+	return companyForm.Replace(strings.TrimSpace(s))
+}
+
+// CompanyName is StripCompanyForm lowercased, for comparing company names.
+func CompanyName(s string) string {
+	return strings.ToLower(StripCompanyForm(s))
 }
 
 func isPlaceholder(s string) bool {

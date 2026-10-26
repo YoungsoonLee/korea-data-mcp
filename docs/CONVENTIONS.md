@@ -93,6 +93,10 @@ Every error is returned in the single `hub.Error` shape, placed in the tool resu
 - Use `httpx.Client` instead of `http.Client` directly. It includes timeouts, retries on 429/502/503/504 (exponential backoff, honoring Retry-After), mapping of status codes to error codes, and key redaction.
 - Cache data that changes rarely with `httpx.WithCache(ttl, max)` to save upstream quota.
 - If the upstream reports errors inside HTTP 200 (OpenDART `status`, data.go.kr `resultCode`), add `httpx.WithCacheCheck` so those responses are not cached.
+- If the upstream signals errors in a non-2xx response body (data.go.kr answers an unregistered key with HTTP 403), add `httpx.WithErrorBody` so the body decides the error code.
+- data.go.kr APIs go through `providers/datagokr`'s shared client (`getList`). It requests XML, recognizes both error shapes, normalizes result codes, and returns `[]T` plus the total count. A tool only defines its item struct.
+- Validate every input yourself, including formats (`YYYYMM`, month 1–12, region codes). Many upstream APIs, data.go.kr in particular, answer an invalid parameter with "success, zero results", which an agent cannot tell apart from "no data".
+- When you find a new upstream quirk, save the real response in `testdata/`, cover it with a test, and add it to [QUIRKS.md](QUIRKS.md).
 - If Go fails with `tls: handshake failure` while curl works, the server probably offers only RSA key exchange ciphers, which Go dropped from its defaults in 1.22. Check with `openssl s_client -connect host:443` and add `httpx.WithLegacyRSATLS()` (OpenDART needs it).
 
 ## 8. Tests

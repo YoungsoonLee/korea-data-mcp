@@ -14,6 +14,9 @@ func TestDate(t *testing.T) {
 		"":            "",
 		"2025년 10월":   "2025년 10월",
 		"20251399":    "20251399",
+		"75/06/11":    "1975-06-11", // two-digit years: data.go.kr listing dates
+		"25.11.28":    "2025-11-28",
+		"99":          "99",
 	} {
 		if got := Date(in); got != want {
 			t.Errorf("Date(%q) = %q, want %q", in, got, want)
@@ -46,3 +49,20 @@ func TestText(t *testing.T) {
 }
 
 func ptr(n int64) *int64 { return &n }
+
+func TestCompanyName(t *testing.T) {
+	for in, want := range map[string]string{
+		"삼성 전자(주)":                    "삼성전자",
+		"㈜카카오":                        "카카오",
+		"(유한)삼성전자벧엘상사":                "삼성전자벧엘상사",
+		"주식회사 SK하이닉스":                 "sk하이닉스",
+		"SAMSUNG ELECTRONICS CO,.LTD": "samsungelectronicscoltd",
+	} {
+		if got := CompanyName(in); got != want {
+			t.Errorf("CompanyName(%q) = %q, want %q", in, got, want)
+		}
+	}
+	if got := StripCompanyForm("주식회사 SK하이닉스"); got != "SK하이닉스" {
+		t.Errorf("StripCompanyForm keeps case: got %q", got)
+	}
+}

@@ -4,7 +4,34 @@
 
 Asian public and financial data, **starting with Korea**, served as **MCP servers that all follow one consistent specification**, so AI agents anywhere can use it without dealing with each source's quirks.
 
-Official APIs such as OpenDART (Korean corporate disclosures) return errors inside HTTP 200, have no company-name search, and send amounts as strings like `"1,234"` or `"-"`. mcp-hub handles all of this and returns clean, typed results with English tool descriptions, ISO dates, and standard errors.
+## Why mcp-hub
+
+Korean public APIs are free and official, but calling them directly is full of traps. Some of them don't even fail; they just give the agent a wrong answer.
+
+**Example:** "What was Samsung Electronics' revenue in the first half of 2025?" Here is what OpenDART actually returns:
+
+```json
+{ "account_nm": "매출액", "thstrm_dt": "2025.01.01 ~ 2025.06.30",
+  "thstrm_amount": "74,566,317,000,000", "thstrm_add_amount": "153,706,820,000,000" }
+```
+
+The period says January to June, so an agent reads `thstrm_amount` and answers **₩74.6 trillion. That is wrong**: it is the second quarter only. The half-year figure, ₩153.7 trillion, is in a different field. mcp-hub returns:
+
+```json
+{ "name": "매출액", "statement_type": "income_statement",
+  "current_period": "2025-01-01 ~ 2025-06-30",
+  "current_amount": 153706820000000, "current_quarter_amount": 74566317000000 }
+```
+
+The same goes for everything else an agent would otherwise stumble on:
+
+- **Outdated data that looks current.** The government company registry returns 19 unordered records for Samsung Electronics, including ones that name a former CEO. mcp-hub uses only the latest record and says how recent it is (`as_of`).
+- **Errors that look like success.** OpenDART reports a bad key or an exceeded quota as HTTP 200. data.go.kr returns zero results, not an error, for an invalid parameter. mcp-hub turns these into [one error format](docs/CONVENTIONS.md#6-errors) with a `hint` the agent can act on.
+- **A different format for every API.** Result codes `00` vs `000`, a single result as an object instead of an array, amounts like `"84,500"` meaning ₩845,000,000, dates like `25.11.28`. mcp-hub always returns typed numbers, ISO dates, and `page`/`page_size` pagination.
+- **Missing basics.** OpenDART has no company search. mcp-hub indexes all ~120,000 companies, so `삼성전자`, `samsung electronics`, or the stock code `005930` all work.
+- **Connection issues.** OpenDART fails with `tls: handshake failure` from Go clients. mcp-hub handles it.
+
+Every item was found on the live APIs and is covered by a test that uses the real response. See the full list: **[What mcp-hub handles for you](docs/QUIRKS.md)**.
 
 ## Running
 
@@ -78,6 +105,14 @@ Call `hub_list_providers` to see which providers are enabled and which keys are 
 | `opendart_get_financials` | Key financial accounts (주요계정) for a year and report, with prior-period comparisons |
 
 Every OpenDART tool that takes `corp_code` also accepts a 6-character stock code (e.g. `005930`).
+
+**data.go.kr** (`DATAGOKR_SERVICE_KEY`). Each API needs its own application (활用신청) on data.go.kr; the links are below.
+
+| Tool | What it does | API to apply for |
+|---|---|---|
+| `datagokr_list_holidays` | Public holidays (공휴일) for a year or month, including substitute holidays, Seollal and Chuseok, and election days, with English names and weekdays. Also anniversaries, the 24 solar terms, and seasonal days. 2004 through two years ahead | [한국천문연구원_특일 정보](https://www.data.go.kr/data/15012690/openapi.do) |
+| `datagokr_search_corporations` | Find Korean corporations by name, listed or not. Returns the corporate registration number (`crno`) and, for DART filers, `dart_corp_code` for opendart tools | [금융위원회_기업기본정보](https://www.data.go.kr/data/15043184/openapi.do) |
+| `datagokr_get_corporation` | Current company profile: CEO, market, registration numbers, founding and listing dates, address, industry, employees, average tenure and salary, auditor and audit opinion | Same as above |
 
 ## Testing locally
 
@@ -156,7 +191,10 @@ When adding a provider, follow [docs/CONVENTIONS.md](docs/CONVENTIONS.md).
 ## Provider roadmap
 
 - [x] OpenDART (전자공시, corporate disclosures): verified against the live API
-- [ ] Popular data.go.kr APIs
+- [ ] data.go.kr: in progress
+  - [x] Public holidays (특일 정보): verified against the live API
+  - [x] Company information (기업기본정보): verified against the live API
+  - [ ] Stock prices, business registration status, apartment trade prices
 - [ ] 국가법령정보 (Korean Law Information Center)
 - [ ] Bank of Korea ECOS, KOSIS (Korean Statistical Information Service)
 - [ ] Next region: Japan EDINET (corporate disclosures)

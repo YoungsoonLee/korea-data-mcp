@@ -132,3 +132,25 @@ func TestLegacyRSATLS(t *testing.T) {
 		t.Fatalf("got %q, %v", b, err)
 	}
 }
+
+func TestErrorBody(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusForbidden)
+		w.Write([]byte("key not registered"))
+	}))
+	defer srv.Close()
+	decode := func(status int, body []byte) error {
+		if status == http.StatusForbidden && string(body) == "key not registered" {
+			return hub.Errorf(hub.CodeUnauthenticated, "bad key")
+		}
+		return nil
+	}
+	_, err := New(WithErrorBody(decode)).Get(context.Background(), srv.URL, nil, nil)
+	if e := hub.AsError(err); e.Code != hub.CodeUnauthenticated {
+		t.Fatalf("decoded error: %+v", e)
+	}
+	_, err = New(WithErrorBody(func(int, []byte) error { return nil })).Get(context.Background(), srv.URL, nil, nil)
+	if e := hub.AsError(err); e.Code != hub.CodePermission {
+		t.Fatalf("fallback to status mapping: %+v", e)
+	}
+}

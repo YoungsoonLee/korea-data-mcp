@@ -134,13 +134,7 @@ func (ix *corpIndex) search(ctx context.Context, query string, listedOnly bool) 
 	return out, nil
 }
 
-var nameNoise = strings.NewReplacer(" ", "", "(주)", "", "㈜", "", "주식회사", "", ",", "", ".", "")
-
-// normName lowercases and strips spacing and corporate-form markers, so
-// "삼성 전자(주)" matches "삼성전자".
-func normName(s string) string {
-	return strings.ToLower(nameNoise.Replace(strings.TrimSpace(s)))
-}
+func normName(s string) string { return normalize.CompanyName(s) }
 
 type corpCodeXML struct {
 	Status  string `xml:"status"`
