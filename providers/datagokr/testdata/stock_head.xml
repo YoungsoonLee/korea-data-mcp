@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<response>
+    <header>
+        <resultCode>00</resultCode>
+        <resultMsg>NORMAL SERVICE.</resultMsg>
+    </header>
+    <body>
+        <numOfRows>1</numOfRows>
+        <pageNo>1</pageNo>
+        <totalCount>4526710</totalCount>
+        <items>
+            <item>
+                <basDt>20261026</basDt>
+                <srtnCd>900110</srtnCd>
+                <isinCd>HK0000057197</isinCd>
+                <itmsNm>딥커머스</itmsNm>
+                <mrktCtg>KOSDAQ</mrktCtg>
+                <clpr>5400</clpr>
+                <vs>-120</vs>
+                <fltRt>-2.17</fltRt>
+                <mkp>5210</mkp>
+                <hipr>5510</hipr>
+                <lopr>5210</lopr>
+                <trqu>13783</trqu>
+                <trPrc>74542280</trPrc>
+                <lstgStCnt>11062278</lstgStCnt>
+                <mrktTotAmt>59736301200</mrktTotAmt>
+            </item>
+        </items>
+    </body>
+</response>

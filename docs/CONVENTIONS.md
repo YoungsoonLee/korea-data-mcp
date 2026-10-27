@@ -96,6 +96,7 @@ Every error is returned in the single `hub.Error` shape, placed in the tool resu
 - If the upstream signals errors in a non-2xx response body (data.go.kr answers an unregistered key with HTTP 403), add `httpx.WithErrorBody` so the body decides the error code.
 - data.go.kr APIs go through `providers/datagokr`'s shared client (`getList`). It requests XML, recognizes both error shapes, normalizes result codes, and returns `[]T` plus the total count. A tool only defines its item struct.
 - Validate every input yourself, including formats (`YYYYMM`, month 1–12, region codes). Many upstream APIs, data.go.kr in particular, answer an invalid parameter with "success, zero results", which an agent cannot tell apart from "no data".
+- Never ask users for administrative codes they would have to look up. `providers/datagokr/regions_data.go` is generated from the official legal-dong code list by `internal/genregions` (maintainers only; the key must be approved for 행정안전부_행정표준코드_법정동코드). Rerun `DATAGOKR_SERVICE_KEY=... go generate ./providers/datagokr` after administrative reorganizations, and add removed districts to `formerDistricts` in `regions.go`.
 - When you find a new upstream quirk, save the real response in `testdata/`, cover it with a test, and add it to [QUIRKS.md](QUIRKS.md).
 - If Go fails with `tls: handshake failure` while curl works, the server probably offers only RSA key exchange ciphers, which Go dropped from its defaults in 1.22. Check with `openssl s_client -connect host:443` and add `httpx.WithLegacyRSATLS()` (OpenDART needs it).
 

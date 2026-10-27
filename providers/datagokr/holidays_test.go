@@ -3,12 +3,14 @@ package datagokr
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -19,20 +21,36 @@ import (
 )
 
 // fakePortal serves testdata files by operation name and records the last
-// query per operation.
+// query per operation. A key "op?K=V" serves only requests whose query has
+// K=V, and takes precedence over "op".
 type fakePortal struct {
 	t     *testing.T
-	files map[string]string // operation -> testdata file, or an inline XML body
+	files map[string]string // operation -> testdata file, or an inline XML body; "401 file" sets the status
 	mu    sync.Mutex
 	last  map[string]url.Values
+	body  map[string]string // operation -> last request body
 }
 
 func (f *fakePortal) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	op := path.Base(r.URL.Path)
+	reqBody, _ := io.ReadAll(r.Body)
 	f.mu.Lock()
 	f.last[op] = r.URL.Query()
+	f.body[op] = string(reqBody)
 	f.mu.Unlock()
 	src := f.files[op]
+	for k, v := range f.files {
+		o, kv, _ := strings.Cut(k, "?")
+		name, val, ok := strings.Cut(kv, "=")
+		if ok && o == op && r.URL.Query().Get(name) == val {
+			src = v
+		}
+	}
+	if code, file, ok := strings.Cut(src, " "); ok && len(code) == 3 && !strings.HasPrefix(src, "<") {
+		status, _ := strconv.Atoi(code)
+		w.WriteHeader(status)
+		src = file
+	}
 	if strings.HasPrefix(src, "<") { // inline body
 		w.Write([]byte(src))
 		return
@@ -46,6 +64,12 @@ func (f *fakePortal) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Write(b)
 }
 
+func (f *fakePortal) lastBody(op string) string {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	return f.body[op]
+}
+
 func (f *fakePortal) query(op string) url.Values {
 	f.mu.Lock()
 	defer f.mu.Unlock()
@@ -54,11 +78,11 @@ func (f *fakePortal) query(op string) url.Values {
 
 func setup(t *testing.T, files map[string]string) (*fakePortal, *mcp.ClientSession) {
 	t.Helper()
-	f := &fakePortal{t: t, files: files, last: map[string]url.Values{}}
+	f := &fakePortal{t: t, files: files, last: map[string]url.Values{}, body: map[string]string{}}
 	srv := httptest.NewServer(f)
 	t.Cleanup(srv.Close)
 
-	p := &Provider{BaseURL: srv.URL, now: func() time.Time { return time.Date(2026, 10, 25, 10, 0, 0, 0, kst) }}
+	p := &Provider{BaseURL: srv.URL, ODCloudURL: srv.URL, now: func() time.Time { return time.Date(2026, 10, 25, 10, 0, 0, 0, kst) }}
 	h := hub.New(&mcp.Implementation{Name: "test", Version: "0"}, slog.New(slog.DiscardHandler))
 	h.Add(p, func(k string) string {
 		if k == envKey {

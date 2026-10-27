@@ -39,12 +39,19 @@ type client struct {
 	key  string
 	http *httpx.Client
 	now  func() time.Time
+
+	// The National Tax Service API is on a different host with its own
+	// request and error formats; see business.go.
+	odcloudBase string
+	odcloud     *httpx.Client
 }
 
 func newClient(base, key string) *client {
 	return &client{
-		base: base,
-		key:  key,
+		base:        base,
+		key:         key,
+		odcloudBase: defaultODCloudURL,
+		odcloud:     httpx.New(httpx.WithErrorBody(odcloudError)),
 		// Public datasets change at most daily; only normal responses are
 		// cached, since errors also arrive as HTTP 200.
 		http: httpx.New(

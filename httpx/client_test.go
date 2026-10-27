@@ -3,6 +3,7 @@ package httpx
 import (
 	"context"
 	"crypto/tls"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -152,5 +153,26 @@ func TestErrorBody(t *testing.T) {
 	_, err = New(WithErrorBody(func(int, []byte) error { return nil })).Get(context.Background(), srv.URL, nil, nil)
 	if e := hub.AsError(err); e.Code != hub.CodePermission {
 		t.Fatalf("fallback to status mapping: %+v", e)
+	}
+}
+
+func TestPostJSON(t *testing.T) {
+	var calls atomic.Int32
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if calls.Add(1) == 1 {
+			w.WriteHeader(http.StatusGatewayTimeout) // the NTS gateway does this occasionally
+			return
+		}
+		b, _ := io.ReadAll(r.Body)
+		if r.Method != http.MethodPost || r.Header.Get("Content-Type") != "application/json" || r.URL.Query().Get("k") != "v" {
+			t.Errorf("request: %s %s %v", r.Method, r.Header.Get("Content-Type"), r.URL.Query())
+		}
+		w.Write(b) // echo
+	}))
+	defer srv.Close()
+	var out struct{ N []string }
+	err := New(WithBackoff(time.Millisecond)).PostJSON(context.Background(), srv.URL, url.Values{"k": {"v"}}, map[string]any{"N": []string{"a"}}, &out)
+	if err != nil || len(out.N) != 1 || calls.Load() != 2 {
+		t.Fatalf("got %+v, %v after %d calls", out, err, calls.Load())
 	}
 }

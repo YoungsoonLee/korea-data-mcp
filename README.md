@@ -26,6 +26,9 @@ The period says January to June, so an agent reads `thstrm_amount` and answers *
 The same goes for everything else an agent would otherwise stumble on:
 
 - **Outdated data that looks current.** The government company registry returns 19 unordered records for Samsung Electronics, including ones that name a former CEO. mcp-hub uses only the latest record and says how recent it is (`as_of`).
+- **Records that should not count.** Apartment trade data keeps cancelled deals, marked only by a flag: 12 of 233 Gangnam trades in September 2025, including a ₩7.5 billion one. Averages that include them are wrong. mcp-hub leaves them out of the summary.
+- **Codes that quietly stop working.** In 2026, 광주광역시 and 전라남도 merged, 화성시 was split into four 구, and 인천 reorganized its 중구, 동구 and 서구. The old district codes, which most code tables and blog posts still list, now return zero apartment trades, **even for past months**: the history moved to the new codes. With mcp-hub, an agent just says `광주 북구` or `화성시`.
+- **Inputs that silently fail.** Ask the National Tax Service about `124-81-00998`, Samsung Electronics' number written the usual way, and it says the number is not registered. mcp-hub normalizes the format first. Ask the stock price API for `POSCO홀딩스` by name and two years of history are missing, because before the 2022 rename the rows say `POSCO`. mcp-hub always queries by code.
 - **Errors that look like success.** OpenDART reports a bad key or an exceeded quota as HTTP 200. data.go.kr returns zero results, not an error, for an invalid parameter. mcp-hub turns these into [one error format](docs/CONVENTIONS.md#6-errors) with a `hint` the agent can act on.
 - **A different format for every API.** Result codes `00` vs `000`, a single result as an object instead of an array, amounts like `"84,500"` meaning ₩845,000,000, dates like `25.11.28`. mcp-hub always returns typed numbers, ISO dates, and `page`/`page_size` pagination.
 - **Missing basics.** OpenDART has no company search. mcp-hub indexes all ~120,000 companies, so `삼성전자`, `samsung electronics`, or the stock code `005930` all work.
@@ -113,6 +116,9 @@ Every OpenDART tool that takes `corp_code` also accepts a 6-character stock code
 | `datagokr_list_holidays` | Public holidays (공휴일) for a year or month, including substitute holidays, Seollal and Chuseok, and election days, with English names and weekdays. Also anniversaries, the 24 solar terms, and seasonal days. 2004 through two years ahead | [한국천문연구원_특일 정보](https://www.data.go.kr/data/15012690/openapi.do) |
 | `datagokr_search_corporations` | Find Korean corporations by name, listed or not. Returns the corporate registration number (`crno`) and, for DART filers, `dart_corp_code` for opendart tools | [금융위원회_기업기본정보](https://www.data.go.kr/data/15043184/openapi.do) |
 | `datagokr_get_corporation` | Current company profile: CEO, market, registration numbers, founding and listing dates, address, industry, employees, average tenure and salary, auditor and audit opinion | Same as above |
+| `datagokr_check_business_status` | Check up to 100 business registration numbers (사업자등록번호) with the National Tax Service: registered or not, active, suspended or closed (with date), and VAT type. Hyphens are fine | [국세청_사업자등록정보 진위확인 및 상태조회](https://www.data.go.kr/data/15081808/openapi.do) |
+| `datagokr_list_apartment_trades` | Apartment sale transactions for a district and month, newest first, with a median/min/max price summary. Prices in KRW; cancelled deals excluded by default; filter by apartment name or neighborhood. The region is a name (`강남구`, `서울 중구`, `분당구`, `광주 북구`) or a 5-digit code; a city with wards, such as `수원시` or `화성시`, covers all of them | [국토교통부_아파트 매매 실거래가 자료](https://www.data.go.kr/data/15126469/openapi.do) |
+| `datagokr_get_stock_prices` | Daily prices of a KOSPI, KOSDAQ or KONEX stock: close, change, open/high/low, volume, trading value, market cap. The stock is a name (`삼성전자`, `naver`), a 6-digit code or an ISIN; history follows the code across renames. Since 2020 | [금융위원회_주식시세정보](https://www.data.go.kr/data/15094808/openapi.do) |
 
 ## Testing locally
 
@@ -191,10 +197,12 @@ When adding a provider, follow [docs/CONVENTIONS.md](docs/CONVENTIONS.md).
 ## Provider roadmap
 
 - [x] OpenDART (전자공시, corporate disclosures): verified against the live API
-- [ ] data.go.kr: in progress
+- [x] data.go.kr: verified against the live API
   - [x] Public holidays (특일 정보): verified against the live API
   - [x] Company information (기업기본정보): verified against the live API
-  - [ ] Stock prices, business registration status, apartment trade prices
+  - [x] Business registration status (사업자등록 상태조회): verified against the live API
+  - [x] Apartment trade prices (아파트 매매 실거래가): verified against the live API, with district names
+  - [x] Stock prices (주식시세): verified against the live API
 - [ ] 국가법령정보 (Korean Law Information Center)
 - [ ] Bank of Korea ECOS, KOSIS (Korean Statistical Information Service)
 - [ ] Next region: Japan EDINET (corporate disclosures)

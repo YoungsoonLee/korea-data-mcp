@@ -148,6 +148,31 @@ func (c *Client) GetJSON(ctx context.Context, rawURL string, query url.Values, h
 	return nil
 }
 
+// PostJSON sends in as a JSON body to rawURL (with query appended) and
+// decodes the JSON response into out. POST responses are never cached.
+func (c *Client) PostJSON(ctx context.Context, rawURL string, query url.Values, in, out any) error {
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		return hub.Errorf(hub.CodeInternal, "bad url").Wrap(err)
+	}
+	if len(query) > 0 {
+		u.RawQuery = query.Encode()
+	}
+	reqBody, err := json.Marshal(in)
+	if err != nil {
+		return hub.Errorf(hub.CodeInternal, "encode request").Wrap(err)
+	}
+	header := http.Header{"Content-Type": {"application/json"}, "Accept": {"application/json"}}
+	body, err := c.do(ctx, http.MethodPost, u, header, reqBody)
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(body, out); err != nil {
+		return hub.Errorf(hub.CodeUpstream, "invalid JSON from upstream").Wrap(err)
+	}
+	return nil
+}
+
 func (c *Client) GetXML(ctx context.Context, rawURL string, query url.Values, header http.Header, out any) error {
 	body, err := c.Get(ctx, rawURL, query, header)
 	if err != nil {

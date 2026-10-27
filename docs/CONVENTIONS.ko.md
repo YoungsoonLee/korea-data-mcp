@@ -96,6 +96,7 @@
 - upstream이 2xx가 아닌 응답의 본문으로 에러 종류를 알려주면(data.go.kr은 등록되지 않은 키에 HTTP 403을 보냄) `httpx.WithErrorBody`를 추가해서 본문을 보고 에러 코드를 정하게 합니다.
 - data.go.kr API는 `providers/datagokr`의 공통 클라이언트(`getList`)를 거칩니다. 공통 클라이언트는 XML로 요청하고, 두 가지 에러 형식을 모두 알아보고, 결과 코드를 통일한 뒤 `[]T`와 전체 건수를 돌려줍니다. tool은 항목 struct만 정의하면 됩니다.
 - 입력은 형식까지(`YYYYMM`, 1~12월, 지역코드 등) 모두 직접 검증합니다. 많은 upstream API, 특히 data.go.kr은 잘못된 파라미터에 "성공, 결과 0건"으로 답해서 에이전트가 "데이터 없음"과 구분할 수 없습니다.
+- 사용자가 직접 찾아봐야 하는 행정 코드를 입력으로 요구하지 않습니다. `providers/datagokr/regions_data.go`는 `internal/genregions`가 공식 법정동코드 목록으로 생성합니다(관리자 전용이고, 키가 행정안전부_행정표준코드_법정동코드에 승인되어 있어야 합니다). 행정구역이 개편되면 `DATAGOKR_SERVICE_KEY=... go generate ./providers/datagokr`를 다시 실행하고, 없어진 시군구는 `regions.go`의 `formerDistricts`에 추가합니다.
 - upstream의 새로운 특이 동작을 발견하면 실제 응답을 `testdata/`에 저장하고, 테스트로 검증하고, [QUIRKS.ko.md](QUIRKS.ko.md)에 추가합니다.
 - curl은 되는데 Go에서 `tls: handshake failure`가 나면, 서버가 RSA 키 교환 암호 스위트만 지원하는 경우일 가능성이 높습니다. Go는 1.22부터 이 방식을 기본 목록에서 뺐습니다. `openssl s_client -connect host:443`로 확인하고 `httpx.WithLegacyRSATLS()`를 추가합니다(OpenDART가 이 경우입니다).
 
