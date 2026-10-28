@@ -131,6 +131,8 @@ Every OpenDART tool that takes `corp_code` also accepts a 6-character stock code
 |---|---|
 | `lawgokr_search_laws` | Search statutes in force (acts, decrees, ordinances) by name or official abbreviation (`민법`, `중대재해처벌법`), or by article text with `in_text`. Exact matches and acts first |
 | `lawgokr_get_law` | The text of a statute **as in force on a date** (default today), whole or one article (`제50조`, `43의2`), with paragraphs, subparagraphs and items. Lists promulgated amendments that take effect later in `upcoming`; any past or future date works with `as_of` |
+| `lawgokr_search_precedents` | Search court rulings (판례), newest first, by case name, full text, case number (`2020다296604`, spaces are fine), court and decision date. Court records only by default, so every result can be read |
+| `lawgokr_get_precedent` | A ruling by id or case number: issues (판시사항), holding (판결요지), cited statutes and cases, and the full decision with `include_full_text` |
 
 ## Testing locally
 
@@ -215,8 +217,6 @@ When adding a provider, follow [docs/CONVENTIONS.md](docs/CONVENTIONS.md).
   - [x] Business registration status (사업자등록 상태조회): verified against the live API
   - [x] Apartment trade prices (아파트 매매 실거래가): verified against the live API, with district names
   - [x] Stock prices (주식시세): verified against the live API
-- [ ] 국가법령정보 (Korean statutes, law.go.kr): in progress
-  - [x] Statute search and text in force on any date: verified against the live API
-  - [ ] Court precedents (판례)
+- [x] 국가법령정보 (Korean statutes and court rulings, law.go.kr): verified against the live API
 - [ ] Bank of Korea ECOS, KOSIS (Korean Statistical Information Service)
 - [ ] Next region: Japan EDINET (corporate disclosures)

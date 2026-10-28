@@ -17,3 +17,9 @@ These files are **real law.go.kr responses** (XML) captured on 2026-10-28. Every
 | `law_serious_full.xml` | `lawService` eflaw, MST 228817, efYd 20220127 | A whole law: 16 articles, 4 chapters, 호 and 목 |
 | `error_no_law.xml` | `lawService` with MST 1 | `<Law>` with plain text, HTTP 200 |
 | `error_bad_oc.xml` | Any call with an unregistered OC | `<Response>` "사용자 정보 검증에 실패하였습니다", HTTP 200 |
+| `prec_search_unfair_dismissal.xml` | `lawSearch` prec, datSrcNm 대법원, query 부당해고, 3 rows | Court records, newest first, dates as `2026.01.29` |
+| `prec_search_national_tax.xml` | Same, datSrcNm 국세법령정보시스템, 1 row | No court name; the court is in the case number |
+| `prec_search_case_number.xml` | `lawSearch` prec, nb 2020다296604 | One ruling by case number |
+| `prec_606191.xml` | `lawService` prec, ID 606191 | A Supreme Court ruling: 판시사항, 판결요지, 참조조문, 참조판례, full text with `<br/>` |
+| `prec_622879_local_tax.xml` | Same, ID 622879 | A 지방세법령정보시스템 record: `선고` is `"null"`, `<br/>` followed by newlines |
+| `prec_not_found.xml` | Same, ID 617999 (a 국세법령정보시스템 record from search) | `<Law>` "일치하는 판례가 없습니다" |

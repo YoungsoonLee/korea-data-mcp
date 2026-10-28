@@ -53,7 +53,7 @@ func (p *Provider) Info() hub.ProviderInfo {
 		ID:    "lawgokr",
 		Title: "국가법령정보 (law.go.kr)",
 		Description: "Korean statutes (법령) from the Ministry of Government Legislation: search by name, abbreviation or text, " +
-			"and read the text in force on any date, article by article. " +
+			"read the text in force on any date, article by article, and search and read court rulings (판례). " +
 			"Requires an OC value from open.law.go.kr and this machine's public IP registered there.",
 		RequiredEnv: []string{envKey},
 		DocsURL:     "https://open.law.go.kr",
@@ -73,6 +73,7 @@ func (p *Provider) Register(r *hub.Registrar) error {
 		c.now = time.Now
 	}
 	registerLaws(r, c)
+	registerPrecedents(r, c)
 	return nil
 }
 

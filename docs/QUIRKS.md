@@ -34,6 +34,7 @@ These are the most dangerous ones: nothing fails, the agent simply gets the wron
 | OpenDART | Net income appears twice with identical values (once in the income statement, once at the top of comprehensive income). | Exact duplicates are removed. | ✅ |
 | law.go.kr | The "current law" text (`target=law`) **includes amendments that are promulgated but not in effect yet**, every article labeled with the current effective date: the Labor Standards Act shows 제44조의4 "in effect since 2026-10-08", but it takes effect on 2027-01-01, and 제13조 and 제101조 already show text from 2026-12-08. | The text is always read by effective date (`target=eflaw`) for the version in force on `as_of` (default today); later amendments are listed in `upcoming`. | ✅ |
 | law.go.kr | Searching `민법` returns 난민법, 난민법 시행규칙 and 난민법 시행령 **before 민법**: results are sorted by name only. | Exact matches first, then prefixes, then acts before decrees and ordinances. | ✅ |
+| law.go.kr (precedents) | A case number with spaces (`2020 다 296604`) or a date range as `2026-01-01~2026-12-31` is **success with zero results**. | Spaces are removed; dates are taken as `YYYY-MM-DD` and validated. | ✅ |
 
 ## Errors that look like something else
 
@@ -60,6 +61,7 @@ These are the most dangerous ones: nothing fails, the agent simply gets the wron
 | All | Amounts come as `"1,234"`, `"-"` (no value), or `"(1,234)"` (negative). | Integers, or `null` when there is no value (never a misleading `0`). | ✅ |
 | data.go.kr | Empty fields are `""` or a single space `" "`, and addresses have double spaces. Some dates are not dates at all (a founding date of `99`). | Whitespace is cleaned; empty and invalid values are omitted. | ✅ |
 | All | Pagination is `pageNo`/`numOfRows`, `page_no`/`page_count`, or none. | Always `page`/`page_size` in, `page_info` out. | ✅ |
+| law.go.kr (precedents) | National Tax Service records have no court name; the court is inside the case number (`서울행정법원-2025-구합-53785`). Text uses `<br/>`, some fields are the string `"null"`, and dates are `2025.10.16` in search and `20251016` in details. | `court` is filled from the case number, which becomes `2025구합53785`; text has plain line breaks; dates are ISO. | ✅ |
 
 ## Missing features
 
@@ -71,6 +73,7 @@ These are the most dangerous ones: nothing fails, the agent simply gets the wron
 | data.go.kr (company info) | A broad name like `삼성` matches 3,158 records (5.8 MB). | Rejected with a hint to use a more specific name, instead of returning an arbitrary slice. | ✅ |
 | law.go.kr | Official abbreviations are not searched: `중대재해처벌법` finds nothing, although it is the official short name of 「중대재해 처벌 등에 관한 법률」. | Names and abbreviations are matched here, ignoring spaces. | ✅ |
 | law.go.kr | Every link in a response contains the caller's **OC** (`lawService.do?OC=…`). | Links are never passed on; tools return public law.go.kr URLs. | ✅ |
+| law.go.kr (precedents) | About **90% of recent rulings** in search results come from the National Tax Service's system (국세법령정보시스템), and fetching any of them returns "no such precedent": their text is only on the website. | Searches default to court records, which all have text. Tax records are opt-in, marked `text_available: false` with a public URL. | ✅ |
 
 ## Connection problems
 
