@@ -4,7 +4,7 @@
 
 Korean public APIs work, but each one has its own surprises. An agent that calls them directly has to discover every one of these by failing, and some of them do not fail at all: they return a plausible but wrong answer.
 
-Everything below was **observed on the live APIs** (last checked 2026-10-25), and the real responses are kept in each provider's `testdata/` so the handling is tested.
+Everything below was **observed on the live APIs** (last checked 2026-10-28), and the real responses are kept in each provider's `testdata/` so the handling is tested.
 
 Status: ✅ handled · 🚧 handled when the tool that needs it ships
 
@@ -32,6 +32,8 @@ These are the most dangerous ones: nothing fails, the agent simply gets the wron
 | data.go.kr (stock prices) | `endBasDt` is exclusive and an invalid date (`2026-10-23` instead of `20261023`) is success with zero results. A preferred share's ISIN does not contain its code (삼성전자우: `KR7005931001`, code `005935`). | `from`/`to` are inclusive ISO dates and validated; ISINs are looked up, not sliced. | ✅ |
 | data.go.kr (business status) | A business number written with hyphens (`124-81-00998`, the usual format) is reported as **not registered with the NTS**, even for Samsung Electronics. | Hyphens and spaces are removed before the lookup; anything that is not 10 digits is rejected with the offending value. | ✅ |
 | OpenDART | Net income appears twice with identical values (once in the income statement, once at the top of comprehensive income). | Exact duplicates are removed. | ✅ |
+| law.go.kr | The "current law" text (`target=law`) **includes amendments that are promulgated but not in effect yet**, every article labeled with the current effective date: the Labor Standards Act shows 제44조의4 "in effect since 2026-10-08", but it takes effect on 2027-01-01, and 제13조 and 제101조 already show text from 2026-12-08. | The text is always read by effective date (`target=eflaw`) for the version in force on `as_of` (default today); later amendments are listed in `upcoming`. | ✅ |
+| law.go.kr | Searching `민법` returns 난민법, 난민법 시행규칙 and 난민법 시행령 **before 민법**: results are sorted by name only. | Exact matches first, then prefixes, then acts before decrees and ordinances. | ✅ |
 
 ## Errors that look like something else
 
@@ -45,6 +47,8 @@ These are the most dangerous ones: nothing fails, the agent simply gets the wron
 | data.go.kr (business status) | The National Tax Service API has its own error format and unusual HTTP statuses: an empty request is 411 (Length Required), over 100 numbers is 413, a bad key is 401 with `{"code":-4,...}`. The gateway also returns an occasional 504. | Mapped to the standard errors (the key error gets the same hint as the other APIs); 504 is retried. | ✅ |
 | data.go.kr | A newly approved key returns `SERVICE_KEY_IS_NOT_REGISTERED_ERROR` for up to a few hours. | The hint says so, so the agent tells the user to wait instead of guessing. | ✅ |
 | data.go.kr | A superseded endpoint (the stock price API before `_V2`) also answers **"key not registered" (30)**, not "no such service" (12), so an approved key looks broken. | Every tool calls the endpoint shown on the API's page today. | ✅ |
+| law.go.kr | Errors are **HTTP 200** documents of different shapes: `<Response>` for a bad OC, `<Law>` with plain text for an unknown law. A wrong OC and an unregistered IP give **the same message**. | `UNAUTHENTICATED` with a hint covering both causes; an unknown law is `NOT_FOUND`. | ✅ |
+| law.go.kr | Asking for a law version by a date (`efYd`) that is not exactly one of its effective dates returns an **empty document** `{}`, and a missing article returns the law without articles. | The version is chosen from the law's history, and a missing article is `NOT_FOUND` with a hint when an upcoming amendment may add it. | ✅ |
 
 ## Formats that differ per API
 
@@ -65,6 +69,8 @@ These are the most dangerous ones: nothing fails, the agent simply gets the wron
 | OpenDART | Stock codes (`005930`) are not accepted. | Any `corp_code` input also accepts a stock code. | ✅ |
 | data.go.kr (company info) | Company name search is a substring match with no ranking: `삼성전자` returns `삼성전자잠실판매` first, as one of 108 records for 37 companies. `삼성 전자` or `(주)삼성전자` finds nothing useful. | Spacing and corporate forms are stripped before searching, records are merged per company, and the exact match comes first, then listed companies. | ✅ |
 | data.go.kr (company info) | A broad name like `삼성` matches 3,158 records (5.8 MB). | Rejected with a hint to use a more specific name, instead of returning an arbitrary slice. | ✅ |
+| law.go.kr | Official abbreviations are not searched: `중대재해처벌법` finds nothing, although it is the official short name of 「중대재해 처벌 등에 관한 법률」. | Names and abbreviations are matched here, ignoring spaces. | ✅ |
+| law.go.kr | Every link in a response contains the caller's **OC** (`lawService.do?OC=…`). | Links are never passed on; tools return public law.go.kr URLs. | ✅ |
 
 ## Connection problems
 

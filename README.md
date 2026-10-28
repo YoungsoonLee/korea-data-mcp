@@ -25,6 +25,8 @@ The period says January to June, so an agent reads `thstrm_amount` and answers *
 
 The same goes for everything else an agent would otherwise stumble on:
 
+- **Law that is not law yet.** Ask law.go.kr for the current Labor Standards Act (근로기준법) and the text includes 제44조의4, labeled as in effect since 2026-10-08. It actually takes effect on **2027-01-01**; the official "current law" text already contains amendments that are only promulgated. mcp-hub returns the text in force on the date you ask for (today by default) and lists what is coming in `upcoming`.
+
 - **Outdated data that looks current.** The government company registry returns 19 unordered records for Samsung Electronics, including ones that name a former CEO. mcp-hub uses only the latest record and says how recent it is (`as_of`).
 - **Records that should not count.** Apartment trade data keeps cancelled deals, marked only by a flag: 12 of 233 Gangnam trades in September 2025, including a ₩7.5 billion one. Averages that include them are wrong. mcp-hub leaves them out of the summary.
 - **Codes that quietly stop working.** In 2026, 광주광역시 and 전라남도 merged, 화성시 was split into four 구, and 인천 reorganized its 중구, 동구 and 서구. The old district codes, which most code tables and blog posts still list, now return zero apartment trades, **even for past months**: the history moved to the new codes. With mcp-hub, an agent just says `광주 북구` or `화성시`.
@@ -55,8 +57,11 @@ API keys are set through environment variables. A provider whose keys are missin
 |---|---|---|
 | `OPENDART_API_KEY` | OpenDART (전자공시, corporate disclosures) | https://opendart.fss.or.kr → 인증키 신청 (request an API key) |
 | `DATAGOKR_SERVICE_KEY` | data.go.kr (공공데이터포털, Public Data Portal) | https://www.data.go.kr → 활용신청 (apply for use) → My Page |
+| `LAWGOKR_OC` | law.go.kr (국가법령정보, Korean statutes) | https://open.law.go.kr → OPEN API 신청 (apply, with this machine's public IP) → 마이페이지 → API인증키관리 (OC) |
 
 > **data.go.kr note**: The portal issues two keys, Encoding and Decoding. Use the **Decoding key**. The Encoding key gets URL-encoded twice and fails with `SERVICE_KEY_IS_NOT_REGISTERED_ERROR`.
+
+> **law.go.kr note**: Calls are accepted only from the **public IP address registered** with the application; if your IP changes, update it on open.law.go.kr. A wrong OC and an unregistered IP give the same error ("사용자 정보 검증에 실패하였습니다"). law.go.kr puts the OC in every link it returns, so don't reuse another key as the OC (mcp-hub never passes those links on).
 
 ### Option 1: In your MCP client configuration
 
@@ -119,6 +124,13 @@ Every OpenDART tool that takes `corp_code` also accepts a 6-character stock code
 | `datagokr_check_business_status` | Check up to 100 business registration numbers (사업자등록번호) with the National Tax Service: registered or not, active, suspended or closed (with date), and VAT type. Hyphens are fine | [국세청_사업자등록정보 진위확인 및 상태조회](https://www.data.go.kr/data/15081808/openapi.do) |
 | `datagokr_list_apartment_trades` | Apartment sale transactions for a district and month, newest first, with a median/min/max price summary. Prices in KRW; cancelled deals excluded by default; filter by apartment name or neighborhood. The region is a name (`강남구`, `서울 중구`, `분당구`, `광주 북구`) or a 5-digit code; a city with wards, such as `수원시` or `화성시`, covers all of them | [국토교통부_아파트 매매 실거래가 자료](https://www.data.go.kr/data/15126469/openapi.do) |
 | `datagokr_get_stock_prices` | Daily prices of a KOSPI, KOSDAQ or KONEX stock: close, change, open/high/low, volume, trading value, market cap. The stock is a name (`삼성전자`, `naver`), a 6-digit code or an ISIN; history follows the code across renames. Since 2020 | [금융위원회_주식시세정보](https://www.data.go.kr/data/15094808/openapi.do) |
+
+**law.go.kr** (`LAWGOKR_OC`)
+
+| Tool | What it does |
+|---|---|
+| `lawgokr_search_laws` | Search statutes in force (acts, decrees, ordinances) by name or official abbreviation (`민법`, `중대재해처벌법`), or by article text with `in_text`. Exact matches and acts first |
+| `lawgokr_get_law` | The text of a statute **as in force on a date** (default today), whole or one article (`제50조`, `43의2`), with paragraphs, subparagraphs and items. Lists promulgated amendments that take effect later in `upcoming`; any past or future date works with `as_of` |
 
 ## Testing locally
 
@@ -203,6 +215,8 @@ When adding a provider, follow [docs/CONVENTIONS.md](docs/CONVENTIONS.md).
   - [x] Business registration status (사업자등록 상태조회): verified against the live API
   - [x] Apartment trade prices (아파트 매매 실거래가): verified against the live API, with district names
   - [x] Stock prices (주식시세): verified against the live API
-- [ ] 국가법령정보 (Korean Law Information Center)
+- [ ] 국가법령정보 (Korean statutes, law.go.kr): in progress
+  - [x] Statute search and text in force on any date: verified against the live API
+  - [ ] Court precedents (판례)
 - [ ] Bank of Korea ECOS, KOSIS (Korean Statistical Information Service)
 - [ ] Next region: Japan EDINET (corporate disclosures)

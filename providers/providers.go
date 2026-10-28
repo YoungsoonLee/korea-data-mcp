@@ -4,6 +4,7 @@ package providers
 import (
 	"github.com/YoungsoonLee/mcp-hub/hub"
 	"github.com/YoungsoonLee/mcp-hub/providers/datagokr"
+	"github.com/YoungsoonLee/mcp-hub/providers/lawgokr"
 	"github.com/YoungsoonLee/mcp-hub/providers/opendart"
 )
 
@@ -12,5 +13,6 @@ func All() []hub.Provider {
 	return []hub.Provider{
 		opendart.New(),
 		datagokr.New(),
+		lawgokr.New(),
 	}
 }

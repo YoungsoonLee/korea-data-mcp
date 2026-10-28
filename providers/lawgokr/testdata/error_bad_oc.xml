@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <Response>
+        <result>사용자 정보 검증에 실패하였습니다.</result>
+        <msg>OPEN API 호출 시 사용자 검증을 위하여 정확한 서버장비의 IP주소 및 도메인주소를 등록해 주세요.</msg>
+    </Response>
