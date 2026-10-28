@@ -220,3 +220,7 @@ When adding a provider, follow [docs/CONVENTIONS.md](docs/CONVENTIONS.md).
 - [x] 국가법령정보 (Korean statutes and court rulings, law.go.kr): verified against the live API
 - [ ] Bank of Korea ECOS, KOSIS (Korean Statistical Information Service)
 - [ ] Next region: Japan EDINET (corporate disclosures)
+
+## License
+
+[Apache License 2.0](LICENSE). Data returned by the tools comes from the upstream services and is subject to their terms of use.

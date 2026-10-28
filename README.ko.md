@@ -219,3 +219,7 @@ Provider를 추가할 때는 [docs/CONVENTIONS.ko.md](docs/CONVENTIONS.ko.md)를
 - [x] 국가법령정보 (법령, 판례): 실제 API 검증 완료
 - [ ] 한국은행 ECOS, KOSIS
 - [ ] 다음 지역: 일본 EDINET (전자공시)
+
+## 라이선스
+
+[Apache License 2.0](LICENSE). tool이 돌려주는 데이터는 각 upstream 서비스에서 오며, 해당 서비스의 이용약관을 따릅니다.
