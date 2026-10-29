@@ -1,0 +1,81 @@
+{
+  "manifest_version": "0.3",
+  "name": "korea-data-mcp",
+  "display_name": "Korea Data MCP",
+  "version": "0.0.0",
+  "description": "Korean public data for AI agents: corporate filings and financials, stock prices, apartment trades, statutes and court rulings.",
+  "long_description": "Free, official Korean data from OpenDART, data.go.kr and law.go.kr, with the traps that make agents give wrong answers already handled: half-year revenue reported as one quarter, statutes that include amendments not in force yet, cancelled apartment deals, district codes that changed in 2026. Each source needs its own free key; enter the ones you have, and tools for the others are not offered.",
+  "author": {
+    "name": "YoungsoonLee",
+    "url": "https://github.com/YoungsoonLee"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YoungsoonLee/korea-data-mcp"
+  },
+  "homepage": "https://github.com/YoungsoonLee/korea-data-mcp",
+  "documentation": "https://github.com/YoungsoonLee/korea-data-mcp#readme",
+  "support": "https://github.com/YoungsoonLee/korea-data-mcp/issues",
+  "license": "Apache-2.0",
+  "keywords": ["korea", "opendart", "public-data", "stocks", "real-estate", "law"],
+  "server": {
+    "type": "binary",
+    "entry_point": "server/darwin/korea-data-mcp",
+    "mcp_config": {
+      "command": "${__dirname}/server/darwin/korea-data-mcp",
+      "args": [],
+      "env": {
+        "OPENDART_API_KEY": "${user_config.opendart_api_key}",
+        "DATAGOKR_SERVICE_KEY": "${user_config.datagokr_service_key}",
+        "LAWGOKR_OC": "${user_config.lawgokr_oc}"
+      },
+      "platform_overrides": {
+        "win32": { "command": "${__dirname}/server/win32/korea-data-mcp.exe" },
+        "linux": { "command": "${__dirname}/server/linux/korea-data-mcp" }
+      }
+    }
+  },
+  "user_config": {
+    "opendart_api_key": {
+      "type": "string",
+      "title": "OpenDART API key",
+      "description": "Corporate filings and financials. Free at opendart.fss.or.kr (인증키 신청).",
+      "sensitive": true,
+      "required": false
+    },
+    "datagokr_service_key": {
+      "type": "string",
+      "title": "data.go.kr service key (Decoding)",
+      "description": "Holidays, corporations, business status, apartment trades, stock prices. Use the Decoding key from data.go.kr, and apply for each API (links in the README).",
+      "sensitive": true,
+      "required": false
+    },
+    "lawgokr_oc": {
+      "type": "string",
+      "title": "law.go.kr OC",
+      "description": "Statutes and court rulings. Set at open.law.go.kr (마이페이지 > API인증키관리); calls work only from the public IP you registered.",
+      "sensitive": true,
+      "required": false
+    }
+  },
+  "tools": [
+    { "name": "hub_list_providers", "description": "Which data sources are enabled and which keys are missing" },
+    { "name": "opendart_search_companies", "description": "Find a company's DART corp_code by name or stock code" },
+    { "name": "opendart_get_company", "description": "Company profile: CEO, market, registration numbers, address" },
+    { "name": "opendart_search_disclosures", "description": "Search corporate disclosures by company, date and type" },
+    { "name": "opendart_get_financials", "description": "Key financial accounts for a year and report, with prior periods" },
+    { "name": "datagokr_list_holidays", "description": "Korean public holidays for a year or month" },
+    { "name": "datagokr_search_corporations", "description": "Find Korean corporations by name, listed or not" },
+    { "name": "datagokr_get_corporation", "description": "Current corporation profile, employees, salary, auditor" },
+    { "name": "datagokr_check_business_status", "description": "Business registration status with the National Tax Service" },
+    { "name": "datagokr_list_apartment_trades", "description": "Apartment sale prices by district and month, with a median" },
+    { "name": "datagokr_get_stock_prices", "description": "Daily KOSPI/KOSDAQ/KONEX stock prices since 2020" },
+    { "name": "lawgokr_search_laws", "description": "Search Korean statutes in force by name or text" },
+    { "name": "lawgokr_get_law", "description": "A statute or article as in force on a date, with upcoming amendments" },
+    { "name": "lawgokr_search_precedents", "description": "Search court rulings by words, case number, court and date" },
+    { "name": "lawgokr_get_precedent", "description": "A ruling's issues, holding, cited statutes and full text" }
+  ],
+  "compatibility": {
+    "platforms": ["darwin", "win32", "linux"]
+  }
+}

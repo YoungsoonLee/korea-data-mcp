@@ -45,10 +45,21 @@ func TestLoadEnvFileInvalidLine(t *testing.T) {
 }
 
 func TestEnvLookupPrefersProcessEnv(t *testing.T) {
-	t.Setenv("MCPHUB_TEST_KEY", "from-shell")
-	t.Setenv("MCPHUB_EMPTY", "")
-	get := envLookup(map[string]string{"MCPHUB_TEST_KEY": "from-file", "MCPHUB_FILE_ONLY": "file", "MCPHUB_EMPTY": "file"})
-	if get("MCPHUB_TEST_KEY") != "from-shell" || get("MCPHUB_FILE_ONLY") != "file" || get("MCPHUB_EMPTY") != "file" {
+	t.Setenv("KOREADATA_TEST_KEY", "from-shell")
+	t.Setenv("KOREADATA_EMPTY", "")
+	get := envLookup(map[string]string{"KOREADATA_TEST_KEY": "from-file", "KOREADATA_FILE_ONLY": "file", "KOREADATA_EMPTY": "file"})
+	if get("KOREADATA_TEST_KEY") != "from-shell" || get("KOREADATA_FILE_ONLY") != "file" || get("KOREADATA_EMPTY") != "file" {
 		t.Fatal("wrong precedence")
+	}
+}
+
+// An optional MCPB setting the user skipped may arrive as the literal
+// ${user_config.x}; it must not enable a provider with a bogus key.
+func TestEnvLookupUnexpanded(t *testing.T) {
+	t.Setenv("KOREADATA_SKIPPED", "${user_config.lawgokr_oc}")
+	t.Setenv("KOREADATA_SHADOWED", "${user_config.opendart_api_key}")
+	get := envLookup(map[string]string{"KOREADATA_SHADOWED": "file"})
+	if get("KOREADATA_SKIPPED") != "" || get("KOREADATA_SHADOWED") != "file" {
+		t.Fatalf("got %q, %q", get("KOREADATA_SKIPPED"), get("KOREADATA_SHADOWED"))
 	}
 }

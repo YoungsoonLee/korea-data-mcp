@@ -3,7 +3,7 @@ package datagokr
 import (
 	"testing"
 
-	"github.com/YoungsoonLee/mcp-hub/hub"
+	"github.com/YoungsoonLee/korea-data-mcp/hub"
 )
 
 func TestGetCorporationUsesLatestRecord(t *testing.T) {

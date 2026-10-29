@@ -12,8 +12,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/YoungsoonLee/mcp-hub/hub"
-	"github.com/YoungsoonLee/mcp-hub/normalize"
+	"github.com/YoungsoonLee/korea-data-mcp/hub"
+	"github.com/YoungsoonLee/korea-data-mcp/normalize"
 )
 
 // corp is one entry of DART's company list (corpCode.xml).

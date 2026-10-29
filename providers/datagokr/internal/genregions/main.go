@@ -23,7 +23,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/YoungsoonLee/mcp-hub/httpx"
+	"github.com/YoungsoonLee/korea-data-mcp/httpx"
 )
 
 const endpoint = "https://apis.data.go.kr/1741000/StanReginCd/getStanReginCdList"

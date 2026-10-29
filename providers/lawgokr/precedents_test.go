@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/YoungsoonLee/mcp-hub/hub"
+	"github.com/YoungsoonLee/korea-data-mcp/hub"
 )
 
 // By default only court records, which all have text, are searched.

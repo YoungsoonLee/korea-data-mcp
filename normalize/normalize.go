@@ -1,5 +1,5 @@
 // Package normalize converts the formats Korean APIs commonly return into the
-// mcp-hub output conventions: ISO 8601 dates, numeric amounts, plain text.
+// korea-data-mcp output conventions: ISO 8601 dates, numeric amounts, plain text.
 package normalize
 
 import (

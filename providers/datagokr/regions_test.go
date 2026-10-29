@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/YoungsoonLee/mcp-hub/hub"
+	"github.com/YoungsoonLee/korea-data-mcp/hub"
 )
 
 func TestResolveRegion(t *testing.T) {

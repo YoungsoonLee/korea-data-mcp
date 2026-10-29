@@ -28,8 +28,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/YoungsoonLee/mcp-hub/httpx"
-	"github.com/YoungsoonLee/mcp-hub/hub"
+	"github.com/YoungsoonLee/korea-data-mcp/httpx"
+	"github.com/YoungsoonLee/korea-data-mcp/hub"
 )
 
 const (

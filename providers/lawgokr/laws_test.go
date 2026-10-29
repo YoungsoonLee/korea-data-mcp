@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/YoungsoonLee/mcp-hub/hub"
+	"github.com/YoungsoonLee/korea-data-mcp/hub"
 )
 
 // Upstream sorts by name, so 민법 comes after 난민법 and its decree; exact

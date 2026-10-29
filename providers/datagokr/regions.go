@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/YoungsoonLee/mcp-hub/hub"
+	"github.com/YoungsoonLee/korea-data-mcp/hub"
 )
 
 // The district table (regions_data.go) is generated from the official

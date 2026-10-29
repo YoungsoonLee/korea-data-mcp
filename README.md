@@ -1,15 +1,15 @@
-# mcp-hub
+# korea-data-mcp
 
 **English** | [한국어](README.ko.md)
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Go](https://img.shields.io/badge/go-1.26-00ADD8.svg)](go.mod)
 
-An MCP server that gives AI agents reliable access to Korean public data: corporate filings and financials, stock prices, apartment sale prices, business registration status, public holidays, statutes and court rulings. It is free and official data, with the traps that make agents give wrong answers already handled. Korea is the first region; Japan is next.
+An MCP server that gives AI agents reliable access to Korean public data: corporate filings and financials, stock prices, apartment sale prices, business registration status, public holidays, statutes and court rulings. It is free and official data, with the traps that make agents give wrong answers already handled.
 
 ## What you can ask
 
-Connect mcp-hub to Claude (or any MCP client) and ask in English or Korean:
+Connect korea-data-mcp to Claude (or any MCP client) and ask in English or Korean:
 
 - "What was Samsung Electronics' revenue in the first half of 2025, and what has it disclosed recently?"
 - "What was the median apartment sale price in 분당구 in September 2025?"
@@ -19,7 +19,7 @@ Connect mcp-hub to Claude (or any MCP client) and ask in English or Korean:
 - "How did NAVER's stock price move last month?"
 - "Which public holidays are left in Korea this year?"
 
-The third question in Claude Code. The official "current" text already contains the article, but mcp-hub knows it takes effect only on 2027-01-01 (tool output shortened):
+The third question in Claude Code. The official "current" text already contains the article, but korea-data-mcp knows it takes effect only on 2027-01-01 (tool output shortened):
 
 ![Claude Code answering whether 근로기준법 제44조의4 is in force, using lawgokr_get_law](docs/images/law-not-yet-in-force.png)
 
@@ -31,7 +31,7 @@ The third question in Claude Code. The official "current" text already contains 
 
 All three keys are free. You can start with just one.
 
-## Why mcp-hub
+## Why korea-data-mcp
 
 Korean public APIs are free and official, but calling them directly is full of traps. Some of them don't even fail; they just give the agent a wrong answer.
 
@@ -42,7 +42,7 @@ Korean public APIs are free and official, but calling them directly is full of t
   "thstrm_amount": "74,566,317,000,000", "thstrm_add_amount": "153,706,820,000,000" }
 ```
 
-The period says January to June, so an agent reads `thstrm_amount` and answers **₩74.6 trillion. That is wrong**: it is the second quarter only. The half-year figure, ₩153.7 trillion, is in a different field. mcp-hub returns:
+The period says January to June, so an agent reads `thstrm_amount` and answers **₩74.6 trillion. That is wrong**: it is the second quarter only. The half-year figure, ₩153.7 trillion, is in a different field. korea-data-mcp returns:
 
 ```json
 { "name": "매출액", "statement_type": "income_statement",
@@ -54,34 +54,36 @@ So the agent gets it right, and can even split out the second quarter:
 
 ![Claude Code answering Samsung Electronics' first-half 2025 revenue with opendart_get_financials](docs/images/samsung-half-revenue.png)
 
-A few more of the traps mcp-hub handles:
+A few more of the traps korea-data-mcp handles:
 
-- **Law that is not law yet.** Ask law.go.kr for the current Labor Standards Act and the text includes 제44조의4, labeled as in effect since 2026-10-08. It actually takes effect on **2027-01-01**; the official "current law" text already contains amendments that are only promulgated. mcp-hub returns the text in force on the date you ask for (today by default) and lists what is coming in `upcoming`.
-- **Deals that never happened.** Apartment trade data keeps cancelled deals, marked only by a flag: 12 of 233 Gangnam trades in September 2025, including a ₩7.5 billion one. Averages that include them are wrong. mcp-hub leaves them out.
-- **Codes that quietly stop working.** In 2026, 광주광역시 and 전라남도 merged, 화성시 was split into four 구, and 인천 reorganized its districts. The old district codes, which most code tables still list, now return zero trades, **even for past months**. With mcp-hub, an agent just says `광주 북구` or `화성시`.
+- **Law that is not law yet.** Ask law.go.kr for the current Labor Standards Act and the text includes 제44조의4, labeled as in effect since 2026-10-08. It actually takes effect on **2027-01-01**; the official "current law" text already contains amendments that are only promulgated. korea-data-mcp returns the text in force on the date you ask for (today by default) and lists what is coming in `upcoming`.
+- **Deals that never happened.** Apartment trade data keeps cancelled deals, marked only by a flag: 12 of 233 Gangnam trades in September 2025, including a ₩7.5 billion one. Averages that include them are wrong. korea-data-mcp leaves them out.
+- **Codes that quietly stop working.** In 2026, 광주광역시 and 전라남도 merged, 화성시 was split into four 구, and 인천 reorganized its districts. The old district codes, which most code tables still list, now return zero trades, **even for past months**. With korea-data-mcp, an agent just says `광주 북구` or `화성시`.
 
-There is more: errors returned as HTTP 200, stale records mixed with current ones, business numbers that fail when written with hyphens, stock history split by a company rename, and a TLS handshake that fails from Go. Every item was found on the live APIs and is covered by a test that uses the real response: **[What mcp-hub handles for you](docs/QUIRKS.md)**.
+There is more: errors returned as HTTP 200, stale records mixed with current ones, business numbers that fail when written with hyphens, stock history split by a company rename, and a TLS handshake that fails from Go. Every item was found on the live APIs and is covered by a test that uses the real response: **[What korea-data-mcp handles for you](docs/QUIRKS.md)**.
 
 ## Quick start
 
+> **Claude Desktop, in one click:** download [korea-data-mcp.mcpb](https://github.com/YoungsoonLee/korea-data-mcp/releases/latest/download/korea-data-mcp.mcpb), open it (or drag it into Settings → Extensions), and enter the keys you have ([how to get them](#api-keys)). Nothing else to install; skip to [step 4](#4-check-it).
+
 ### 1. Install
 
-**Download a binary** for macOS, Linux or Windows (Intel or ARM) from [Releases](https://github.com/YoungsoonLee/mcp-hub/releases/latest), extract it, and note the absolute path of `mcp-hub` (`mcp-hub.exe` on Windows). For example, on an Apple Silicon Mac:
+**Download a binary** for macOS, Linux or Windows (Intel or ARM) from [Releases](https://github.com/YoungsoonLee/korea-data-mcp/releases/latest), extract it, and note the absolute path of `korea-data-mcp` (`korea-data-mcp.exe` on Windows). For example, on an Apple Silicon Mac:
 
 ```sh
-curl -L https://github.com/YoungsoonLee/mcp-hub/releases/latest/download/mcp-hub_darwin_arm64.tar.gz | tar xz
-./mcp-hub -version
+curl -L https://github.com/YoungsoonLee/korea-data-mcp/releases/latest/download/korea-data-mcp_darwin_arm64.tar.gz | tar xz
+./korea-data-mcp -version
 ```
 
-On macOS, a binary downloaded with a browser is blocked as coming from an unidentified developer; run `xattr -d com.apple.quarantine mcp-hub` once. `curl` downloads are not affected.
+On macOS, a binary downloaded with a browser is blocked as coming from an unidentified developer; run `xattr -d com.apple.quarantine korea-data-mcp` once. `curl` downloads are not affected.
 
 **Or with Go** 1.26 or later (Go 1.21+ downloads the right toolchain automatically):
 
 ```sh
-go install github.com/YoungsoonLee/mcp-hub/cmd/mcp-hub@latest
+go install github.com/YoungsoonLee/korea-data-mcp/cmd/korea-data-mcp@latest
 ```
 
-The binary is installed to `$(go env GOPATH)/bin/mcp-hub`.
+The binary is installed to `$(go env GOPATH)/bin/korea-data-mcp`.
 
 ### 2. Get a key
 
@@ -94,11 +96,11 @@ Use absolute paths. Leave out the keys you don't have.
 **Claude Code:**
 
 ```sh
-claude mcp add mcp-hub \
+claude mcp add korea-data-mcp \
   -e OPENDART_API_KEY=... \
   -e DATAGOKR_SERVICE_KEY=... \
   -e LAWGOKR_OC=... \
-  -- /absolute/path/to/mcp-hub
+  -- /absolute/path/to/korea-data-mcp
 ```
 
 **Claude Desktop:** edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows), then restart Claude Desktop:
@@ -106,8 +108,8 @@ claude mcp add mcp-hub \
 ```json
 {
   "mcpServers": {
-    "mcp-hub": {
-      "command": "/absolute/path/to/mcp-hub",
+    "korea-data-mcp": {
+      "command": "/absolute/path/to/korea-data-mcp",
       "env": {
         "OPENDART_API_KEY": "...",
         "DATAGOKR_SERVICE_KEY": "...",
@@ -124,7 +126,7 @@ To keep keys in one file instead, copy [`.env.example`](.env.example) to `.env`,
 
 ### 4. Check it
 
-Ask your agent "Which mcp-hub providers are enabled?". It calls `hub_list_providers`, which lists the enabled providers and any missing keys. Then try one of the questions [above](#what-you-can-ask).
+Ask your agent "Which korea-data-mcp providers are enabled?". It calls `hub_list_providers`, which lists the enabled providers and any missing keys. Then try one of the questions [above](#what-you-can-ask).
 
 ## API keys
 
@@ -136,7 +138,7 @@ Ask your agent "Which mcp-hub providers are enabled?". It calls `hub_list_provid
 
 > **data.go.kr**: The portal issues two keys, Encoding and Decoding. Use the **Decoding key**. The Encoding key gets URL-encoded twice and fails with `SERVICE_KEY_IS_NOT_REGISTERED_ERROR`. One key covers every API you apply for.
 
-> **law.go.kr**: Calls are accepted only from the **public IP address registered** with the application; if your IP changes, update it on open.law.go.kr. A wrong OC and an unregistered IP give the same error ("사용자 정보 검증에 실패하였습니다"). law.go.kr puts the OC in every link it returns, so don't reuse another key as the OC (mcp-hub never passes those links on).
+> **law.go.kr**: Calls are accepted only from the **public IP address registered** with the application; if your IP changes, update it on open.law.go.kr. A wrong OC and an unregistered IP give the same error ("사용자 정보 검증에 실패하였습니다"). law.go.kr puts the OC in every link it returns, so don't reuse another key as the OC (korea-data-mcp never passes those links on).
 
 ## Tools
 
@@ -175,9 +177,9 @@ Every OpenDART tool that takes `corp_code` also accepts a 6-character stock code
 
 ## Security, limits and freshness
 
-- **Your keys stay on your machine.** mcp-hub runs locally and sends each key only to the service that issued it. There is no telemetry. Error messages never include keys or query strings.
+- **Your keys stay on your machine.** korea-data-mcp runs locally and sends each key only to the service that issued it. There is no telemetry. Error messages never include keys or query strings.
 - **HTTP mode has no authentication.** `-http` serves the tools to anyone who can reach the port, using your keys. Bind it to localhost (`-http 127.0.0.1:8080`) unless it is behind an authenticating proxy. The default stdio mode does not open a port.
-- **Upstream quotas apply.** A data.go.kr development account allows 10,000 calls per day for each API; OpenDART and law.go.kr have their own limits. mcp-hub caches responses for 10 minutes and the DART company list for 24 hours.
+- **Upstream quotas apply.** A data.go.kr development account allows 10,000 calls per day for each API; OpenDART and law.go.kr have their own limits. korea-data-mcp caches responses for 10 minutes and the DART company list for 24 hours.
 - **Data is as fresh as the source.** Apartment deals can be reported up to 30 days after the contract, so the latest month fills in over time. Stock prices are daily, updated after each trading day.
 
 ## Roadmap
@@ -186,9 +188,9 @@ Every OpenDART tool that takes `corp_code` also accepts a 6-character stock code
 - [x] data.go.kr: holidays, corporation info, business status, apartment trades, stock prices
 - [x] law.go.kr: statutes, court rulings
 - [ ] Bank of Korea ECOS, KOSIS (Korean Statistical Information Service)
-- [ ] Next region: Japan EDINET (corporate disclosures)
+- [ ] A sibling server for Japan, starting with EDINET (corporate disclosures)
 
-Want a data source added, or found an API behaving oddly? [Open an issue](https://github.com/YoungsoonLee/mcp-hub/issues). To build, test or add a provider, see [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
+Want a data source added, or found an API behaving oddly? [Open an issue](https://github.com/YoungsoonLee/korea-data-mcp/issues). To build, test or add a provider, see [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
 ## License
 

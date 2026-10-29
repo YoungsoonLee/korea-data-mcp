@@ -2,18 +2,18 @@
 
 **English** | [한국어](DEVELOPMENT.ko.md)
 
-How to build, test and debug mcp-hub, and how the code is organized. To add a provider or a tool, also read [CONVENTIONS.md](CONVENTIONS.md).
+How to build, test and debug korea-data-mcp, and how the code is organized. To add a provider or a tool, also read [CONVENTIONS.md](CONVENTIONS.md).
 
 ## Build
 
 ```sh
-go build -o mcp-hub ./cmd/mcp-hub
+go build -o korea-data-mcp ./cmd/korea-data-mcp
 
-./mcp-hub                            # stdio (Claude Desktop, Claude Code, etc.)
-./mcp-hub -http 127.0.0.1:8080       # streamable HTTP
-./mcp-hub -providers opendart        # enable only specific providers
-./mcp-hub -env-file /abs/path/.env   # read API keys from a .env file
-./mcp-hub -v                         # debug logs (to stderr)
+./korea-data-mcp                            # stdio (Claude Desktop, Claude Code, etc.)
+./korea-data-mcp -http 127.0.0.1:8080       # streamable HTTP
+./korea-data-mcp -providers opendart        # enable only specific providers
+./korea-data-mcp -env-file /abs/path/.env   # read API keys from a .env file
+./korea-data-mcp -v                         # debug logs (to stderr)
 ```
 
 ## 1. Unit tests (no API key needed)
@@ -30,13 +30,13 @@ The tests use real upstream responses saved under each provider's `testdata/` an
 [MCP Inspector](https://github.com/modelcontextprotocol/inspector) is the official MCP debugging UI. It requires Node.js.
 
 ```sh
-go build -o mcp-hub ./cmd/mcp-hub
-npx @modelcontextprotocol/inspector -- ./mcp-hub -env-file $PWD/.env
+go build -o korea-data-mcp ./cmd/korea-data-mcp
+npx @modelcontextprotocol/inspector -- ./korea-data-mcp -env-file $PWD/.env
 ```
 
 > Keep the `--`. Without it, Inspector reads `-env-file` as its own `-e` option and fails with `Invalid parameter format: nv-file`.
 
-Alternatively, run `npx @modelcontextprotocol/inspector` with no arguments and fill in the left panel: **Transport Type** `STDIO`, **Command** the absolute path to `mcp-hub`, **Arguments** `-env-file /absolute/path/to/.env`.
+Alternatively, run `npx @modelcontextprotocol/inspector` with no arguments and fill in the left panel: **Transport Type** `STDIO`, **Command** the absolute path to `korea-data-mcp`, **Arguments** `-env-file /absolute/path/to/.env`.
 
 Then:
 
@@ -60,7 +60,7 @@ The first OpenDART company lookup takes a few seconds, because it downloads DART
 ## 3. Claude Code (use it from a real agent)
 
 ```sh
-claude mcp add mcp-hub -- /absolute/path/to/mcp-hub -env-file /absolute/path/to/.env
+claude mcp add korea-data-mcp -- /absolute/path/to/korea-data-mcp -env-file /absolute/path/to/.env
 ```
 
 Start a new session, check the connection with `/mcp`, and ask a question. This shows whether an agent picks the right tools and arguments from the descriptions alone, which is what tool descriptions should be judged by.
@@ -68,7 +68,7 @@ Start a new session, check the connection with `/mcp`, and ask a question. This 
 ## 4. HTTP mode
 
 ```sh
-./mcp-hub -http 127.0.0.1:8080 -env-file /absolute/path/to/.env
+./korea-data-mcp -http 127.0.0.1:8080 -env-file /absolute/path/to/.env
 ```
 
 In Inspector, set **Transport Type** to `Streamable HTTP` and the URL to `http://127.0.0.1:8080`.
@@ -77,13 +77,13 @@ The HTTP server has **no authentication**: anyone who can reach it can call the 
 
 ## Releasing
 
-Push a tag, and GitHub Actions ([release.yml](../.github/workflows/release.yml)) builds binaries for macOS, Linux and Windows (amd64, arm64) with [GoReleaser](https://goreleaser.com) and publishes them as a GitHub release:
+Push a tag, and GitHub Actions ([release.yml](../.github/workflows/release.yml)) builds binaries for macOS, Linux and Windows (amd64, arm64) with [GoReleaser](https://goreleaser.com) packs them into an MCP Bundle (`korea-data-mcp.mcpb`, built by [mcpb/build.sh](../mcpb/build.sh) from [mcpb/manifest.json](../mcpb/manifest.json)), publishes everything as a GitHub release, and publishes [server.json](../server.json) to the [MCP Registry](https://registry.modelcontextprotocol.io) with the release's version and bundle hash:
 
 ```sh
 git tag v0.1.0 && git push origin v0.1.0
 ```
 
-To try the build locally without publishing: `goreleaser release --snapshot --clean --skip=publish` (output in `dist/`).
+To try the build locally without publishing: `goreleaser release --snapshot --clean --skip=publish` (output in `dist/`), then `mcpb/build.sh 0.0.0` for the bundle (needs Node.js and jq).
 
 ## Layout
 
@@ -94,8 +94,8 @@ To try the build locally without publishing: `goreleaser release --snapshot --cl
 | `normalize/` | Normalization of dates, amounts, company names and HTML text |
 | `cache/` | In-memory TTL cache |
 | `providers/` | One package per data source; `providers.go` lists them |
-| `cmd/mcp-hub/` | Executable |
-| `docs/QUIRKS.md` | Every upstream quirk mcp-hub handles, with its status |
+| `cmd/korea-data-mcp/` | Executable |
+| `docs/QUIRKS.md` | Every upstream quirk korea-data-mcp handles, with its status |
 
 ## Recording a new quirk
 

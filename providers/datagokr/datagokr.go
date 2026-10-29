@@ -3,7 +3,7 @@ package datagokr
 import (
 	"time"
 
-	"github.com/YoungsoonLee/mcp-hub/hub"
+	"github.com/YoungsoonLee/korea-data-mcp/hub"
 )
 
 // kst is Korea Standard Time. A fixed zone avoids depending on tzdata.

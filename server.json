@@ -1,0 +1,43 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.YoungsoonLee/korea-data-mcp",
+  "title": "Korea Data MCP",
+  "description": "Korean public data: corporate filings, stock prices, apartment trades, statutes, court rulings",
+  "websiteUrl": "https://github.com/YoungsoonLee/korea-data-mcp",
+  "repository": {
+    "url": "https://github.com/YoungsoonLee/korea-data-mcp",
+    "source": "github"
+  },
+  "version": "0.0.0",
+  "packages": [
+    {
+      "registryType": "mcpb",
+      "identifier": "https://github.com/YoungsoonLee/korea-data-mcp/releases/download/v0.0.0/korea-data-mcp.mcpb",
+      "version": "0.0.0",
+      "fileSha256": "0000000000000000000000000000000000000000000000000000000000000000",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "OPENDART_API_KEY",
+          "description": "OpenDART key for corporate filings and financials (opendart.fss.or.kr)",
+          "isSecret": true,
+          "isRequired": false
+        },
+        {
+          "name": "DATAGOKR_SERVICE_KEY",
+          "description": "data.go.kr Decoding key for holidays, corporations, business status, apartment trades, stock prices",
+          "isSecret": true,
+          "isRequired": false
+        },
+        {
+          "name": "LAWGOKR_OC",
+          "description": "law.go.kr OC for statutes and court rulings (open.law.go.kr; registered public IP only)",
+          "isSecret": true,
+          "isRequired": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-# What mcp-hub handles for you
+# What korea-data-mcp handles for you
 
 **English** | [한국어](QUIRKS.ko.md)
 
@@ -12,7 +12,7 @@ Status: ✅ handled · 🚧 handled when the tool that needs it ships
 
 These are the most dangerous ones: nothing fails, the agent simply gets the wrong number.
 
-| Source | What the API does | What mcp-hub does | |
+| Source | What the API does | What korea-data-mcp does | |
 |---|---|---|---|
 | OpenDART | In half-year and quarterly reports, income statement items are labeled with the year-to-date range (`2025.01.01 ~ 2025.06.30`) but `thstrm_amount` holds **only the latest quarter**. The year-to-date figure is in a separate `thstrm_add_amount`. | `current_amount` always matches `current_period`; the quarter is in `current_quarter_amount`. | ✅ |
 | data.go.kr | An invalid parameter is not an error. `DEAL_YMD=2025` (instead of `202509`) or `solMonth=13` returns **success with zero results**, which looks like "no data". | Every tool validates its inputs and returns `INVALID_ARGUMENT` with the expected format. | ✅ |
@@ -38,7 +38,7 @@ These are the most dangerous ones: nothing fails, the agent simply gets the wron
 
 ## Errors that look like something else
 
-| Source | What the API does | What mcp-hub does | |
+| Source | What the API does | What korea-data-mcp does | |
 |---|---|---|---|
 | OpenDART | Errors (bad key, quota exceeded, no data) come back as **HTTP 200** with a `status` field. | Mapped to standard error codes, with the original in `upstream_code`. Error responses are never cached. | ✅ |
 | data.go.kr | An unregistered key is **HTTP 403**, which looks like a permission problem. | `UNAUTHENTICATED` with a hint: apply for the API, use the Decoding key, wait for activation. | ✅ |
@@ -53,9 +53,9 @@ These are the most dangerous ones: nothing fails, the agent simply gets the wron
 
 ## Formats that differ per API
 
-| Source | What the API does | What mcp-hub does | |
+| Source | What the API does | What korea-data-mcp does | |
 |---|---|---|---|
-| data.go.kr | In JSON, one result is an **object**, several are an **array**, and none is `""` in one service and `{"item":[]}` in another. Numbers are strings in some fields and numbers in others (`"locdate": 20261225`). | mcp-hub requests XML, which has none of these problems, and outputs typed JSON. | ✅ |
+| data.go.kr | In JSON, one result is an **object**, several are an **array**, and none is `""` in one service and `{"item":[]}` in another. Numbers are strings in some fields and numbers in others (`"locdate": 20261225`). | korea-data-mcp requests XML, which has none of these problems, and outputs typed JSON. | ✅ |
 | data.go.kr | Some services are XML only (apartment trades), others JSON or XML, and the National Tax Service API is on a different host (`api.odcloud.kr`) with POST requests. | One provider, one output format. | ✅ |
 | All | Dates come as `20251114`, `2024.12.31 현재`, `25.11.28`, `75/06/11`. | ISO 8601 (`2025-11-14`). | ✅ OpenDART, company info / 🚧 others |
 | All | Amounts come as `"1,234"`, `"-"` (no value), or `"(1,234)"` (negative). | Integers, or `null` when there is no value (never a misleading `0`). | ✅ |
@@ -65,7 +65,7 @@ These are the most dangerous ones: nothing fails, the agent simply gets the wron
 
 ## Missing features
 
-| Source | What the API does | What mcp-hub does | |
+| Source | What the API does | What korea-data-mcp does | |
 |---|---|---|---|
 | OpenDART | **No company search.** Every call needs an 8-digit `corp_code`, available only in a 3.6 MB zip of ~120,000 companies. | Downloads and indexes the list (refreshed daily). Search by Korean or English name, ignoring spacing and `(주)`; listed companies first. | ✅ |
 | OpenDART | Stock codes (`005930`) are not accepted. | Any `corp_code` input also accepts a stock code. | ✅ |
@@ -77,7 +77,7 @@ These are the most dangerous ones: nothing fails, the agent simply gets the wron
 
 ## Connection problems
 
-| Source | What the API does | What mcp-hub does | |
+| Source | What the API does | What korea-data-mcp does | |
 |---|---|---|---|
 | OpenDART | The server only offers TLS 1.2 RSA key exchange ciphers, which Go has disabled by default since 1.22. Go clients fail with `tls: handshake failure` while curl works. | Enables those ciphers for OpenDART only. | ✅ |
 | data.go.kr | The portal issues an "Encoding" and a "Decoding" key. The Encoding key is already URL-encoded, so most HTTP clients encode it twice and authentication fails. | Documented: use the Decoding key. The error hint says the same. | ✅ |

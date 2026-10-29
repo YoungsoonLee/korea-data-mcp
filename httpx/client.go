@@ -18,8 +18,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/YoungsoonLee/mcp-hub/cache"
-	"github.com/YoungsoonLee/mcp-hub/hub"
+	"github.com/YoungsoonLee/korea-data-mcp/cache"
+	"github.com/YoungsoonLee/korea-data-mcp/hub"
 )
 
 const maxBodyBytes = 10 << 20
@@ -102,7 +102,7 @@ func withLegacyRSA(t *http.Transport) *http.Transport {
 func New(opts ...Option) *Client {
 	c := &Client{
 		http:       &http.Client{Timeout: 15 * time.Second},
-		userAgent:  "mcp-hub (+https://github.com/YoungsoonLee/mcp-hub)",
+		userAgent:  "korea-data-mcp (+https://github.com/YoungsoonLee/korea-data-mcp)",
 		maxRetries: 2,
 		backoff:    500 * time.Millisecond,
 	}

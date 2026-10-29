@@ -1,8 +1,8 @@
-# mcp-hub Conventions
+# korea-data-mcp Conventions
 
 **English** | [한국어](CONVENTIONS.ko.md)
 
-Every provider follows these conventions. Upstream APIs differ wildly, but agents should always see **the same shape of inputs, outputs, and errors**. That consistency is the core value of mcp-hub.
+Every provider follows these conventions. Upstream APIs differ wildly, but agents should always see **the same shape of inputs, outputs, and errors**. That consistency is the core value of korea-data-mcp.
 
 ## 1. Providers
 
@@ -82,7 +82,7 @@ Every error is returned in the single `hub.Error` shape, placed in the tool resu
 | `RATE_LIMITED` | Quota or rate limit exceeded | Retry later |
 | `UNAVAILABLE` | Upstream outage or timeout | Retry |
 | `UPSTREAM_ERROR` | Other upstream failure | Report to the user |
-| `INTERNAL` | Bug in mcp-hub | Report to the user |
+| `INTERNAL` | Bug in korea-data-mcp | Report to the user |
 
 - For APIs that return error codes inside an HTTP 200 response (OpenDART `status`, data.go.kr `resultCode`), the provider maps them to the codes above and puts the original code in `upstream_code`.
 - Use `hint` for a concrete next step the model can take to fix the problem on its own.

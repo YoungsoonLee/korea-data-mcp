@@ -15,7 +15,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/YoungsoonLee/mcp-hub/hub"
+	"github.com/YoungsoonLee/korea-data-mcp/hub"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 

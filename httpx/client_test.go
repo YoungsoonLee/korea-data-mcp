@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/YoungsoonLee/mcp-hub/hub"
+	"github.com/YoungsoonLee/korea-data-mcp/hub"
 )
 
 func TestRetriesThenSucceeds(t *testing.T) {

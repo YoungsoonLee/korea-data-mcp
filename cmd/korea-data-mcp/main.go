@@ -1,4 +1,4 @@
-// Command mcp-hub serves all configured Korean service providers as one MCP
+// Command korea-data-mcp serves all configured Korean service providers as one MCP
 // server, over stdio (default) or streamable HTTP (-http :8080).
 package main
 
@@ -15,8 +15,8 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/YoungsoonLee/mcp-hub/hub"
-	"github.com/YoungsoonLee/mcp-hub/providers"
+	"github.com/YoungsoonLee/korea-data-mcp/hub"
+	"github.com/YoungsoonLee/korea-data-mcp/providers"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -38,7 +38,7 @@ func main() {
 		}
 	}
 	if *showVersion {
-		fmt.Println("mcp-hub", version)
+		fmt.Println("korea-data-mcp", version)
 		return
 	}
 
@@ -60,8 +60,8 @@ func main() {
 	getenv := envLookup(fileEnv)
 
 	h := hub.New(&mcp.Implementation{
-		Name:    "mcp-hub",
-		Title:   "MCP Hub for Korean services",
+		Name:    "korea-data-mcp",
+		Title:   "Korea Data MCP",
 		Version: version,
 	}, logger)
 

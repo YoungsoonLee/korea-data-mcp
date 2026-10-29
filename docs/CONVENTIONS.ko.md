@@ -1,8 +1,8 @@
-# mcp-hub 규격 (Conventions)
+# korea-data-mcp 규격 (Conventions)
 
 [English](CONVENTIONS.md) | **한국어**
 
-모든 provider는 이 규격을 따릅니다. upstream API가 제각각이어도, 에이전트 입장에서는 **같은 모양의 입력·출력·에러**를 보게 만드는 것이 mcp-hub의 핵심 가치입니다.
+모든 provider는 이 규격을 따릅니다. upstream API가 제각각이어도, 에이전트 입장에서는 **같은 모양의 입력·출력·에러**를 보게 만드는 것이 korea-data-mcp의 핵심 가치입니다.
 
 ## 1. Provider
 
@@ -82,7 +82,7 @@
 | `RATE_LIMITED` | 호출 한도 초과 | 나중에 재시도 |
 | `UNAVAILABLE` | upstream 장애, 타임아웃 | 재시도 |
 | `UPSTREAM_ERROR` | 기타 upstream 오류 | 사용자에게 보고 |
-| `INTERNAL` | mcp-hub 버그 | 사용자에게 보고 |
+| `INTERNAL` | korea-data-mcp 버그 | 사용자에게 보고 |
 
 - HTTP 200 안에 에러 코드를 담아 보내는 API(OpenDART `status`, data.go.kr `resultCode`)는 provider가 위 코드로 매핑하고, 원래 코드는 `upstream_code`에 넣습니다.
 - `hint`에는 모델이 스스로 고칠 수 있도록 구체적인 다음 행동을 적습니다.

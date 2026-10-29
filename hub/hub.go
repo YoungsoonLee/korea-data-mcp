@@ -1,4 +1,4 @@
-// Package hub defines the conventions every mcp-hub provider follows:
+// Package hub defines the conventions every korea-data-mcp provider follows:
 // provider registration, tool naming, error shape and pagination.
 // See docs/CONVENTIONS.md.
 package hub

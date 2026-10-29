@@ -2,10 +2,10 @@
 package providers
 
 import (
-	"github.com/YoungsoonLee/mcp-hub/hub"
-	"github.com/YoungsoonLee/mcp-hub/providers/datagokr"
-	"github.com/YoungsoonLee/mcp-hub/providers/lawgokr"
-	"github.com/YoungsoonLee/mcp-hub/providers/opendart"
+	"github.com/YoungsoonLee/korea-data-mcp/hub"
+	"github.com/YoungsoonLee/korea-data-mcp/providers/datagokr"
+	"github.com/YoungsoonLee/korea-data-mcp/providers/lawgokr"
+	"github.com/YoungsoonLee/korea-data-mcp/providers/opendart"
 )
 
 // All returns the providers in registration order. Add new providers here.

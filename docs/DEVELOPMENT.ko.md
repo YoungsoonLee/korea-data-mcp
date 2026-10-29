@@ -2,18 +2,18 @@
 
 [English](DEVELOPMENT.md) | **한국어**
 
-mcp-hub를 빌드하고 테스트하고 디버깅하는 방법과 코드 구조를 설명합니다. provider나 tool을 추가할 때는 [CONVENTIONS.ko.md](CONVENTIONS.ko.md)도 함께 읽으세요.
+korea-data-mcp를 빌드하고 테스트하고 디버깅하는 방법과 코드 구조를 설명합니다. provider나 tool을 추가할 때는 [CONVENTIONS.ko.md](CONVENTIONS.ko.md)도 함께 읽으세요.
 
 ## 빌드
 
 ```sh
-go build -o mcp-hub ./cmd/mcp-hub
+go build -o korea-data-mcp ./cmd/korea-data-mcp
 
-./mcp-hub                            # stdio (Claude Desktop, Claude Code 등)
-./mcp-hub -http 127.0.0.1:8080       # streamable HTTP
-./mcp-hub -providers opendart        # 특정 provider만 활성화
-./mcp-hub -env-file /abs/path/.env   # .env 파일에서 API 키 읽기
-./mcp-hub -v                         # 디버그 로그 (stderr)
+./korea-data-mcp                            # stdio (Claude Desktop, Claude Code 등)
+./korea-data-mcp -http 127.0.0.1:8080       # streamable HTTP
+./korea-data-mcp -providers opendart        # 특정 provider만 활성화
+./korea-data-mcp -env-file /abs/path/.env   # .env 파일에서 API 키 읽기
+./korea-data-mcp -v                         # 디버그 로그 (stderr)
 ```
 
 ## 1. 단위 테스트 (API 키 불필요)
@@ -30,13 +30,13 @@ provider마다 `testdata/`에 저장해 둔 실제 upstream 응답과 가짜 ups
 [MCP Inspector](https://github.com/modelcontextprotocol/inspector)는 MCP 공식 디버깅 UI입니다. Node.js가 필요합니다.
 
 ```sh
-go build -o mcp-hub ./cmd/mcp-hub
-npx @modelcontextprotocol/inspector -- ./mcp-hub -env-file $PWD/.env
+go build -o korea-data-mcp ./cmd/korea-data-mcp
+npx @modelcontextprotocol/inspector -- ./korea-data-mcp -env-file $PWD/.env
 ```
 
 > `--`를 빼면 안 됩니다. 빼면 Inspector가 `-env-file`을 자기 옵션 `-e`로 읽어서 `Invalid parameter format: nv-file` 에러가 납니다.
 
-또는 인자 없이 `npx @modelcontextprotocol/inspector`를 실행하고 왼쪽 패널을 직접 채워도 됩니다. **Transport Type**은 `STDIO`, **Command**는 `mcp-hub`의 절대 경로, **Arguments**는 `-env-file /absolute/path/to/.env`입니다.
+또는 인자 없이 `npx @modelcontextprotocol/inspector`를 실행하고 왼쪽 패널을 직접 채워도 됩니다. **Transport Type**은 `STDIO`, **Command**는 `korea-data-mcp`의 절대 경로, **Arguments**는 `-env-file /absolute/path/to/.env`입니다.
 
 그다음 순서는 이렇습니다.
 
@@ -60,7 +60,7 @@ npx @modelcontextprotocol/inspector -- ./mcp-hub -env-file $PWD/.env
 ## 3. Claude Code (실제 에이전트에서 사용)
 
 ```sh
-claude mcp add mcp-hub -- /absolute/path/to/mcp-hub -env-file /absolute/path/to/.env
+claude mcp add korea-data-mcp -- /absolute/path/to/korea-data-mcp -env-file /absolute/path/to/.env
 ```
 
 새 세션에서 `/mcp`로 연결 상태를 확인한 뒤 질문해 보세요. 에이전트가 tool 설명만 보고 올바른 tool과 인자를 고르는지 확인할 수 있습니다. tool 설명은 이 기준으로 평가해야 합니다.
@@ -68,7 +68,7 @@ claude mcp add mcp-hub -- /absolute/path/to/mcp-hub -env-file /absolute/path/to/
 ## 4. HTTP 모드
 
 ```sh
-./mcp-hub -http 127.0.0.1:8080 -env-file /absolute/path/to/.env
+./korea-data-mcp -http 127.0.0.1:8080 -env-file /absolute/path/to/.env
 ```
 
 Inspector에서 **Transport Type**을 `Streamable HTTP`로, URL을 `http://127.0.0.1:8080`으로 설정합니다.
@@ -77,13 +77,13 @@ HTTP 서버에는 **인증이 없습니다.** 접속할 수 있는 사람은 누
 
 ## 릴리스
 
-태그를 푸시하면 GitHub Actions([release.yml](../.github/workflows/release.yml))가 [GoReleaser](https://goreleaser.com)로 macOS, Linux, Windows(amd64, arm64)용 실행 파일을 빌드해 GitHub 릴리스로 올립니다.
+태그를 푸시하면 GitHub Actions([release.yml](../.github/workflows/release.yml))가 [GoReleaser](https://goreleaser.com)로 macOS, Linux, Windows(amd64, arm64)용 실행 파일을 빌드하고, MCP 번들(`korea-data-mcp.mcpb`, [mcpb/manifest.json](../mcpb/manifest.json)으로 [mcpb/build.sh](../mcpb/build.sh)가 만듭니다)로 묶어 GitHub 릴리스로 올린 뒤, 릴리스 버전과 번들 해시를 채운 [server.json](../server.json)을 [MCP Registry](https://registry.modelcontextprotocol.io)에 게시합니다.
 
 ```sh
 git tag v0.1.0 && git push origin v0.1.0
 ```
 
-게시하지 않고 로컬에서 빌드만 해 보려면 `goreleaser release --snapshot --clean --skip=publish`를 실행합니다(결과는 `dist/`에 생깁니다).
+게시하지 않고 로컬에서 빌드만 해 보려면 `goreleaser release --snapshot --clean --skip=publish`를 실행합니다(결과는 `dist/`에 생깁니다). 번들은 이어서 `mcpb/build.sh 0.0.0`으로 만듭니다(Node.js와 jq 필요).
 
 ## 구조
 
@@ -94,8 +94,8 @@ git tag v0.1.0 && git push origin v0.1.0
 | `normalize/` | 날짜, 금액, 회사명, HTML 텍스트 정규화 |
 | `cache/` | TTL 메모리 캐시 |
 | `providers/` | 데이터 소스마다 패키지 하나. `providers.go`에 목록이 있습니다 |
-| `cmd/mcp-hub/` | 실행 파일 |
-| `docs/QUIRKS.ko.md` | mcp-hub가 처리하는 upstream 특이 동작 전체와 처리 상태 |
+| `cmd/korea-data-mcp/` | 실행 파일 |
+| `docs/QUIRKS.ko.md` | korea-data-mcp가 처리하는 upstream 특이 동작 전체와 처리 상태 |
 
 ## 새 특이 동작 기록하기
 

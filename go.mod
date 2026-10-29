@@ -1,4 +1,4 @@
-module github.com/YoungsoonLee/mcp-hub
+module github.com/YoungsoonLee/korea-data-mcp
 
 go 1.26.1
 

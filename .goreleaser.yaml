@@ -1,4 +1,5 @@
 version: 2
+project_name: korea-data-mcp
 
 before:
   hooks:
@@ -6,18 +7,26 @@ before:
     - go test ./...
 
 builds:
-  - main: ./cmd/mcp-hub
-    binary: mcp-hub
+  - id: korea-data-mcp
+    main: ./cmd/korea-data-mcp
+    binary: korea-data-mcp
     env:
       - CGO_ENABLED=0
     goos: [linux, darwin, windows]
     goarch: [amd64, arm64]
     flags: [-trimpath]
     ldflags:
-      - -s -w -X main.version={{.Version}}
+      - -s -w -X main.version={{.Tag}}
+
+# A macOS universal binary for the MCP Bundle (mcpb/build.sh); the archives
+# keep one binary per architecture.
+universal_binaries:
+  - id: korea-data-mcp-darwin
+    ids: [korea-data-mcp]
 
 archives:
-  - formats: [tar.gz]
+  - ids: [korea-data-mcp]
+    formats: [tar.gz]
     format_overrides:
       - goos: windows
         formats: [zip]

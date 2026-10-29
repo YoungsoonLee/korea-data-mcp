@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/YoungsoonLee/mcp-hub/hub"
+	"github.com/YoungsoonLee/korea-data-mcp/hub"
 )
 
 // Expected values were computed independently from the fixture (233 real

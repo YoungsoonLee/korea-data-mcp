@@ -40,12 +40,21 @@ func loadEnvFile(path string) (map[string]string, error) {
 
 // envLookup prefers non-empty process environment values, falling back to
 // file values, so a key set in the shell or MCP client config overrides the
-// file but an empty placeholder (KEY=) does not hide it.
+// file but an empty placeholder (KEY=) does not hide it. A variable a client
+// left unexpanded, such as ${user_config.lawgokr_oc} for an optional key the
+// user skipped in an MCPB install, counts as empty, not as a key.
 func envLookup(file map[string]string) func(string) string {
 	return func(key string) string {
-		if v := os.Getenv(key); v != "" {
+		if v := os.Getenv(key); v != "" && !unexpanded(v) {
 			return v
 		}
-		return file[key]
+		if v := file[key]; !unexpanded(v) {
+			return v
+		}
+		return ""
 	}
+}
+
+func unexpanded(v string) bool {
+	return strings.HasPrefix(v, "${") && strings.HasSuffix(v, "}")
 }
