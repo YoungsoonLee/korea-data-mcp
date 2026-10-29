@@ -75,6 +75,16 @@ In Inspector, set **Transport Type** to `Streamable HTTP` and the URL to `http:/
 
 The HTTP server has **no authentication**: anyone who can reach it can call the tools with your API keys. Bind it to `127.0.0.1`, not `:8080`, unless it is behind an authenticating proxy.
 
+## Releasing
+
+Push a tag, and GitHub Actions ([release.yml](../.github/workflows/release.yml)) builds binaries for macOS, Linux and Windows (amd64, arm64) with [GoReleaser](https://goreleaser.com) and publishes them as a GitHub release:
+
+```sh
+git tag v0.1.0 && git push origin v0.1.0
+```
+
+To try the build locally without publishing: `goreleaser release --snapshot --clean --skip=publish` (output in `dist/`).
+
 ## Layout
 
 | Path | Purpose |

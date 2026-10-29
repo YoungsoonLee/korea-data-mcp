@@ -66,20 +66,22 @@ There is more: errors returned as HTTP 200, stale records mixed with current one
 
 ### 1. Install
 
-With Go 1.26 or later (Go 1.21+ downloads the right toolchain automatically):
+**Download a binary** for macOS, Linux or Windows (Intel or ARM) from [Releases](https://github.com/YoungsoonLee/mcp-hub/releases/latest), extract it, and note the absolute path of `mcp-hub` (`mcp-hub.exe` on Windows). For example, on an Apple Silicon Mac:
+
+```sh
+curl -L https://github.com/YoungsoonLee/mcp-hub/releases/latest/download/mcp-hub_darwin_arm64.tar.gz | tar xz
+./mcp-hub -version
+```
+
+On macOS, a binary downloaded with a browser is blocked as coming from an unidentified developer; run `xattr -d com.apple.quarantine mcp-hub` once. `curl` downloads are not affected.
+
+**Or with Go** 1.26 or later (Go 1.21+ downloads the right toolchain automatically):
 
 ```sh
 go install github.com/YoungsoonLee/mcp-hub/cmd/mcp-hub@latest
 ```
 
-The binary is installed to `$(go env GOPATH)/bin/mcp-hub`. Or build from a clone:
-
-```sh
-git clone https://github.com/YoungsoonLee/mcp-hub && cd mcp-hub
-go build -o mcp-hub ./cmd/mcp-hub
-```
-
-Prebuilt binaries are coming.
+The binary is installed to `$(go env GOPATH)/bin/mcp-hub`.
 
 ### 2. Get a key
 

@@ -66,20 +66,22 @@ mcp-hub가 처리하는 함정을 몇 가지 더 들면 이렇습니다.
 
 ### 1. 설치
 
-Go 1.26 이상이 필요합니다(Go 1.21 이상이면 맞는 툴체인을 자동으로 내려받습니다).
+[Releases](https://github.com/YoungsoonLee/mcp-hub/releases/latest)에서 macOS, Linux, Windows(Intel, ARM)용 **실행 파일을 내려받아** 압축을 풀고, `mcp-hub`(Windows는 `mcp-hub.exe`)의 절대 경로를 기억해 두세요. 예를 들어 Apple Silicon Mac에서는 이렇게 합니다.
+
+```sh
+curl -L https://github.com/YoungsoonLee/mcp-hub/releases/latest/download/mcp-hub_darwin_arm64.tar.gz | tar xz
+./mcp-hub -version
+```
+
+macOS에서 브라우저로 내려받은 파일은 "확인되지 않은 개발자" 경고와 함께 실행이 막힙니다. `xattr -d com.apple.quarantine mcp-hub`를 한 번 실행하세요. `curl`로 받은 파일은 해당되지 않습니다.
+
+**Go로 설치할 수도 있습니다.** Go 1.26 이상이 필요합니다(Go 1.21 이상이면 맞는 툴체인을 자동으로 내려받습니다).
 
 ```sh
 go install github.com/YoungsoonLee/mcp-hub/cmd/mcp-hub@latest
 ```
 
-실행 파일은 `$(go env GOPATH)/bin/mcp-hub`에 설치됩니다. 소스에서 직접 빌드해도 됩니다.
-
-```sh
-git clone https://github.com/YoungsoonLee/mcp-hub && cd mcp-hub
-go build -o mcp-hub ./cmd/mcp-hub
-```
-
-미리 빌드한 실행 파일도 곧 제공합니다.
+실행 파일은 `$(go env GOPATH)/bin/mcp-hub`에 설치됩니다.
 
 ### 2. 키 발급
 

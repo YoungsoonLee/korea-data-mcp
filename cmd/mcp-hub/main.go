@@ -5,10 +5,12 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime/debug"
 	"slices"
 	"strings"
 	"syscall"
@@ -18,6 +20,8 @@ import (
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
+// version is set by release builds (-ldflags "-X main.version=..."); go install
+// builds take it from the module version instead.
 var version = "dev"
 
 func main() {
@@ -25,7 +29,18 @@ func main() {
 	only := flag.String("providers", "", "comma-separated provider IDs to enable (default: all with keys set)")
 	envFile := flag.String("env-file", "", "read API keys from a .env file (process environment takes precedence)")
 	verbose := flag.Bool("v", false, "debug logging")
+	showVersion := flag.Bool("version", false, "print the version and exit")
 	flag.Parse()
+
+	if version == "dev" {
+		if bi, ok := debug.ReadBuildInfo(); ok && bi.Main.Version != "" && bi.Main.Version != "(devel)" {
+			version = bi.Main.Version
+		}
+	}
+	if *showVersion {
+		fmt.Println("mcp-hub", version)
+		return
+	}
 
 	// stdout is the MCP stdio channel, so logs must go to stderr.
 	level := slog.LevelInfo

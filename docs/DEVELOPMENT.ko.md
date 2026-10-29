@@ -75,6 +75,16 @@ Inspector에서 **Transport Type**을 `Streamable HTTP`로, URL을 `http://127.0
 
 HTTP 서버에는 **인증이 없습니다.** 접속할 수 있는 사람은 누구나 내 API 키로 tool을 호출할 수 있습니다. 인증 프록시 뒤에 두는 경우가 아니라면 `:8080`이 아니라 `127.0.0.1`에 바인딩하세요.
 
+## 릴리스
+
+태그를 푸시하면 GitHub Actions([release.yml](../.github/workflows/release.yml))가 [GoReleaser](https://goreleaser.com)로 macOS, Linux, Windows(amd64, arm64)용 실행 파일을 빌드해 GitHub 릴리스로 올립니다.
+
+```sh
+git tag v0.1.0 && git push origin v0.1.0
+```
+
+게시하지 않고 로컬에서 빌드만 해 보려면 `goreleaser release --snapshot --clean --skip=publish`를 실행합니다(결과는 `dist/`에 생깁니다).
+
 ## 구조
 
 | 경로 | 역할 |
