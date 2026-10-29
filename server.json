@@ -33,7 +33,7 @@
         },
         {
           "name": "LAWGOKR_OC",
-          "description": "law.go.kr OC for statutes and court rulings (open.law.go.kr; registered public IP only)",
+          "description": "law.go.kr OC for statutes and court rulings (set at open.law.go.kr)",
           "isSecret": true,
           "isRequired": false
         }

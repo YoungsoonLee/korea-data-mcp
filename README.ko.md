@@ -92,7 +92,7 @@ go install github.com/YoungsoonLee/korea-data-mcp/cmd/korea-data-mcp@latest
 
 ### 2. 키 발급
 
-**OpenDART**부터 시작하세요. [opendart.fss.or.kr](https://opendart.fss.or.kr)에 가입하고 인증키를 신청하면 바로 발급됩니다. 나머지 키는 [API 키](#api-키)에 설명되어 있습니다. 일부 키만 있어도 되고, 키가 없는 tool은 목록에 나오지 않을 뿐입니다.
+**OpenDART**부터 시작하세요. [opendart.fss.or.kr](https://opendart.fss.or.kr)에 가입하고 인증키를 신청하면 바로 발급됩니다. 세 키 모두 단계별 발급 방법은 **[API 키 발급 가이드](docs/KEYS.ko.md)**에 있습니다. 일부 키만 있어도 되고, 키가 없는 tool은 목록에 나오지 않을 뿐입니다.
 
 > **키 발급이 번거롭다면:** 키 없이 URL만으로 연결하는 호스팅 버전을 준비하고 있습니다. **[대기 명단에 등록](https://github.com/YoungsoonLee/korea-data-mcp/issues/new?template=hosted-access.yml)**해 주세요. 해외에 계셔서 한국 본인인증이 어려운 분도 마찬가지입니다.
 
@@ -137,15 +137,17 @@ claude mcp add korea-data-mcp \
 
 ## API 키
 
+단계별 발급 방법과 문제 해결은 [API 키 발급 가이드](docs/KEYS.ko.md)에 있습니다.
+
 | 환경변수 | 데이터 소스 | 발급 방법 |
 |---|---|---|
 | `OPENDART_API_KEY` | OpenDART | [opendart.fss.or.kr](https://opendart.fss.or.kr) → 인증키 신청 |
 | `DATAGOKR_SERVICE_KEY` | 공공데이터포털 | [data.go.kr](https://www.data.go.kr) → 회원가입 → API별 활용신청([Tool 목록](#tool-목록)의 링크) → 마이페이지 |
-| `LAWGOKR_OC` | 국가법령정보 | [open.law.go.kr](https://open.law.go.kr) → OPEN API 신청(이 컴퓨터의 공인 IP 포함) → 마이페이지 → API인증키관리(OC) |
+| `LAWGOKR_OC` | 국가법령정보 | [open.law.go.kr](https://open.law.go.kr) → OPEN API 신청 → 마이페이지 → API인증키관리(OC) |
 
 > **공공데이터포털**: 키가 Encoding과 Decoding 두 가지로 발급됩니다. **Decoding 키**를 넣으세요. Encoding 키를 넣으면 인코딩이 두 번 되어 `SERVICE_KEY_IS_NOT_REGISTERED_ERROR`가 납니다. 키 하나로 활용신청한 모든 API를 쓸 수 있습니다.
 
-> **국가법령정보**: 신청할 때 **등록한 공인 IP에서만** 호출할 수 있습니다. IP가 바뀌면 open.law.go.kr에서 고쳐야 합니다. OC가 틀린 경우와 IP가 등록되지 않은 경우 모두 같은 에러("사용자 정보 검증에 실패하였습니다")가 납니다. law.go.kr은 돌려주는 모든 링크에 OC를 넣으므로, 다른 키를 OC로 재사용하지 마세요(korea-data-mcp는 그 링크를 넘기지 않습니다).
+> **국가법령정보**: OC는 마이페이지 → API인증키관리에서 직접 정하는 값입니다. OC가 틀리면 "사용자 정보 검증에 실패하였습니다" 에러가 납니다. law.go.kr은 돌려주는 모든 링크에 OC를 넣으므로, 다른 키를 OC로 재사용하지 마세요(korea-data-mcp는 그 링크를 넘기지 않습니다).
 
 ## Tool 목록
 

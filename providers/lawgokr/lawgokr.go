@@ -11,7 +11,7 @@
 //     returns an empty document. The version is picked from the law's
 //     history (LID) instead.
 //   - Errors are HTTP 200 with a different document per case: <Response>
-//     for a bad OC or unregistered IP (indistinguishable), <Law> with plain
+//     for a bad OC, <Law> with plain
 //     text for an unknown law.
 //   - Every link in a response contains the OC. Links are never passed on;
 //     tools return public law.go.kr URLs instead.
@@ -54,7 +54,7 @@ func (p *Provider) Info() hub.ProviderInfo {
 		Title: "국가법령정보 (law.go.kr)",
 		Description: "Korean statutes (법령) from the Ministry of Government Legislation: search by name, abbreviation or text, " +
 			"read the text in force on any date, article by article, and search and read court rulings (판례). " +
-			"Requires an OC value from open.law.go.kr and this machine's public IP registered there.",
+			"Requires an OC value from open.law.go.kr.",
 		RequiredEnv: []string{envKey},
 		DocsURL:     "https://open.law.go.kr",
 	}
@@ -113,8 +113,7 @@ func apiError(body []byte) error {
 		xml.Unmarshal(body, &doc)
 		if strings.Contains(doc.Result, "사용자 정보 검증") {
 			return hub.Errorf(hub.CodeUnauthenticated, "law.go.kr rejected the OC: %s", doc.Result).
-				WithHint(envKey + " must be the API key (OC) shown under 마이페이지 > API인증키관리 on open.law.go.kr, " +
-					"and this machine's public IP must be registered there; law.go.kr reports both problems the same way")
+				WithHint(envKey + " must be the API key (OC) shown under 마이페이지 > API인증키관리 on open.law.go.kr")
 		}
 		return hub.Errorf(hub.CodeUpstream, "law.go.kr: %s %s", doc.Result, doc.Msg)
 	case "Law": // <Law>일치하는 법령이 없습니다. …</Law>

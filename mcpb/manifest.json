@@ -53,7 +53,7 @@
     "lawgokr_oc": {
       "type": "string",
       "title": "law.go.kr OC",
-      "description": "Statutes and court rulings. Set at open.law.go.kr (마이페이지 > API인증키관리); calls work only from the public IP you registered.",
+      "description": "Statutes and court rulings. Set at open.law.go.kr (마이페이지 > API인증키관리).",
       "sensitive": true,
       "required": false
     }

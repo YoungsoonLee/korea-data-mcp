@@ -204,11 +204,11 @@ func TestGetLawValidation(t *testing.T) {
 	}
 }
 
-// A bad OC and an unregistered IP are the same HTTP 200 document.
+// A bad OC is an HTTP 200 document.
 func TestErrors(t *testing.T) {
 	_, cs := setup(t, map[string]string{"lawSearch": "error_bad_oc.xml"})
 	e := call(t, cs, "lawgokr_search_laws", map[string]any{"query": "민법"}, nil)
-	if e == nil || e.Code != hub.CodeUnauthenticated || !strings.Contains(e.Hint, "IP") || strings.Contains(e.Message+e.Hint, testOC) {
+	if e == nil || e.Code != hub.CodeUnauthenticated || !strings.Contains(e.Hint, "API인증키관리") || strings.Contains(e.Message+e.Hint, testOC) {
 		t.Errorf("bad OC: got %+v", e)
 	}
 

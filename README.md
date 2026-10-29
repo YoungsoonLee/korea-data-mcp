@@ -92,7 +92,7 @@ The binary is installed to `$(go env GOPATH)/bin/korea-data-mcp`.
 
 ### 2. Get a key
 
-Start with **OpenDART**: sign up at [opendart.fss.or.kr](https://opendart.fss.or.kr), request a key (인증키 신청), and it is issued right away. The other keys are described in [API keys](#api-keys). Any subset works; tools whose key is missing are simply not offered.
+Start with **OpenDART**: sign up at [opendart.fss.or.kr](https://opendart.fss.or.kr), request a key (인증키 신청), and it is issued right away. For all three, step by step with the Korean menu names: **[Getting API keys](docs/KEYS.md)**. Any subset works; tools whose key is missing are simply not offered.
 
 > **Outside Korea?** These portals usually require Korean identity verification (a Korean mobile number) to sign up, so getting keys from abroad can be hard or impossible. A hosted version that needs no keys of your own is planned: **[join the waitlist](https://github.com/YoungsoonLee/korea-data-mcp/issues/new?template=hosted-access.yml)**.
 
@@ -137,17 +137,17 @@ Ask your agent "Which korea-data-mcp providers are enabled?". It calls `hub_list
 
 ## API keys
 
-All three are free, but signing up usually requires Korean identity verification. If you can't get them, [join the hosted waitlist](https://github.com/YoungsoonLee/korea-data-mcp/issues/new?template=hosted-access.yml).
+Step-by-step instructions and troubleshooting: [Getting API keys](docs/KEYS.md). All three are free, but signing up usually requires Korean identity verification. If you can't get them, [join the hosted waitlist](https://github.com/YoungsoonLee/korea-data-mcp/issues/new?template=hosted-access.yml).
 
 | Environment variable | Source | How to get it |
 |---|---|---|
 | `OPENDART_API_KEY` | OpenDART | [opendart.fss.or.kr](https://opendart.fss.or.kr) → 인증키 신청 (request a key) |
 | `DATAGOKR_SERVICE_KEY` | data.go.kr | [data.go.kr](https://www.data.go.kr) → sign up → apply for each API (활용신청; links in [Tools](#tools)) → My Page |
-| `LAWGOKR_OC` | law.go.kr | [open.law.go.kr](https://open.law.go.kr) → OPEN API 신청 (apply, with this machine's public IP) → 마이페이지 → API인증키관리 (OC) |
+| `LAWGOKR_OC` | law.go.kr | [open.law.go.kr](https://open.law.go.kr) → OPEN API 신청 (apply) → 마이페이지 → API인증키관리 (OC) |
 
 > **data.go.kr**: The portal issues two keys, Encoding and Decoding. Use the **Decoding key**. The Encoding key gets URL-encoded twice and fails with `SERVICE_KEY_IS_NOT_REGISTERED_ERROR`. One key covers every API you apply for.
 
-> **law.go.kr**: Calls are accepted only from the **public IP address registered** with the application; if your IP changes, update it on open.law.go.kr. A wrong OC and an unregistered IP give the same error ("사용자 정보 검증에 실패하였습니다"). law.go.kr puts the OC in every link it returns, so don't reuse another key as the OC (korea-data-mcp never passes those links on).
+> **law.go.kr**: The OC is a value you choose under 마이페이지 → API인증키관리. A wrong OC gives the error "사용자 정보 검증에 실패하였습니다". law.go.kr puts the OC in every link it returns, so don't reuse another key as the OC (korea-data-mcp never passes those links on).
 
 ## Tools
 
