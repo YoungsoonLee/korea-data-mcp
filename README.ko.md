@@ -94,6 +94,8 @@ go install github.com/YoungsoonLee/korea-data-mcp/cmd/korea-data-mcp@latest
 
 **OpenDART**부터 시작하세요. [opendart.fss.or.kr](https://opendart.fss.or.kr)에 가입하고 인증키를 신청하면 바로 발급됩니다. 나머지 키는 [API 키](#api-키)에 설명되어 있습니다. 일부 키만 있어도 되고, 키가 없는 tool은 목록에 나오지 않을 뿐입니다.
 
+> **키 발급이 번거롭다면:** 키 없이 URL만으로 연결하는 호스팅 버전을 준비하고 있습니다. **[대기 명단에 등록](https://github.com/YoungsoonLee/korea-data-mcp/issues/new?template=hosted-access.yml)**해 주세요. 해외에 계셔서 한국 본인인증이 어려운 분도 마찬가지입니다.
+
 ### 3. 클라이언트에 연결
 
 절대 경로를 쓰세요. 없는 키는 빼면 됩니다.
@@ -195,7 +197,7 @@ claude mcp add korea-data-mcp \
 - [ ] 한국은행 ECOS, KOSIS(국가통계포털)
 - [ ] 같은 방식의 일본 서버: EDINET(전자공시)부터
 
-추가했으면 하는 데이터 소스가 있거나 이상하게 동작하는 API를 발견하면 [이슈를 열어 주세요](https://github.com/YoungsoonLee/korea-data-mcp/issues). 빌드, 테스트, provider 추가 방법은 [docs/DEVELOPMENT.ko.md](docs/DEVELOPMENT.ko.md)에 있습니다.
+추가했으면 하는 데이터 소스는 [요청해 주세요](https://github.com/YoungsoonLee/korea-data-mcp/issues/new?template=data-source.yml). 이상하게 동작하는 API를 발견하면 [이슈를 열어 주세요](https://github.com/YoungsoonLee/korea-data-mcp/issues). 키 없이 쓰고 싶다면 [호스팅 대기 명단](https://github.com/YoungsoonLee/korea-data-mcp/issues/new?template=hosted-access.yml)에 등록해 주세요. 빌드, 테스트, provider 추가 방법은 [docs/DEVELOPMENT.ko.md](docs/DEVELOPMENT.ko.md)에 있습니다.
 
 ## 라이선스
 

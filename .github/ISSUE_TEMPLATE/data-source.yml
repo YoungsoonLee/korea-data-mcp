@@ -1,0 +1,19 @@
+name: Data source request
+description: Ask for Korean data that korea-data-mcp does not cover yet.
+title: "Data source: "
+labels: ["data-source"]
+body:
+  - type: input
+    id: source
+    attributes:
+      label: Data or API
+      description: For example, Bank of Korea ECOS, KOSIS, a specific data.go.kr API (link if you have one).
+    validations:
+      required: true
+  - type: textarea
+    id: questions
+    attributes:
+      label: Questions you want an agent to answer with it
+      description: Two or three real examples help the most.
+    validations:
+      required: true

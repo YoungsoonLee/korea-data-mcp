@@ -1,0 +1,56 @@
+name: Hosted access (no Korean API keys needed)
+description: Join the waitlist for a hosted korea-data-mcp that works without your own Korean API keys.
+title: "Hosted access: "
+labels: ["hosted-waitlist"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Getting the Korean API keys usually requires Korean identity verification, which is hard from outside Korea. A hosted version is being planned: connect with a URL and a token, no keys of your own.
+
+        Tell us a little about your use, so we build the right thing. This issue is public; do not include anything confidential.
+  - type: checkboxes
+    id: data
+    attributes:
+      label: Which data do you need?
+      options:
+        - label: Corporate filings and financials (OpenDART)
+        - label: Stock prices
+        - label: Apartment sale prices
+        - label: Business registration status
+        - label: Statutes and court rulings
+        - label: Other (describe below)
+  - type: dropdown
+    id: client
+    attributes:
+      label: Where would you use it?
+      options:
+        - Claude (Desktop, web or Code)
+        - ChatGPT
+        - Cursor or another IDE
+        - My own agent or app (API)
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: volume
+    attributes:
+      label: Expected usage
+      options:
+        - Personal, a few questions a day
+        - Team or company, regular use
+        - Product or service built on it
+    validations:
+      required: true
+  - type: textarea
+    id: use_case
+    attributes:
+      label: What would you use it for?
+      description: For example, researching Korean companies for investment, due diligence, legal research, a real estate product.
+    validations:
+      required: true
+  - type: input
+    id: contact
+    attributes:
+      label: How to reach you (optional)
+      description: You will also get notified through this issue. Leave an email only if you are fine with it being public.

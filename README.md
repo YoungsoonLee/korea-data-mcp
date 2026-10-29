@@ -94,6 +94,8 @@ The binary is installed to `$(go env GOPATH)/bin/korea-data-mcp`.
 
 Start with **OpenDART**: sign up at [opendart.fss.or.kr](https://opendart.fss.or.kr), request a key (인증키 신청), and it is issued right away. The other keys are described in [API keys](#api-keys). Any subset works; tools whose key is missing are simply not offered.
 
+> **Outside Korea?** These portals usually require Korean identity verification (a Korean mobile number) to sign up, so getting keys from abroad can be hard or impossible. A hosted version that needs no keys of your own is planned: **[join the waitlist](https://github.com/YoungsoonLee/korea-data-mcp/issues/new?template=hosted-access.yml)**.
+
 ### 3. Connect your client
 
 Use absolute paths. Leave out the keys you don't have.
@@ -134,6 +136,8 @@ To keep keys in one file instead, copy [`.env.example`](.env.example) to `.env`,
 Ask your agent "Which korea-data-mcp providers are enabled?". It calls `hub_list_providers`, which lists the enabled providers and any missing keys. Then try one of the questions [above](#what-you-can-ask).
 
 ## API keys
+
+All three are free, but signing up usually requires Korean identity verification. If you can't get them, [join the hosted waitlist](https://github.com/YoungsoonLee/korea-data-mcp/issues/new?template=hosted-access.yml).
 
 | Environment variable | Source | How to get it |
 |---|---|---|
@@ -195,7 +199,7 @@ Every OpenDART tool that takes `corp_code` also accepts a 6-character stock code
 - [ ] Bank of Korea ECOS, KOSIS (Korean Statistical Information Service)
 - [ ] A sibling server for Japan, starting with EDINET (corporate disclosures)
 
-Want a data source added, or found an API behaving oddly? [Open an issue](https://github.com/YoungsoonLee/korea-data-mcp/issues). To build, test or add a provider, see [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
+Want a data source added? [Request it](https://github.com/YoungsoonLee/korea-data-mcp/issues/new?template=data-source.yml). Found an API behaving oddly? [Open an issue](https://github.com/YoungsoonLee/korea-data-mcp/issues). No Korean API keys? [Join the hosted waitlist](https://github.com/YoungsoonLee/korea-data-mcp/issues/new?template=hosted-access.yml). To build, test or add a provider, see [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
 ## License
 
