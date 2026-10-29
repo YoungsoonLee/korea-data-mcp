@@ -2,10 +2,50 @@
 
 **English** | [한국어](README.ko.md)
 
+[![Release](https://img.shields.io/github/v/release/YoungsoonLee/korea-data-mcp)](https://github.com/YoungsoonLee/korea-data-mcp/releases/latest)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Go](https://img.shields.io/badge/go-1.26-00ADD8.svg)](go.mod)
 
-An MCP server that gives AI agents reliable access to Korean public data: corporate filings and financials, stock prices, apartment sale prices, business registration status, public holidays, statutes and court rulings. It is free and official data, with the traps that make agents give wrong answers already handled.
+**Pass Korean public APIs straight to an AI agent and it gets answers wrong. korea-data-mcp gives it the right ones.**
+
+An MCP server for Korean corporate filings and financials, stock prices, apartment sale prices, business registration status, public holidays, statutes and court rulings, from the official free APIs of OpenDART, data.go.kr and law.go.kr.
+
+- **Correct, with evidence.** 47 traps found on the live APIs (wrong half-year revenue, laws not in force yet, cancelled deals, district codes that changed in 2026, and more) are handled, each covered by a test that uses the real response. The full list is public: [What korea-data-mcp handles for you](docs/QUIRKS.md).
+- **Installs in one click.** A single binary with nothing else to install. In Claude Desktop, open [korea-data-mcp.mcpb](https://github.com/YoungsoonLee/korea-data-mcp/releases/latest/download/korea-data-mcp.mcpb) and enter your keys. Also in the [official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.YoungsoonLee/korea-data-mcp).
+- **Private.** It runs on your machine. Your keys and questions go only to the government APIs, never through a third-party server, and there is no telemetry.
+- **Focused.** 15 tools with clear descriptions, so an agent picks the right one without filling its context with dozens of others.
+
+## Why it matters
+
+**Example:** "What was Samsung Electronics' revenue in the first half of 2025?" Here is what OpenDART actually returns:
+
+```json
+{ "account_nm": "매출액", "thstrm_dt": "2025.01.01 ~ 2025.06.30",
+  "thstrm_amount": "74,566,317,000,000", "thstrm_add_amount": "153,706,820,000,000" }
+```
+
+The period says January to June, so an agent reads `thstrm_amount` and answers **₩74.6 trillion. That is wrong**: it is the second quarter only. The half-year figure, ₩153.7 trillion, is in a different field. Most Korean MCP servers pass this response on as is. korea-data-mcp returns:
+
+```json
+{ "name": "매출액", "statement_type": "income_statement",
+  "current_period": "2025-01-01 ~ 2025-06-30",
+  "current_amount": 153706820000000, "current_quarter_amount": 74566317000000 }
+```
+
+So the agent gets it right, and can even split out the second quarter:
+
+![Claude Code answering Samsung Electronics' first-half 2025 revenue with opendart_get_financials](docs/images/samsung-half-revenue.png)
+
+Three more traps, each of which silently produces a wrong answer:
+
+- **Law that is not law yet.** Ask law.go.kr for the current Labor Standards Act (근로기준법) and the text includes 제44조의4, labeled as in effect since 2026-10-08. It actually takes effect on **2027-01-01**; the official "current law" text already contains amendments that are only promulgated. korea-data-mcp returns the text in force on the date you ask for (today by default) and lists what is coming in `upcoming` (tool output shortened):
+
+  ![Claude Code answering whether 근로기준법 제44조의4 is in force, using lawgokr_get_law](docs/images/law-not-yet-in-force.png)
+
+- **Deals that never happened.** Apartment trade data keeps cancelled deals, marked only by a flag: 12 of 233 Gangnam trades in September 2025, including a ₩7.5 billion one. Averages that include them are wrong. korea-data-mcp leaves them out.
+- **Codes that quietly stop working.** In 2026, 광주광역시 and 전라남도 merged, 화성시 was split into four 구, and 인천 reorganized its districts. The old district codes, which most code tables still list, now return zero trades, **even for past months**. With korea-data-mcp, an agent just says `광주 북구` or `화성시`.
+
+There is more: errors returned as HTTP 200, stale records mixed with current ones, business numbers that fail when written with hyphens, stock history split by a company rename, and a TLS handshake that fails from Go. See all 47: **[What korea-data-mcp handles for you](docs/QUIRKS.md)**.
 
 ## What you can ask
 
@@ -19,10 +59,6 @@ Connect korea-data-mcp to Claude (or any MCP client) and ask in English or Korea
 - "How did NAVER's stock price move last month?"
 - "Which public holidays are left in Korea this year?"
 
-The third question in Claude Code. The official "current" text already contains the article, but korea-data-mcp knows it takes effect only on 2027-01-01 (tool output shortened):
-
-![Claude Code answering whether 근로기준법 제44조의4 is in force, using lawgokr_get_law](docs/images/law-not-yet-in-force.png)
-
 | Source | What it covers | Key |
 |---|---|---|
 | [OpenDART](https://opendart.fss.or.kr) (전자공시) | Company profiles, disclosures, financial statements of ~120,000 companies | `OPENDART_API_KEY` |
@@ -30,37 +66,6 @@ The third question in Claude Code. The official "current" text already contains 
 | [law.go.kr](https://open.law.go.kr) (국가법령정보) | Statutes as in force on any date, court rulings | `LAWGOKR_OC` |
 
 All three keys are free. You can start with just one.
-
-## Why korea-data-mcp
-
-Korean public APIs are free and official, but calling them directly is full of traps. Some of them don't even fail; they just give the agent a wrong answer.
-
-**Example:** "What was Samsung Electronics' revenue in the first half of 2025?" Here is what OpenDART actually returns:
-
-```json
-{ "account_nm": "매출액", "thstrm_dt": "2025.01.01 ~ 2025.06.30",
-  "thstrm_amount": "74,566,317,000,000", "thstrm_add_amount": "153,706,820,000,000" }
-```
-
-The period says January to June, so an agent reads `thstrm_amount` and answers **₩74.6 trillion. That is wrong**: it is the second quarter only. The half-year figure, ₩153.7 trillion, is in a different field. korea-data-mcp returns:
-
-```json
-{ "name": "매출액", "statement_type": "income_statement",
-  "current_period": "2025-01-01 ~ 2025-06-30",
-  "current_amount": 153706820000000, "current_quarter_amount": 74566317000000 }
-```
-
-So the agent gets it right, and can even split out the second quarter:
-
-![Claude Code answering Samsung Electronics' first-half 2025 revenue with opendart_get_financials](docs/images/samsung-half-revenue.png)
-
-A few more of the traps korea-data-mcp handles:
-
-- **Law that is not law yet.** Ask law.go.kr for the current Labor Standards Act and the text includes 제44조의4, labeled as in effect since 2026-10-08. It actually takes effect on **2027-01-01**; the official "current law" text already contains amendments that are only promulgated. korea-data-mcp returns the text in force on the date you ask for (today by default) and lists what is coming in `upcoming`.
-- **Deals that never happened.** Apartment trade data keeps cancelled deals, marked only by a flag: 12 of 233 Gangnam trades in September 2025, including a ₩7.5 billion one. Averages that include them are wrong. korea-data-mcp leaves them out.
-- **Codes that quietly stop working.** In 2026, 광주광역시 and 전라남도 merged, 화성시 was split into four 구, and 인천 reorganized its districts. The old district codes, which most code tables still list, now return zero trades, **even for past months**. With korea-data-mcp, an agent just says `광주 북구` or `화성시`.
-
-There is more: errors returned as HTTP 200, stale records mixed with current ones, business numbers that fail when written with hyphens, stock history split by a company rename, and a TLS handshake that fails from Go. Every item was found on the live APIs and is covered by a test that uses the real response: **[What korea-data-mcp handles for you](docs/QUIRKS.md)**.
 
 ## Quick start
 

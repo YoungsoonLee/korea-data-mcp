@@ -57,7 +57,7 @@ These are the most dangerous ones: nothing fails, the agent simply gets the wron
 |---|---|---|---|
 | data.go.kr | In JSON, one result is an **object**, several are an **array**, and none is `""` in one service and `{"item":[]}` in another. Numbers are strings in some fields and numbers in others (`"locdate": 20261225`). | korea-data-mcp requests XML, which has none of these problems, and outputs typed JSON. | ✅ |
 | data.go.kr | Some services are XML only (apartment trades), others JSON or XML, and the National Tax Service API is on a different host (`api.odcloud.kr`) with POST requests. | One provider, one output format. | ✅ |
-| All | Dates come as `20251114`, `2024.12.31 현재`, `25.11.28`, `75/06/11`. | ISO 8601 (`2025-11-14`). | ✅ OpenDART, company info / 🚧 others |
+| All | Dates come as `20251114`, `2024.12.31 현재`, `25.11.28`, `75/06/11`. | ISO 8601 (`2025-11-14`). | ✅ |
 | All | Amounts come as `"1,234"`, `"-"` (no value), or `"(1,234)"` (negative). | Integers, or `null` when there is no value (never a misleading `0`). | ✅ |
 | data.go.kr | Empty fields are `""` or a single space `" "`, and addresses have double spaces. Some dates are not dates at all (a founding date of `99`). | Whitespace is cleaned; empty and invalid values are omitted. | ✅ |
 | All | Pagination is `pageNo`/`numOfRows`, `page_no`/`page_count`, or none. | Always `page`/`page_size` in, `page_info` out. | ✅ |

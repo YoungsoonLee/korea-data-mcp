@@ -2,10 +2,50 @@
 
 [English](README.md) | **한국어**
 
+[![Release](https://img.shields.io/github/v/release/YoungsoonLee/korea-data-mcp)](https://github.com/YoungsoonLee/korea-data-mcp/releases/latest)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Go](https://img.shields.io/badge/go-1.26-00ADD8.svg)](go.mod)
 
-AI 에이전트가 한국 공공 데이터를 믿고 쓸 수 있게 해 주는 MCP 서버입니다. 기업 공시와 재무제표, 주가, 아파트 실거래가, 사업자 상태, 공휴일, 법령과 판례를 다룹니다. 무료 공식 데이터를 쓰되, 에이전트가 틀린 답을 내게 만드는 함정은 미리 처리해 둡니다.
+**한국 공공 API를 AI 에이전트에 그대로 넘기면 틀린 답이 나옵니다. korea-data-mcp는 정답을 줍니다.**
+
+기업 공시와 재무제표, 주가, 아파트 실거래가, 사업자 상태, 공휴일, 법령과 판례를 OpenDART, 공공데이터포털, 국가법령정보의 무료 공식 API로 제공하는 MCP 서버입니다.
+
+- **증거가 있는 정확성.** 실제 API에서 찾은 함정 47개(반기 매출 오독, 아직 시행 전인 법령, 해제된 거래, 2026년에 바뀐 시군구 코드 등)를 처리하고, 하나하나를 실제 응답으로 테스트합니다. 전체 목록을 공개합니다: [korea-data-mcp가 대신 처리하는 것들](docs/QUIRKS.ko.md)
+- **클릭 한 번으로 설치.** 실행 파일 하나뿐이라 따로 설치할 것이 없습니다. Claude Desktop에서는 [korea-data-mcp.mcpb](https://github.com/YoungsoonLee/korea-data-mcp/releases/latest/download/korea-data-mcp.mcpb)를 열고 키만 넣으면 됩니다. [공식 MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.YoungsoonLee/korea-data-mcp)에도 등록되어 있습니다.
+- **프라이버시.** 내 컴퓨터에서 실행됩니다. 키와 질문은 정부 API로만 가고 제3자 서버를 거치지 않으며, 텔레메트리도 없습니다.
+- **집중.** 설명이 명확한 tool 15개라서, 에이전트가 컨텍스트를 수십 개의 tool로 채우지 않고도 맞는 tool을 고릅니다.
+
+## 왜 중요한가
+
+**예시:** "삼성전자 2025년 상반기 매출은?"이라는 질문에 OpenDART가 실제로 돌려주는 값입니다.
+
+```json
+{ "account_nm": "매출액", "thstrm_dt": "2025.01.01 ~ 2025.06.30",
+  "thstrm_amount": "74,566,317,000,000", "thstrm_add_amount": "153,706,820,000,000" }
+```
+
+기간이 1월~6월로 되어 있어서 에이전트는 `thstrm_amount`를 읽고 **74.6조 원이라고 답합니다. 틀린 답입니다.** 이 값은 2분기 3개월치이고, 상반기 금액 153.7조 원은 다른 필드에 있습니다. 한국 MCP 서버 대부분은 이 응답을 그대로 넘깁니다. korea-data-mcp는 이렇게 돌려줍니다.
+
+```json
+{ "name": "매출액", "statement_type": "income_statement",
+  "current_period": "2025-01-01 ~ 2025-06-30",
+  "current_amount": 153706820000000, "current_quarter_amount": 74566317000000 }
+```
+
+그래서 에이전트가 올바르게 답하고, 2분기 매출도 따로 짚어 줍니다.
+
+![Claude Code가 opendart_get_financials로 삼성전자 2025년 상반기 매출에 답하는 화면](docs/images/samsung-half-revenue.png)
+
+조용히 틀린 답을 만드는 함정을 세 가지 더 들면 이렇습니다.
+
+- **아직 법이 아닌 법.** law.go.kr에 현행 근로기준법을 요청하면 본문에 제44조의4가 2026-10-08부터 시행 중인 것처럼 들어 있습니다. 실제로는 **2027-01-01**부터 시행됩니다. 공식 "현행 법령" 본문에 공포만 되고 아직 시행되지 않은 개정이 섞여 있기 때문입니다. korea-data-mcp는 요청한 날짜(기본은 오늘)에 시행 중인 본문을 돌려주고, 앞으로 바뀔 내용은 `upcoming`에 알려줍니다(tool 결과는 일부만 표시).
+
+  ![Claude Code가 lawgokr_get_law로 근로기준법 제44조의4 시행 여부에 답하는 화면](docs/images/law-not-yet-in-force.png)
+
+- **없던 일이 된 거래.** 아파트 실거래가 데이터에는 해제된 계약이 표시만 된 채 남아 있습니다. 2025년 9월 강남구 거래 233건 중 12건이고, 75억 원짜리 거래도 있습니다. 이를 포함해 평균을 내면 틀립니다. korea-data-mcp는 이를 뺍니다.
+- **조용히 멈추는 코드.** 2026년에 광주광역시와 전라남도가 통합되고, 화성시가 4개 구로 나뉘고, 인천의 구가 개편됐습니다. 대부분의 코드표에 아직 남아 있는 옛 시군구 코드로 조회하면 거래가 0건으로 나옵니다. **과거 달을 조회해도 마찬가지입니다.** korea-data-mcp에서는 에이전트가 `광주 북구`나 `화성시`라고만 하면 됩니다.
+
+이 밖에도 HTTP 200으로 오는 에러, 최신 레코드에 섞인 옛 레코드, 하이픈을 넣으면 실패하는 사업자번호, 사명 변경으로 끊기는 주가 이력, Go에서 실패하는 TLS 핸드셰이크 등을 처리합니다. 47개 전체: **[korea-data-mcp가 대신 처리하는 것들](docs/QUIRKS.ko.md)**
 
 ## 이런 질문을 할 수 있습니다
 
@@ -19,10 +59,6 @@ korea-data-mcp를 Claude(또는 다른 MCP 클라이언트)에 연결하고 한�
 - "NAVER 주가 지난달에 어떻게 움직였어?"
 - "올해 남은 공휴일 알려줘"
 
-세 번째 질문을 Claude Code에서 한 화면입니다. 공식 "현행 법령" 본문에는 이미 이 조문이 들어 있지만, korea-data-mcp는 2027-01-01부터 시행된다는 것을 알려줍니다(tool 결과는 일부만 표시).
-
-![Claude Code가 lawgokr_get_law로 근로기준법 제44조의4 시행 여부에 답하는 화면](docs/images/law-not-yet-in-force.png)
-
 | 데이터 소스 | 다루는 데이터 | 키 |
 |---|---|---|
 | [OpenDART](https://opendart.fss.or.kr) (전자공시) | 약 12만 개 회사의 기업개황, 공시, 재무제표 | `OPENDART_API_KEY` |
@@ -30,37 +66,6 @@ korea-data-mcp를 Claude(또는 다른 MCP 클라이언트)에 연결하고 한�
 | [국가법령정보](https://open.law.go.kr) | 원하는 날짜 기준으로 시행 중인 법령, 판례 | `LAWGOKR_OC` |
 
 세 키 모두 무료이고, 하나만 있어도 시작할 수 있습니다.
-
-## 왜 korea-data-mcp인가
-
-한국 공공 API는 무료이고 공식적이지만, 직접 호출하면 함정이 많습니다. 일부는 실패조차 하지 않고 에이전트에게 틀린 답을 줍니다.
-
-**예시:** "삼성전자 2025년 상반기 매출은?"이라는 질문에 OpenDART가 실제로 돌려주는 값입니다.
-
-```json
-{ "account_nm": "매출액", "thstrm_dt": "2025.01.01 ~ 2025.06.30",
-  "thstrm_amount": "74,566,317,000,000", "thstrm_add_amount": "153,706,820,000,000" }
-```
-
-기간이 1월~6월로 되어 있어서 에이전트는 `thstrm_amount`를 읽고 **74.6조 원이라고 답합니다. 틀린 답입니다.** 이 값은 2분기 3개월치이고, 상반기 금액 153.7조 원은 다른 필드에 있습니다. korea-data-mcp는 이렇게 돌려줍니다.
-
-```json
-{ "name": "매출액", "statement_type": "income_statement",
-  "current_period": "2025-01-01 ~ 2025-06-30",
-  "current_amount": 153706820000000, "current_quarter_amount": 74566317000000 }
-```
-
-그래서 에이전트가 올바르게 답하고, 2분기 매출도 따로 짚어 줍니다.
-
-![Claude Code가 opendart_get_financials로 삼성전자 2025년 상반기 매출에 답하는 화면](docs/images/samsung-half-revenue.png)
-
-korea-data-mcp가 처리하는 함정을 몇 가지 더 들면 이렇습니다.
-
-- **아직 법이 아닌 법.** law.go.kr에 현행 근로기준법을 요청하면 본문에 제44조의4가 2026-10-08부터 시행 중인 것처럼 들어 있습니다. 실제로는 **2027-01-01**부터 시행됩니다. 공식 "현행 법령" 본문에 공포만 되고 아직 시행되지 않은 개정이 섞여 있기 때문입니다. korea-data-mcp는 요청한 날짜(기본은 오늘)에 시행 중인 본문을 돌려주고, 앞으로 바뀔 내용은 `upcoming`에 알려줍니다.
-- **없던 일이 된 거래.** 아파트 실거래가 데이터에는 해제된 계약이 표시만 된 채 남아 있습니다. 2025년 9월 강남구 거래 233건 중 12건이고, 75억 원짜리 거래도 있습니다. 이를 포함해 평균을 내면 틀립니다. korea-data-mcp는 이를 뺍니다.
-- **조용히 멈추는 코드.** 2026년에 광주광역시와 전라남도가 통합되고, 화성시가 4개 구로 나뉘고, 인천의 구가 개편됐습니다. 대부분의 코드표에 아직 남아 있는 옛 시군구 코드로 조회하면 거래가 0건으로 나옵니다. **과거 달을 조회해도 마찬가지입니다.** korea-data-mcp에서는 에이전트가 `광주 북구`나 `화성시`라고만 하면 됩니다.
-
-이 밖에도 HTTP 200으로 오는 에러, 최신 레코드에 섞인 옛 레코드, 하이픈을 넣으면 실패하는 사업자번호, 사명 변경으로 끊기는 주가 이력, Go에서 실패하는 TLS 핸드셰이크 등을 처리합니다. 모든 항목은 실제 API에서 확인했고, 실제 응답을 쓰는 테스트로 검증합니다. 전체 목록: **[korea-data-mcp가 대신 처리하는 것들](docs/QUIRKS.ko.md)**
 
 ## 빠른 시작
 
