@@ -2,7 +2,34 @@
 
 **English** | [한국어](README.ko.md)
 
-Asian public and financial data, **starting with Korea**, served as **MCP servers that all follow one consistent specification**, so AI agents anywhere can use it without dealing with each source's quirks.
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![Go](https://img.shields.io/badge/go-1.26-00ADD8.svg)](go.mod)
+
+An MCP server that gives AI agents reliable access to Korean public data: corporate filings and financials, stock prices, apartment sale prices, business registration status, public holidays, statutes and court rulings. It is free and official data, with the traps that make agents give wrong answers already handled. Korea is the first region; Japan is next.
+
+## What you can ask
+
+Connect mcp-hub to Claude (or any MCP client) and ask in English or Korean:
+
+- "What was Samsung Electronics' revenue in the first half of 2025, and what has it disclosed recently?"
+- "What was the median apartment sale price in 분당구 in September 2025?"
+- "Is 제44조의4 of the Labor Standards Act (근로기준법) in force yet?"
+- "Find recent Supreme Court rulings on unfair dismissal (부당해고) and summarize the holding of the latest one."
+- "Is business registration number 124-81-00998 still active?"
+- "How did NAVER's stock price move last month?"
+- "Which public holidays are left in Korea this year?"
+
+The third question in Claude Code. The official "current" text already contains the article, but mcp-hub knows it takes effect only on 2027-01-01 (tool output shortened):
+
+![Claude Code answering whether 근로기준법 제44조의4 is in force, using lawgokr_get_law](docs/images/law-not-yet-in-force.png)
+
+| Source | What it covers | Key |
+|---|---|---|
+| [OpenDART](https://opendart.fss.or.kr) (전자공시) | Company profiles, disclosures, financial statements of ~120,000 companies | `OPENDART_API_KEY` |
+| [data.go.kr](https://www.data.go.kr) (공공데이터포털) | Holidays, corporation info, business status, apartment trades, stock prices | `DATAGOKR_SERVICE_KEY` |
+| [law.go.kr](https://open.law.go.kr) (국가법령정보) | Statutes as in force on any date, court rulings | `LAWGOKR_OC` |
+
+All three keys are free. You can start with just one.
 
 ## Why mcp-hub
 
@@ -23,85 +50,93 @@ The period says January to June, so an agent reads `thstrm_amount` and answers *
   "current_amount": 153706820000000, "current_quarter_amount": 74566317000000 }
 ```
 
-The same goes for everything else an agent would otherwise stumble on:
+So the agent gets it right, and can even split out the second quarter:
 
-- **Law that is not law yet.** Ask law.go.kr for the current Labor Standards Act (근로기준법) and the text includes 제44조의4, labeled as in effect since 2026-10-08. It actually takes effect on **2027-01-01**; the official "current law" text already contains amendments that are only promulgated. mcp-hub returns the text in force on the date you ask for (today by default) and lists what is coming in `upcoming`.
+![Claude Code answering Samsung Electronics' first-half 2025 revenue with opendart_get_financials](docs/images/samsung-half-revenue.png)
 
-- **Outdated data that looks current.** The government company registry returns 19 unordered records for Samsung Electronics, including ones that name a former CEO. mcp-hub uses only the latest record and says how recent it is (`as_of`).
-- **Records that should not count.** Apartment trade data keeps cancelled deals, marked only by a flag: 12 of 233 Gangnam trades in September 2025, including a ₩7.5 billion one. Averages that include them are wrong. mcp-hub leaves them out of the summary.
-- **Codes that quietly stop working.** In 2026, 광주광역시 and 전라남도 merged, 화성시 was split into four 구, and 인천 reorganized its 중구, 동구 and 서구. The old district codes, which most code tables and blog posts still list, now return zero apartment trades, **even for past months**: the history moved to the new codes. With mcp-hub, an agent just says `광주 북구` or `화성시`.
-- **Inputs that silently fail.** Ask the National Tax Service about `124-81-00998`, Samsung Electronics' number written the usual way, and it says the number is not registered. mcp-hub normalizes the format first. Ask the stock price API for `POSCO홀딩스` by name and two years of history are missing, because before the 2022 rename the rows say `POSCO`. mcp-hub always queries by code.
-- **Errors that look like success.** OpenDART reports a bad key or an exceeded quota as HTTP 200. data.go.kr returns zero results, not an error, for an invalid parameter. mcp-hub turns these into [one error format](docs/CONVENTIONS.md#6-errors) with a `hint` the agent can act on.
-- **A different format for every API.** Result codes `00` vs `000`, a single result as an object instead of an array, amounts like `"84,500"` meaning ₩845,000,000, dates like `25.11.28`. mcp-hub always returns typed numbers, ISO dates, and `page`/`page_size` pagination.
-- **Missing basics.** OpenDART has no company search. mcp-hub indexes all ~120,000 companies, so `삼성전자`, `samsung electronics`, or the stock code `005930` all work.
-- **Connection issues.** OpenDART fails with `tls: handshake failure` from Go clients. mcp-hub handles it.
+A few more of the traps mcp-hub handles:
 
-Every item was found on the live APIs and is covered by a test that uses the real response. See the full list: **[What mcp-hub handles for you](docs/QUIRKS.md)**.
+- **Law that is not law yet.** Ask law.go.kr for the current Labor Standards Act and the text includes 제44조의4, labeled as in effect since 2026-10-08. It actually takes effect on **2027-01-01**; the official "current law" text already contains amendments that are only promulgated. mcp-hub returns the text in force on the date you ask for (today by default) and lists what is coming in `upcoming`.
+- **Deals that never happened.** Apartment trade data keeps cancelled deals, marked only by a flag: 12 of 233 Gangnam trades in September 2025, including a ₩7.5 billion one. Averages that include them are wrong. mcp-hub leaves them out.
+- **Codes that quietly stop working.** In 2026, 광주광역시 and 전라남도 merged, 화성시 was split into four 구, and 인천 reorganized its districts. The old district codes, which most code tables still list, now return zero trades, **even for past months**. With mcp-hub, an agent just says `광주 북구` or `화성시`.
 
-## Running
+There is more: errors returned as HTTP 200, stale records mixed with current ones, business numbers that fail when written with hyphens, stock history split by a company rename, and a TLS handshake that fails from Go. Every item was found on the live APIs and is covered by a test that uses the real response: **[What mcp-hub handles for you](docs/QUIRKS.md)**.
+
+## Quick start
+
+### 1. Install
+
+With Go 1.26 or later (Go 1.21+ downloads the right toolchain automatically):
 
 ```sh
-go build -o mcp-hub ./cmd/mcp-hub
-
-./mcp-hub                       # stdio (Claude Desktop, Claude Code, etc.)
-./mcp-hub -http :8080           # streamable HTTP
-./mcp-hub -providers opendart   # enable only specific providers
-./mcp-hub -env-file .env        # read API keys from a .env file
+go install github.com/YoungsoonLee/mcp-hub/cmd/mcp-hub@latest
 ```
 
-## API key setup
+The binary is installed to `$(go env GOPATH)/bin/mcp-hub`. Or build from a clone:
 
-API keys are set through environment variables. A provider whose keys are missing is disabled automatically, and the `hub_list_providers` tool shows which keys are missing. Use each key exactly as issued.
+```sh
+git clone https://github.com/YoungsoonLee/mcp-hub && cd mcp-hub
+go build -o mcp-hub ./cmd/mcp-hub
+```
 
-| Environment variable | Provider | Where to get it |
-|---|---|---|
-| `OPENDART_API_KEY` | OpenDART (전자공시, corporate disclosures) | https://opendart.fss.or.kr → 인증키 신청 (request an API key) |
-| `DATAGOKR_SERVICE_KEY` | data.go.kr (공공데이터포털, Public Data Portal) | https://www.data.go.kr → 활용신청 (apply for use) → My Page |
-| `LAWGOKR_OC` | law.go.kr (국가법령정보, Korean statutes) | https://open.law.go.kr → OPEN API 신청 (apply, with this machine's public IP) → 마이페이지 → API인증키관리 (OC) |
+Prebuilt binaries are coming.
 
-> **data.go.kr note**: The portal issues two keys, Encoding and Decoding. Use the **Decoding key**. The Encoding key gets URL-encoded twice and fails with `SERVICE_KEY_IS_NOT_REGISTERED_ERROR`.
+### 2. Get a key
 
-> **law.go.kr note**: Calls are accepted only from the **public IP address registered** with the application; if your IP changes, update it on open.law.go.kr. A wrong OC and an unregistered IP give the same error ("사용자 정보 검증에 실패하였습니다"). law.go.kr puts the OC in every link it returns, so don't reuse another key as the OC (mcp-hub never passes those links on).
+Start with **OpenDART**: sign up at [opendart.fss.or.kr](https://opendart.fss.or.kr), request a key (인증키 신청), and it is issued right away. The other keys are described in [API keys](#api-keys). Any subset works; tools whose key is missing are simply not offered.
 
-### Option 1: In your MCP client configuration
+### 3. Connect your client
 
-Claude Code:
+Use absolute paths. Leave out the keys you don't have.
+
+**Claude Code:**
 
 ```sh
 claude mcp add mcp-hub \
   -e OPENDART_API_KEY=... \
   -e DATAGOKR_SERVICE_KEY=... \
-  -- /path/to/mcp-hub
+  -e LAWGOKR_OC=... \
+  -- /absolute/path/to/mcp-hub
 ```
 
-Claude Desktop and other clients configured with JSON:
+**Claude Desktop:** edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows), then restart Claude Desktop:
 
 ```json
 {
   "mcpServers": {
     "mcp-hub": {
-      "command": "/path/to/mcp-hub",
-      "env": { "OPENDART_API_KEY": "...", "DATAGOKR_SERVICE_KEY": "..." }
+      "command": "/absolute/path/to/mcp-hub",
+      "env": {
+        "OPENDART_API_KEY": "...",
+        "DATAGOKR_SERVICE_KEY": "...",
+        "LAWGOKR_OC": "..."
+      }
     }
   }
 }
 ```
 
-### Option 2: A `.env` file
+Other MCP clients take the same command and environment variables.
 
-```sh
-cp .env.example .env    # then fill in the values
-./mcp-hub -env-file /absolute/path/to/.env
-```
+To keep keys in one file instead, copy [`.env.example`](.env.example) to `.env`, fill it in, and pass `-env-file /absolute/path/to/.env` as an argument. A variable set in the environment takes precedence over the file.
 
-- Use an **absolute path**, because MCP clients do not launch servers from a predictable working directory.
-- The format is `KEY=VALUE`, with support for `#` comments, an `export ` prefix, and quoted values.
-- If the same variable is also set (non-empty) in the shell or the client configuration, **that value takes precedence**.
-- `.env` is listed in `.gitignore`. Do not commit it.
+### 4. Check it
+
+Ask your agent "Which mcp-hub providers are enabled?". It calls `hub_list_providers`, which lists the enabled providers and any missing keys. Then try one of the questions [above](#what-you-can-ask).
+
+## API keys
+
+| Environment variable | Source | How to get it |
+|---|---|---|
+| `OPENDART_API_KEY` | OpenDART | [opendart.fss.or.kr](https://opendart.fss.or.kr) → 인증키 신청 (request a key) |
+| `DATAGOKR_SERVICE_KEY` | data.go.kr | [data.go.kr](https://www.data.go.kr) → sign up → apply for each API (활용신청; links in [Tools](#tools)) → My Page |
+| `LAWGOKR_OC` | law.go.kr | [open.law.go.kr](https://open.law.go.kr) → OPEN API 신청 (apply, with this machine's public IP) → 마이페이지 → API인증키관리 (OC) |
+
+> **data.go.kr**: The portal issues two keys, Encoding and Decoding. Use the **Decoding key**. The Encoding key gets URL-encoded twice and fails with `SERVICE_KEY_IS_NOT_REGISTERED_ERROR`. One key covers every API you apply for.
+
+> **law.go.kr**: Calls are accepted only from the **public IP address registered** with the application; if your IP changes, update it on open.law.go.kr. A wrong OC and an unregistered IP give the same error ("사용자 정보 검증에 실패하였습니다"). law.go.kr puts the OC in every link it returns, so don't reuse another key as the OC (mcp-hub never passes those links on).
 
 ## Tools
-
-Call `hub_list_providers` to see which providers are enabled and which keys are missing.
 
 **OpenDART** (`OPENDART_API_KEY`)
 
@@ -114,7 +149,7 @@ Call `hub_list_providers` to see which providers are enabled and which keys are 
 
 Every OpenDART tool that takes `corp_code` also accepts a 6-character stock code (e.g. `005930`).
 
-**data.go.kr** (`DATAGOKR_SERVICE_KEY`). Each API needs its own application (활用신청) on data.go.kr; the links are below.
+**data.go.kr** (`DATAGOKR_SERVICE_KEY`). Each API needs its own application (활용신청) on data.go.kr; the links are below.
 
 | Tool | What it does | API to apply for |
 |---|---|---|
@@ -134,92 +169,24 @@ Every OpenDART tool that takes `corp_code` also accepts a 6-character stock code
 | `lawgokr_search_precedents` | Search court rulings (판례), newest first, by case name, full text, case number (`2020다296604`, spaces are fine), court and decision date. Court records only by default, so every result can be read |
 | `lawgokr_get_precedent` | A ruling by id or case number: issues (판시사항), holding (판결요지), cited statutes and cases, and the full decision with `include_full_text` |
 
-## Testing locally
+**Hub**: `hub_list_providers` lists the enabled providers and the keys that are missing.
 
-### 1. Unit tests (no API key needed)
+## Security, limits and freshness
 
-```sh
-go test -race ./...
-go test -race -v -run TestGetFinancials ./providers/opendart   # a single test
-```
+- **Your keys stay on your machine.** mcp-hub runs locally and sends each key only to the service that issued it. There is no telemetry. Error messages never include keys or query strings.
+- **HTTP mode has no authentication.** `-http` serves the tools to anyone who can reach the port, using your keys. Bind it to localhost (`-http 127.0.0.1:8080`) unless it is behind an authenticating proxy. The default stdio mode does not open a port.
+- **Upstream quotas apply.** A data.go.kr development account allows 10,000 calls per day for each API; OpenDART and law.go.kr have their own limits. mcp-hub caches responses for 10 minutes and the DART company list for 24 hours.
+- **Data is as fresh as the source.** Apartment deals can be reported up to 30 days after the contract, so the latest month fills in over time. Stock prices are daily, updated after each trading day.
 
-The tests use real upstream responses saved under each provider's `testdata/` and a fake upstream server, so they need no network or keys.
+## Roadmap
 
-### 2. MCP Inspector (call tools against the live API)
-
-[MCP Inspector](https://github.com/modelcontextprotocol/inspector) is the official MCP debugging UI. It requires Node.js.
-
-```sh
-go build -o mcp-hub ./cmd/mcp-hub
-npx @modelcontextprotocol/inspector -- ./mcp-hub -env-file $PWD/.env
-```
-
-> Keep the `--`. Without it, Inspector reads `-env-file` as its own `-e` option and fails with `Invalid parameter format: nv-file`.
-
-Alternatively, run `npx @modelcontextprotocol/inspector` with no arguments and fill in the left panel: **Transport Type** `STDIO`, **Command** the absolute path to `mcp-hub`, **Arguments** `-env-file /absolute/path/to/.env`.
-
-Then:
-
-1. Click **Connect**, open the **Tools** tab, and click **List Tools**.
-2. Pick a tool, fill in its inputs, and click **Execute Tool**. For example, `opendart_get_company` with `corp_code` = `000660` (SK hynix):
-
-![Calling opendart_get_company in MCP Inspector](docs/images/inspector-call-tool.png)
-
-3. The result appears under **Results** and **Structured Output**:
-
-![opendart_get_company result in MCP Inspector](docs/images/inspector-result.png)
-
-4. Try the other tools the same way. For example, `opendart_get_financials` with `corp_code` = `000660` and `year` = `2025` returns key accounts with amounts in KRW as plain numbers, ISO dates, and prior-period comparisons:
-
-![opendart_get_financials result in MCP Inspector](docs/images/inspector-financials.png)
-
-`corp_code` takes a code, not a company name. Use `005930` (Samsung Electronics), `000660` (SK hynix), or `035720` (Kakao), or find one first with `opendart_search_companies` (`query` = `삼성전자` or `samsung electronics`). Passing a name returns `INVALID_ARGUMENT` with a hint, which is a quick way to see the error format.
-
-The first company lookup takes a few seconds, because it downloads DART's full company list (about 120,000 entries) and builds an in-memory index. Later lookups are instant for 24 hours.
-
-### 3. Claude Code (use it from a real agent)
-
-```sh
-claude mcp add mcp-hub -- /absolute/path/to/mcp-hub -env-file /absolute/path/to/.env
-```
-
-Start a new session, check the connection with `/mcp`, and ask something like "What were Samsung Electronics' revenue in the first half of 2025 and its latest disclosures?". This shows whether an agent picks the right tools and arguments from the descriptions alone.
-
-### 4. HTTP mode
-
-```sh
-./mcp-hub -http :8080 -env-file .env
-```
-
-In Inspector, set **Transport Type** to `Streamable HTTP` and the URL to `http://localhost:8080`.
-
-Server logs go to stderr. Add `-v` for debug logs.
-
-## Layout
-
-| Path | Purpose |
-|---|---|
-| `hub/` | Provider registration, tool naming rules, standard errors, pagination |
-| `httpx/` | Upstream HTTP client (retries, caching, error mapping, API key redaction) |
-| `normalize/` | Normalization of dates, amounts, and HTML text |
-| `cache/` | In-memory TTL cache |
-| `providers/` | List of providers |
-| `cmd/mcp-hub/` | Executable |
-
-When adding a provider, follow [docs/CONVENTIONS.md](docs/CONVENTIONS.md).
-
-## Provider roadmap
-
-- [x] OpenDART (전자공시, corporate disclosures): verified against the live API
-- [x] data.go.kr: verified against the live API
-  - [x] Public holidays (특일 정보): verified against the live API
-  - [x] Company information (기업기본정보): verified against the live API
-  - [x] Business registration status (사업자등록 상태조회): verified against the live API
-  - [x] Apartment trade prices (아파트 매매 실거래가): verified against the live API, with district names
-  - [x] Stock prices (주식시세): verified against the live API
-- [x] 국가법령정보 (Korean statutes and court rulings, law.go.kr): verified against the live API
+- [x] OpenDART: companies, disclosures, financials
+- [x] data.go.kr: holidays, corporation info, business status, apartment trades, stock prices
+- [x] law.go.kr: statutes, court rulings
 - [ ] Bank of Korea ECOS, KOSIS (Korean Statistical Information Service)
 - [ ] Next region: Japan EDINET (corporate disclosures)
+
+Want a data source added, or found an API behaving oddly? [Open an issue](https://github.com/YoungsoonLee/mcp-hub/issues). To build, test or add a provider, see [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
 ## License
 

@@ -101,15 +101,21 @@ func TestGetLawArticle(t *testing.T) {
 }
 
 // 제44조의4 is in the "current law" text already, but takes effect only on
-// 2027-01-01.
+// 2027-01-01, after two other amendments.
 func TestGetLawNotYetInForce(t *testing.T) {
 	f, cs := setup(t, laborRoutes(map[string]string{
 		"lawService?JO=004404&efYd=20261008": "law_labor_44_4_missing.xml",
+		"lawService?JO=004404&efYd=20261208": "law_labor_44_4_missing.xml",
+		"lawService?JO=004404&efYd=20261210": "law_labor_44_4_missing.xml",
 		"lawService?JO=004404&efYd=20270101": "law_labor_44_4_2027.xml",
 	}))
-	e := call(t, cs, "lawgokr_get_law", map[string]any{"law": "001872", "article": "제44조의4"}, nil)
-	if e == nil || e.Code != hub.CodeNotFound || !strings.Contains(e.Hint, "2026-12-08") {
-		t.Errorf("today: got %+v", e)
+	var today Law
+	if e := call(t, cs, "lawgokr_get_law", map[string]any{"law": "001872", "article": "제44조의4"}, &today); e != nil {
+		t.Fatal(e)
+	}
+	if !today.NotYetInForce || today.AsOf != "2026-10-28" || today.EffectiveDate != "2027-01-01" || today.PromulgationDate != "2026-04-07" ||
+		len(today.Articles) != 1 || today.Articles[0].Number != "제44조의4" || len(today.Upcoming) != 5 {
+		t.Errorf("today: got %+v", today)
 	}
 
 	var got Law
@@ -120,7 +126,7 @@ func TestGetLawNotYetInForce(t *testing.T) {
 	if q := f.query("lawService"); q.Get("MST") != "285279" || q.Get("efYd") != "20270101" {
 		t.Errorf("query: %v", q)
 	}
-	if got.EffectiveDate != "2027-01-01" || got.Articles[0].Number != "제44조의4" || !strings.Contains(got.Articles[0].Text, "임금비용") ||
+	if got.NotYetInForce || got.EffectiveDate != "2027-01-01" || got.Articles[0].Number != "제44조의4" || !strings.Contains(got.Articles[0].Text, "임금비용") ||
 		len(got.Upcoming) != 1 || got.Upcoming[0].EffectiveDate != "2027-06-10" {
 		t.Errorf("got %+v", got)
 	}

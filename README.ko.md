@@ -2,7 +2,34 @@
 
 [English](README.md) | **한국어**
 
-**한국을 시작으로** 아시아의 공공·금융 데이터를 **하나의 규격으로 통일된 MCP 서버**로 제공합니다. 전 세계 어디서든 AI 에이전트가 데이터 소스마다 다른 특이한 동작을 신경 쓰지 않고 쓸 수 있게 하는 것이 목표입니다.
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![Go](https://img.shields.io/badge/go-1.26-00ADD8.svg)](go.mod)
+
+AI 에이전트가 한국 공공 데이터를 믿고 쓸 수 있게 해 주는 MCP 서버입니다. 기업 공시와 재무제표, 주가, 아파트 실거래가, 사업자 상태, 공휴일, 법령과 판례를 다룹니다. 무료 공식 데이터를 쓰되, 에이전트가 틀린 답을 내게 만드는 함정은 미리 처리해 둡니다. 한국이 첫 지역이고, 다음은 일본입니다.
+
+## 이런 질문을 할 수 있습니다
+
+mcp-hub를 Claude(또는 다른 MCP 클라이언트)에 연결하고 한국어나 영어로 물어보세요.
+
+- "삼성전자 2025년 상반기 매출이랑 최근 공시 알려줘"
+- "2025년 9월 분당구 아파트 매매 중앙값은?"
+- "근로기준법 제44조의4 지금 시행 중이야?"
+- "부당해고 관련 최근 대법원 판례 찾아서 가장 최근 판결 요지 정리해줘"
+- "사업자번호 124-81-00998 아직 영업 중이야?"
+- "NAVER 주가 지난달에 어떻게 움직였어?"
+- "올해 남은 공휴일 알려줘"
+
+세 번째 질문을 Claude Code에서 한 화면입니다. 공식 "현행 법령" 본문에는 이미 이 조문이 들어 있지만, mcp-hub는 2027-01-01부터 시행된다는 것을 알려줍니다(tool 결과는 일부만 표시).
+
+![Claude Code가 lawgokr_get_law로 근로기준법 제44조의4 시행 여부에 답하는 화면](docs/images/law-not-yet-in-force.png)
+
+| 데이터 소스 | 다루는 데이터 | 키 |
+|---|---|---|
+| [OpenDART](https://opendart.fss.or.kr) (전자공시) | 약 12만 개 회사의 기업개황, 공시, 재무제표 | `OPENDART_API_KEY` |
+| [공공데이터포털](https://www.data.go.kr) | 공휴일, 기업 정보, 사업자 상태, 아파트 실거래가, 주가 | `DATAGOKR_SERVICE_KEY` |
+| [국가법령정보](https://open.law.go.kr) | 원하는 날짜 기준으로 시행 중인 법령, 판례 | `LAWGOKR_OC` |
+
+세 키 모두 무료이고, 하나만 있어도 시작할 수 있습니다.
 
 ## 왜 mcp-hub인가
 
@@ -23,84 +50,93 @@
   "current_amount": 153706820000000, "current_quarter_amount": 74566317000000 }
 ```
 
-에이전트가 걸려 넘어질 만한 다른 문제도 모두 처리합니다.
+그래서 에이전트가 올바르게 답하고, 2분기 매출도 따로 짚어 줍니다.
 
-- **최신처럼 보이는 옛날 데이터.** 정부 기업정보 API는 삼성전자 하나에 순서 없는 레코드 19개를 돌려주는데, 그중에는 전임 대표이사가 적힌 레코드도 있습니다. mcp-hub는 최신 레코드만 쓰고, 언제 기준 데이터인지(`as_of`) 함께 알려줍니다.
-- **세면 안 되는 레코드.** 아파트 실거래가 데이터에는 해제된 계약이 표시만 된 채 남아 있습니다. 2025년 9월 강남구 거래 233건 중 12건이고, 75억 원짜리 거래도 있습니다. 이를 포함해 평균을 내면 틀립니다. mcp-hub는 요약에서 이를 뺍니다.
-- **조용히 실패하는 입력.** 삼성전자 사업자번호를 흔히 쓰는 형식대로 `124-81-00998`로 국세청에 조회하면 "등록되지 않은 사업자등록번호"라고 답합니다. mcp-hub는 형식을 먼저 정리합니다. 주식시세 API에 `POSCO홀딩스`를 이름으로 조회하면 2년 치 이력이 빠집니다. 2022년 사명 변경 전 데이터는 `POSCO`로 기록되어 있기 때문입니다. mcp-hub는 항상 종목코드로 조회합니다.
-- **성공처럼 보이는 에러.** OpenDART는 키 오류나 호출 한도 초과도 HTTP 200으로 보냅니다. data.go.kr은 잘못된 파라미터에 에러 대신 결과 0건을 줍니다. mcp-hub는 이를 [하나의 에러 형식](docs/CONVENTIONS.ko.md#6-에러)으로 바꾸고, 에이전트가 바로 따를 수 있는 `hint`를 붙입니다.
-- **API마다 다른 형식.** 결과 코드가 `00`이기도 하고 `000`이기도 합니다. 결과가 1건이면 배열이 아니라 객체로 옵니다. `"84,500"`이 8억 4,500만 원을 뜻하고, 날짜가 `25.11.28`처럼 옵니다. mcp-hub는 항상 타입이 정해진 숫자, ISO 날짜, `page`/`page_size` 페이지네이션으로 돌려줍니다.
-- **없는 기본 기능.** OpenDART에는 회사 검색이 없습니다. mcp-hub는 약 12만 개 회사를 인덱싱해서 `삼성전자`, `samsung electronics`, 종목코드 `005930` 모두 찾을 수 있게 합니다.
+![Claude Code가 opendart_get_financials로 삼성전자 2025년 상반기 매출에 답하는 화면](docs/images/samsung-half-revenue.png)
+
+mcp-hub가 처리하는 함정을 몇 가지 더 들면 이렇습니다.
+
 - **아직 법이 아닌 법.** law.go.kr에 현행 근로기준법을 요청하면 본문에 제44조의4가 2026-10-08부터 시행 중인 것처럼 들어 있습니다. 실제로는 **2027-01-01**부터 시행됩니다. 공식 "현행 법령" 본문에 공포만 되고 아직 시행되지 않은 개정이 섞여 있기 때문입니다. mcp-hub는 요청한 날짜(기본은 오늘)에 시행 중인 본문을 돌려주고, 앞으로 바뀔 내용은 `upcoming`에 알려줍니다.
-- **조용히 멈추는 코드.** 2026년에 광주광역시와 전라남도가 통합되고, 화성시가 4개 구로 나뉘고, 인천의 중구·동구·서구가 개편됐습니다. 대부분의 코드표와 블로그 글에 아직 남아 있는 옛 시군구 코드로 조회하면 아파트 거래가 0건으로 나옵니다. **과거 달을 조회해도 마찬가지입니다.** 과거 데이터까지 새 코드로 옮겨졌기 때문입니다. mcp-hub에서는 에이전트가 `광주 북구`나 `화성시`라고만 하면 됩니다.
-- **연결 문제.** Go 클라이언트로 OpenDART에 접속하면 `tls: handshake failure`가 납니다. mcp-hub가 이를 처리합니다.
+- **없던 일이 된 거래.** 아파트 실거래가 데이터에는 해제된 계약이 표시만 된 채 남아 있습니다. 2025년 9월 강남구 거래 233건 중 12건이고, 75억 원짜리 거래도 있습니다. 이를 포함해 평균을 내면 틀립니다. mcp-hub는 이를 뺍니다.
+- **조용히 멈추는 코드.** 2026년에 광주광역시와 전라남도가 통합되고, 화성시가 4개 구로 나뉘고, 인천의 구가 개편됐습니다. 대부분의 코드표에 아직 남아 있는 옛 시군구 코드로 조회하면 거래가 0건으로 나옵니다. **과거 달을 조회해도 마찬가지입니다.** mcp-hub에서는 에이전트가 `광주 북구`나 `화성시`라고만 하면 됩니다.
 
-모든 항목은 실제 API에서 확인했고, 실제 응답을 쓰는 테스트로 검증합니다. 전체 목록은 **[mcp-hub가 대신 처리하는 것들](docs/QUIRKS.ko.md)**에 있습니다.
+이 밖에도 HTTP 200으로 오는 에러, 최신 레코드에 섞인 옛 레코드, 하이픈을 넣으면 실패하는 사업자번호, 사명 변경으로 끊기는 주가 이력, Go에서 실패하는 TLS 핸드셰이크 등을 처리합니다. 모든 항목은 실제 API에서 확인했고, 실제 응답을 쓰는 테스트로 검증합니다. 전체 목록: **[mcp-hub가 대신 처리하는 것들](docs/QUIRKS.ko.md)**
 
-## 실행
+## 빠른 시작
+
+### 1. 설치
+
+Go 1.26 이상이 필요합니다(Go 1.21 이상이면 맞는 툴체인을 자동으로 내려받습니다).
 
 ```sh
-go build -o mcp-hub ./cmd/mcp-hub
-
-./mcp-hub                       # stdio (Claude Desktop, Claude Code 등)
-./mcp-hub -http :8080           # streamable HTTP
-./mcp-hub -providers opendart   # 특정 provider만 활성화
-./mcp-hub -env-file .env        # .env 파일에서 API 키 읽기
+go install github.com/YoungsoonLee/mcp-hub/cmd/mcp-hub@latest
 ```
 
-## API 키 설정
+실행 파일은 `$(go env GOPATH)/bin/mcp-hub`에 설치됩니다. 소스에서 직접 빌드해도 됩니다.
 
-API 키는 환경변수로 설정합니다. 키가 없는 provider는 자동으로 비활성화되며, `hub_list_providers` tool로 어떤 키가 빠졌는지 확인할 수 있습니다. 값은 발급받은 문자열을 그대로 넣습니다.
+```sh
+git clone https://github.com/YoungsoonLee/mcp-hub && cd mcp-hub
+go build -o mcp-hub ./cmd/mcp-hub
+```
 
-| 환경변수 | Provider | 발급처 |
-|---|---|---|
-| `OPENDART_API_KEY` | OpenDART (전자공시) | https://opendart.fss.or.kr → 인증키 신청 |
-| `DATAGOKR_SERVICE_KEY` | 공공데이터포털 | https://www.data.go.kr → 활용신청 → 마이페이지 |
-| `LAWGOKR_OC` | 국가법령정보 | https://open.law.go.kr → OPEN API 신청(이 컴퓨터의 공인 IP 포함) → 마이페이지 → API인증키관리(OC) |
+미리 빌드한 실행 파일도 곧 제공합니다.
 
-> **공공데이터포털 주의**: 키가 Encoding과 Decoding 두 가지로 발급됩니다. **Decoding 키**를 넣으세요. Encoding 키를 넣으면 인코딩이 두 번 되어 `SERVICE_KEY_IS_NOT_REGISTERED_ERROR`가 납니다.
+### 2. 키 발급
 
-> **국가법령정보 주의**: 신청할 때 **등록한 공인 IP에서만** 호출할 수 있습니다. IP가 바뀌면 open.law.go.kr에서 고쳐야 합니다. OC가 틀린 경우와 IP가 등록되지 않은 경우 모두 같은 에러("사용자 정보 검증에 실패하였습니다")가 납니다. law.go.kr은 돌려주는 모든 링크에 OC를 넣으므로, 다른 키를 OC로 재사용하지 마세요(mcp-hub는 그 링크를 넘기지 않습니다).
+**OpenDART**부터 시작하세요. [opendart.fss.or.kr](https://opendart.fss.or.kr)에 가입하고 인증키를 신청하면 바로 발급됩니다. 나머지 키는 [API 키](#api-키)에 설명되어 있습니다. 일부 키만 있어도 되고, 키가 없는 tool은 목록에 나오지 않을 뿐입니다.
 
-### 방법 1: MCP 클라이언트 설정에 직접 넣기
+### 3. 클라이언트에 연결
 
-Claude Code:
+절대 경로를 쓰세요. 없는 키는 빼면 됩니다.
+
+**Claude Code:**
 
 ```sh
 claude mcp add mcp-hub \
   -e OPENDART_API_KEY=... \
   -e DATAGOKR_SERVICE_KEY=... \
-  -- /path/to/mcp-hub
+  -e LAWGOKR_OC=... \
+  -- /absolute/path/to/mcp-hub
 ```
 
-Claude Desktop 등 JSON 설정:
+**Claude Desktop:** `~/Library/Application Support/Claude/claude_desktop_config.json`(macOS) 또는 `%APPDATA%\Claude\claude_desktop_config.json`(Windows)을 수정하고 Claude Desktop을 다시 시작합니다.
 
 ```json
 {
   "mcpServers": {
     "mcp-hub": {
-      "command": "/path/to/mcp-hub",
-      "env": { "OPENDART_API_KEY": "...", "DATAGOKR_SERVICE_KEY": "..." }
+      "command": "/absolute/path/to/mcp-hub",
+      "env": {
+        "OPENDART_API_KEY": "...",
+        "DATAGOKR_SERVICE_KEY": "...",
+        "LAWGOKR_OC": "..."
+      }
     }
   }
 }
 ```
 
-### 방법 2: `.env` 파일
+다른 MCP 클라이언트도 같은 명령과 환경변수를 쓰면 됩니다.
 
-```sh
-cp .env.example .env    # 값을 채운 뒤
-./mcp-hub -env-file /absolute/path/to/.env
-```
+키를 파일 하나로 관리하려면 [`.env.example`](.env.example)을 `.env`로 복사해 값을 채우고, 인자로 `-env-file /absolute/path/to/.env`를 넘기세요. 환경변수로 설정한 값이 파일보다 우선합니다.
 
-- MCP 클라이언트는 실행 디렉토리가 일정하지 않으므로 **절대 경로**를 쓰세요.
-- 형식은 `KEY=VALUE`이고 `#` 주석, `export ` 접두사, 따옴표를 지원합니다.
-- 같은 변수가 셸 환경이나 클라이언트 설정에도 있으면 **그쪽이 우선**합니다.
-- `.env`는 `.gitignore`에 포함되어 있습니다. 커밋하지 마세요.
+### 4. 확인
+
+에이전트에게 "mcp-hub에서 어떤 provider가 활성화돼 있어?"라고 물어보세요. `hub_list_providers`를 호출해서 활성화된 provider와 빠진 키를 알려줍니다. 그다음 [위의 질문](#이런-질문을-할-수-있습니다) 중 하나를 해 보세요.
+
+## API 키
+
+| 환경변수 | 데이터 소스 | 발급 방법 |
+|---|---|---|
+| `OPENDART_API_KEY` | OpenDART | [opendart.fss.or.kr](https://opendart.fss.or.kr) → 인증키 신청 |
+| `DATAGOKR_SERVICE_KEY` | 공공데이터포털 | [data.go.kr](https://www.data.go.kr) → 회원가입 → API별 활용신청([Tool 목록](#tool-목록)의 링크) → 마이페이지 |
+| `LAWGOKR_OC` | 국가법령정보 | [open.law.go.kr](https://open.law.go.kr) → OPEN API 신청(이 컴퓨터의 공인 IP 포함) → 마이페이지 → API인증키관리(OC) |
+
+> **공공데이터포털**: 키가 Encoding과 Decoding 두 가지로 발급됩니다. **Decoding 키**를 넣으세요. Encoding 키를 넣으면 인코딩이 두 번 되어 `SERVICE_KEY_IS_NOT_REGISTERED_ERROR`가 납니다. 키 하나로 활용신청한 모든 API를 쓸 수 있습니다.
+
+> **국가법령정보**: 신청할 때 **등록한 공인 IP에서만** 호출할 수 있습니다. IP가 바뀌면 open.law.go.kr에서 고쳐야 합니다. OC가 틀린 경우와 IP가 등록되지 않은 경우 모두 같은 에러("사용자 정보 검증에 실패하였습니다")가 납니다. law.go.kr은 돌려주는 모든 링크에 OC를 넣으므로, 다른 키를 OC로 재사용하지 마세요(mcp-hub는 그 링크를 넘기지 않습니다).
 
 ## Tool 목록
-
-`hub_list_providers`를 호출하면 활성화된 provider와 빠진 키를 확인할 수 있습니다.
 
 **OpenDART** (`OPENDART_API_KEY`)
 
@@ -133,92 +169,24 @@ cp .env.example .env    # 값을 채운 뒤
 | `lawgokr_search_precedents` | 판례를 최신순으로 사건명, 본문, 사건번호(`2020다296604`, 띄어 써도 됨), 법원, 선고일로 검색합니다. 기본으로 법원 판례만 검색해서 모든 결과의 본문을 읽을 수 있습니다 |
 | `lawgokr_get_precedent` | id나 사건번호로 판례를 조회합니다. 판시사항, 판결요지, 참조조문, 참조판례를 주고, `include_full_text`를 켜면 판결문 전문도 줍니다 |
 
-## 로컬에서 테스트하기
+**Hub**: `hub_list_providers`는 활성화된 provider와 빠진 키를 알려줍니다.
 
-### 1. 단위 테스트 (API 키 불필요)
+## 보안, 한도, 데이터 시점
 
-```sh
-go test -race ./...
-go test -race -v -run TestGetFinancials ./providers/opendart   # 특정 테스트만
-```
+- **키는 내 컴퓨터에만 있습니다.** mcp-hub는 로컬에서 실행되고, 각 키는 그 키를 발급한 서비스에만 보냅니다. 텔레메트리는 없습니다. 에러 메시지에는 키나 쿼리 문자열이 들어가지 않습니다.
+- **HTTP 모드에는 인증이 없습니다.** `-http`로 실행하면 그 포트에 접속할 수 있는 누구나 내 키로 tool을 호출할 수 있습니다. 인증 프록시 뒤에 두는 경우가 아니라면 localhost에 바인딩하세요(`-http 127.0.0.1:8080`). 기본 stdio 모드는 포트를 열지 않습니다.
+- **upstream 호출 한도가 적용됩니다.** 공공데이터포털 개발계정은 API마다 하루 10,000건까지 호출할 수 있고, OpenDART와 국가법령정보에도 각자 한도가 있습니다. mcp-hub는 응답을 10분, DART 회사 목록을 24시간 캐싱합니다.
+- **데이터는 원천만큼 최신입니다.** 아파트 거래는 계약 후 30일 안에 신고되므로 최근 한두 달 데이터는 시간이 지나면서 채워집니다. 주가는 일별 데이터이고 거래일마다 갱신됩니다.
 
-provider마다 `testdata/`에 저장해 둔 실제 upstream 응답과 가짜 upstream 서버로 테스트하므로 네트워크나 키가 필요 없습니다.
+## 로드맵
 
-### 2. MCP Inspector (실제 API로 tool 호출)
-
-[MCP Inspector](https://github.com/modelcontextprotocol/inspector)는 MCP 공식 디버깅 UI입니다. Node.js가 필요합니다.
-
-```sh
-go build -o mcp-hub ./cmd/mcp-hub
-npx @modelcontextprotocol/inspector -- ./mcp-hub -env-file $PWD/.env
-```
-
-> `--`를 빼면 안 됩니다. 빼면 Inspector가 `-env-file`을 자기 옵션 `-e`로 읽어서 `Invalid parameter format: nv-file` 에러가 납니다.
-
-또는 인자 없이 `npx @modelcontextprotocol/inspector`를 실행하고 왼쪽 패널을 직접 채워도 됩니다. **Transport Type**은 `STDIO`, **Command**는 `mcp-hub`의 절대 경로, **Arguments**는 `-env-file /absolute/path/to/.env`입니다.
-
-그다음 순서는 이렇습니다.
-
-1. **Connect**를 누르고 **Tools** 탭에서 **List Tools**를 누릅니다.
-2. tool을 고르고 입력값을 넣은 뒤 **Execute Tool**을 누릅니다. 예를 들어 `opendart_get_company`의 `corp_code`에 `000660`(SK하이닉스)을 넣습니다.
-
-![MCP Inspector에서 opendart_get_company 호출](docs/images/inspector-call-tool.png)
-
-3. 결과는 **Results**와 **Structured Output**에 나옵니다.
-
-![MCP Inspector의 opendart_get_company 결과](docs/images/inspector-result.png)
-
-4. 다른 tool도 같은 방식으로 호출합니다. 예를 들어 `opendart_get_financials`에 `corp_code` `000660`, `year` `2025`를 넣으면 주요계정이 나옵니다. 금액은 원 단위 숫자, 날짜는 ISO 형식이고, 전기 대비 비교값도 함께 나옵니다.
-
-![MCP Inspector의 opendart_get_financials 결과](docs/images/inspector-financials.png)
-
-`corp_code`에는 회사명이 아니라 코드를 넣습니다. `005930`(삼성전자), `000660`(SK하이닉스), `035720`(카카오)을 쓰거나, 먼저 `opendart_search_companies`(`query`에 `삼성전자` 또는 `samsung electronics`)로 찾으세요. 회사명을 넣으면 hint가 담긴 `INVALID_ARGUMENT`가 나오므로, 에러 형식을 확인하는 용도로 써 볼 수 있습니다.
-
-처음 회사를 조회할 때는 몇 초 걸립니다. DART 전체 회사 목록(약 12만 개)을 받아 메모리 인덱스를 만들기 때문입니다. 이후 24시간 동안은 바로 응답합니다.
-
-### 3. Claude Code (실제 에이전트에서 사용)
-
-```sh
-claude mcp add mcp-hub -- /absolute/path/to/mcp-hub -env-file /absolute/path/to/.env
-```
-
-새 세션에서 `/mcp`로 연결 상태를 확인한 뒤 "삼성전자 2025년 상반기 매출이랑 최근 공시 알려줘"처럼 물어보세요. 에이전트가 tool 설명만 보고 올바른 tool과 인자를 고르는지 확인할 수 있습니다.
-
-### 4. HTTP 모드
-
-```sh
-./mcp-hub -http :8080 -env-file .env
-```
-
-Inspector에서 **Transport Type**을 `Streamable HTTP`로, URL을 `http://localhost:8080`으로 설정합니다.
-
-서버 로그는 stderr로 나옵니다. 디버그 로그를 보려면 `-v`를 붙이세요.
-
-## 구조
-
-| 경로 | 역할 |
-|---|---|
-| `hub/` | Provider 등록, tool 이름 규칙, 표준 에러, 페이지네이션 |
-| `httpx/` | upstream HTTP 클라이언트 (재시도, 캐시, 에러 매핑, API 키 마스킹) |
-| `normalize/` | 날짜, 금액, HTML 텍스트 정규화 |
-| `cache/` | TTL 메모리 캐시 |
-| `providers/` | provider 목록 |
-| `cmd/mcp-hub/` | 실행 파일 |
-
-Provider를 추가할 때는 [docs/CONVENTIONS.ko.md](docs/CONVENTIONS.ko.md)를 따릅니다.
-
-## Provider 로드맵
-
-- [x] OpenDART (전자공시): 실제 API 검증 완료
-- [x] 공공데이터포털: 실제 API 검증 완료
-  - [x] 공휴일(특일 정보): 실제 API 검증 완료
-  - [x] 기업기본정보: 실제 API 검증 완료
-  - [x] 사업자등록 상태조회: 실제 API 검증 완료
-  - [x] 아파트 매매 실거래가: 실제 API 검증 완료, 지역명 입력 지원
-  - [x] 주식시세: 실제 API 검증 완료
-- [x] 국가법령정보 (법령, 판례): 실제 API 검증 완료
-- [ ] 한국은행 ECOS, KOSIS
+- [x] OpenDART: 기업, 공시, 재무제표
+- [x] 공공데이터포털: 공휴일, 기업 정보, 사업자 상태, 아파트 실거래가, 주가
+- [x] 국가법령정보: 법령, 판례
+- [ ] 한국은행 ECOS, KOSIS(국가통계포털)
 - [ ] 다음 지역: 일본 EDINET (전자공시)
+
+추가했으면 하는 데이터 소스가 있거나 이상하게 동작하는 API를 발견하면 [이슈를 열어 주세요](https://github.com/YoungsoonLee/mcp-hub/issues). 빌드, 테스트, provider 추가 방법은 [docs/DEVELOPMENT.ko.md](docs/DEVELOPMENT.ko.md)에 있습니다.
 
 ## 라이선스
 

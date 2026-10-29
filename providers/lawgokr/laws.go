@@ -19,7 +19,10 @@ const (
 	searchPageRows = 100 // the maximum display
 	maxSearchRows  = 1000
 	maxVersionRows = 1000
-	undeterminedEf = "99990101" // promulgated, effective date not set yet
+	// maxUpcomingProbes bounds the upcoming versions checked for a missing
+	// article.
+	maxUpcomingProbes = 5
+	undeterminedEf    = "99990101" // promulgated, effective date not set yet
 )
 
 func registerLaws(r *hub.Registrar, c *client) {
@@ -34,7 +37,8 @@ func registerLaws(r *hub.Registrar, c *client) {
 		Name: "lawgokr_get_law",
 		Description: "Read a Korean statute as in force on a date (default today), all articles or one article (e.g. 제50조, 43의2). " +
 			"Amendments promulgated but not yet in effect are not included; they are listed in upcoming with their effective dates, " +
-			"and as_of shows the text on any date, past or future. The law can be a name, an official abbreviation or a law_id.",
+			"and as_of shows the text on any date, past or future. An article that only an upcoming amendment adds is returned with not_yet_in_force " +
+			"and the date it takes effect. The law can be a name, an official abbreviation or a law_id.",
 	}, c.getLaw)
 }
 
@@ -209,10 +213,11 @@ type getLawInput struct {
 
 type Law struct {
 	LawSummary
-	AsOf     string       `json:"as_of"`
-	Upcoming []Upcoming   `json:"upcoming,omitempty" jsonschema:"amendments promulgated by as_of that take effect later; pass their effective_date as as_of to read them"`
-	Articles []Article    `json:"articles"`
-	PageInfo hub.PageInfo `json:"page_info"`
+	AsOf          string       `json:"as_of"`
+	NotYetInForce bool         `json:"not_yet_in_force,omitempty" jsonschema:"true when the requested article is not in force on as_of: it is shown from the amendment that adds it, which takes effect on effective_date"`
+	Upcoming      []Upcoming   `json:"upcoming,omitempty" jsonschema:"amendments promulgated by as_of that take effect later; pass their effective_date as as_of to read them"`
+	Articles      []Article    `json:"articles"`
+	PageInfo      hub.PageInfo `json:"page_info"`
 }
 
 type Upcoming struct {
@@ -277,18 +282,48 @@ func (c *client) getLaw(ctx context.Context, in getLawInput) (Law, error) {
 	out := Law{LawSummary: version.summary(), AsOf: asOf.Format(time.DateOnly), Upcoming: upcoming, Articles: []Article{}}
 	articles := doc.articles(out.Name)
 	if jo != "" && len(articles) == 0 {
-		hint := "the article may have been renumbered; omit article to list them all"
-		if len(upcoming) > 0 {
-			hint = "it may be added by an amendment that is not in effect yet: retry with as_of set to an upcoming effective_date (" +
-				cmp.Or(upcoming[0].EffectiveDate, "not set yet") + "), or omit article to list them all"
+		if out, articles, err = c.upcomingArticle(ctx, id, jo, in.Article, out); err != nil {
+			return Law{}, err
 		}
-		return Law{}, hub.Errorf(hub.CodeNotFound, "%s has no article %s in force on %s", out.Name, in.Article, out.AsOf).WithHint(hint)
 	}
 	out.PageInfo = hub.NewPageInfo(page, size, len(articles))
 	for i := (page - 1) * size; i < len(articles) && i < page*size; i++ {
 		out.Articles = append(out.Articles, articles[i])
 	}
 	return out, nil
+}
+
+// upcomingArticle handles an article missing from the text in force. It is
+// often added by an amendment that is promulgated but not in effect yet
+// (근로기준법 제44조의4), so the upcoming versions are checked, soonest
+// first, and the first one that has it is returned, marked not_yet_in_force.
+// "Not in force until 2027-01-01" answers the question; as an error it looked
+// like a failure, and an agent retried every upcoming date in turn.
+func (c *client) upcomingArticle(ctx context.Context, id, jo, article string, out Law) (Law, []Article, error) {
+	var probed []string
+	for _, u := range out.Upcoming {
+		ef, err := time.ParseInLocation(time.DateOnly, u.EffectiveDate, kst)
+		if err != nil || slices.Contains(probed, u.EffectiveDate) { // not set yet, or one of several amendments on that date
+			continue
+		}
+		if probed = append(probed, u.EffectiveDate); len(probed) > maxUpcomingProbes {
+			break
+		}
+		v, _, err := c.pickVersion(ctx, id, ef)
+		if err != nil {
+			return Law{}, nil, err
+		}
+		var doc lawDoc
+		if err := c.get(ctx, "lawService", url.Values{"target": {"eflaw"}, "MST": {v.MST}, "efYd": {v.EfDate}, "JO": {jo}}, &doc); err != nil {
+			return Law{}, nil, err
+		}
+		if articles := doc.articles(out.Name); len(articles) > 0 {
+			out.LawSummary, out.NotYetInForce = v.summary(), true
+			return out, articles, nil
+		}
+	}
+	hint := "the article may have been renumbered or added by a later amendment; omit article to list them all"
+	return Law{}, nil, hub.Errorf(hub.CodeNotFound, "%s has no article %s in force on %s", out.Name, article, out.AsOf).WithHint(hint)
 }
 
 func (c *client) parseAsOf(s string) (time.Time, error) {
