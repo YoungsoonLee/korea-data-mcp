@@ -8,7 +8,7 @@ korea-data-mcp needs your own free key for each data source. Get **one** to star
 |---|---|---|---|
 | [OpenDART](#opendart-start-here) | Companies, disclosures, financial statements (4 tools) | Minutes | Easy |
 | [data.go.kr](#datagokr) | Holidays, corporation info, business status, apartment trades, stock prices (6 tools) | Minutes to a few hours | Medium: one application per API |
-| [law.go.kr](#lawgokr) | Statutes and court rulings (4 tools) | 1 to 2 days | Medium: wait for approval |
+| [law.go.kr](#lawgokr) | Statutes and court rulings (4 tools) | Minutes | Easy |
 
 > **Outside Korea?** Signing up for these portals usually requires Korean identity verification (a Korean mobile number). If you can't, [join the waitlist for the hosted version](https://github.com/YoungsoonLee/korea-data-mcp/issues/new?template=hosted-access.yml), which needs no keys of your own.
 
@@ -48,7 +48,7 @@ A development account allows 10,000 calls a day for each API.
 
 1. Sign up at [open.law.go.kr](https://open.law.go.kr).
 2. Apply for the Open API (**OPEN API 신청**). Select the statute (법령) and precedent (판례) APIs.
-3. Wait for approval, usually one or two days.
+3. The application is approved right away.
 4. On **마이페이지 → API인증키관리**, set your **OC**: a value you choose (up to 50 characters). Set it as `LAWGOKR_OC`.
 
 Things to know:
