@@ -10,7 +10,7 @@
 
 기업 공시와 재무제표, 주가, 아파트 실거래가, 사업자 상태, 공휴일, 법령과 판례를 OpenDART, 공공데이터포털, 국가법령정보의 무료 공식 API로 제공하는 MCP 서버입니다.
 
-- **증거가 있는 정확성.** 실제 API에서 찾은 함정 47개(반기 매출 오독, 아직 시행 전인 법령, 해제된 거래, 2026년에 바뀐 시군구 코드 등)를 처리하고, 하나하나를 실제 응답으로 테스트합니다. 전체 목록을 공개합니다: [korea-data-mcp가 대신 처리하는 것들](docs/QUIRKS.ko.md)
+- **증거가 있는 정확성.** 실제 API에서 찾은 함정 47개(반기 매출 오독, 아직 시행 전인 법령, 해제된 거래, 2026년에 바뀐 시군구 코드 등)를 처리하고, 하나하나를 실제 응답으로 테스트합니다. 전체 목록을 공개합니다: [korea-data-mcp가 대신 처리하는 것들](docs/QUIRKS.ko.md). [작은 평가](eval/RESULTS.md)에서 korea-data-mcp를 쓴 에이전트는 10문항을 모두 한 번의 호출로 맞혔고, 원본 API를 쓴 에이전트는 함정에 부딪혀 호출이 약 3배 들었으며 1문항을 놓쳤습니다.
 - **클릭 한 번으로 설치.** 실행 파일 하나뿐이라 따로 설치할 것이 없습니다. Claude Desktop에서는 [korea-data-mcp.mcpb](https://github.com/YoungsoonLee/korea-data-mcp/releases/latest/download/korea-data-mcp.mcpb)를 열고 키만 넣으면 됩니다. [공식 MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.YoungsoonLee/korea-data-mcp)에도 등록되어 있습니다.
 - **프라이버시.** 내 컴퓨터에서 실행됩니다. 키와 질문은 정부 API로만 가고 제3자 서버를 거치지 않으며, 텔레메트리도 없습니다.
 - **집중.** 설명이 명확한 tool 15개라서, 에이전트가 컨텍스트를 수십 개의 tool로 채우지 않고도 맞는 tool을 고릅니다.
