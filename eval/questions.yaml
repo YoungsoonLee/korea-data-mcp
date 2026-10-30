@@ -1,0 +1,87 @@
+# Mini evaluation: the same question asked to an agent with the raw APIs and
+# to an agent with korea-data-mcp. Answers were checked on the raw APIs on
+# 2026-10-30, independently of korea-data-mcp. Trade counts can still change
+# when late reports or cancellations are filed.
+#
+# The agent ends its reply with "ANSWER: <value>" in the given format.
+# Numbers are correct within 0.5%; everything else must match exactly.
+# Run 2 (RESULTS.md) asked q04, q05 and q10 without the "(해제된 계약은 빼고)" hint.
+
+questions:
+  - id: q01
+    kind: trap
+    quirk: Half-year thstrm_amount holds only the latest quarter
+    question: 삼성전자의 2025년 상반기(1~6월) 연결 매출액은 얼마야?
+    format: KRW integer
+    answer: 153706820000000
+    source: OpenDART fnlttSinglAcnt, corp_code 00126380, 2025, reprt_code 11012, CFS 매출액 thstrm_add_amount (thstrm_amount is 74,566,317,000,000)
+
+  - id: q02
+    kind: trap
+    quirk: Q3 thstrm_amount holds only the latest quarter
+    question: SK하이닉스의 2025년 1~3분기 누적 연결 영업이익은 얼마야?
+    format: KRW integer
+    answer: 28036745000000
+    source: OpenDART fnlttSinglAcnt, corp_code 00164779, 2025, reprt_code 11014, CFS 영업이익 thstrm_add_amount (thstrm_amount is 11,383,390,000,000)
+
+  - id: q03
+    kind: control
+    question: 삼성전자의 2024년 연간 연결 매출액은 얼마야?
+    format: KRW integer
+    answer: 300870903000000
+    source: OpenDART fnlttSinglAcnt, corp_code 00126380, 2024, reprt_code 11011, CFS 매출액 thstrm_amount
+
+  - id: q04
+    kind: trap
+    quirk: Cancelled deals stay in the data (cdealType O)
+    question: 서울 강남구에서 2025년 9월에 계약된 아파트 매매는 몇 건이야? (해제된 계약은 거래가 아니니 빼고)
+    format: integer
+    answer: 221
+    source: RTMSDataSvcAptTrade LAWD_CD 11680, DEAL_YMD 202509 → 233 items, 12 with cdealType O
+
+  - id: q05
+    kind: trap
+    quirk: 화성시 41590 returns zero after the 2026 split into four 구
+    question: 경기도 화성시에서 2025년 6월에 계약된 아파트 매매는 몇 건이야? (해제된 계약은 빼고)
+    format: integer
+    answer: 1428
+    source: RTMSDataSvcAptTrade DEAL_YMD 202506 → 41590 0 items; 41591 147 (16 cancelled), 41593 194 (18), 41595 262 (17), 41597 946 (70)
+
+  - id: q06
+    kind: trap
+    quirk: likeSrtnCd is a substring match; a preferred share's ISIN does not contain its code
+    question: 삼성전자우(우선주)의 2026년 10월 23일 종가는 얼마야?
+    format: KRW integer
+    answer: 167900
+    source: getStockPriceInfo_V2 basDt 20261023, srtnCd 005935 (ISIN KR7005931001)
+
+  - id: q07
+    kind: trap
+    quirk: A business number with hyphens is reported as not registered
+    question: 사업자등록번호 124-81-00998의 현재 사업자 상태는 뭐야? (계속사업자, 휴업자, 폐업자, 미등록 중 하나)
+    format: one of 계속사업자 | 휴업자 | 폐업자 | 미등록
+    answer: 계속사업자
+    source: api.odcloud.kr nts-businessman/v1/status, b_no 1248100998 → b_stt 계속사업자 (with hyphens the API says not registered)
+
+  - id: q08
+    kind: trap
+    quirk: The current-law text includes promulgated amendments that are not in force yet
+    question: 2026년 10월 29일 기준으로 근로기준법 제44조의4는 시행 중이야? 아니라면 언제부터 시행돼?
+    format: "예, or 아니오 followed by the effective date: 아니오 YYYY-MM-DD"
+    answer: 아니오 2027-01-01
+    source: law.go.kr target=law MST 285279 shows 제44조의4 with 조문시행일자 20261008; target=eflaw efYd 20261008 has no 제44조의4; 부칙 says 제44조의4 takes effect 2027-01-01
+
+  - id: q09
+    kind: control
+    question: 삼성전자 보통주의 2026년 10월 23일 종가는 얼마야?
+    format: KRW integer
+    answer: 215500
+    source: getStockPriceInfo_V2 basDt 20261023, srtnCd 005930
+
+  - id: q10
+    kind: trap
+    quirk: 광주광역시 codes (29xxx) moved to 전남광주통합특별시 (12xxx), even for past months
+    question: 광주 북구에서 2025년 3월에 계약된 아파트 매매는 몇 건이야? (해제된 계약은 빼고)
+    format: integer
+    answer: 492
+    source: RTMSDataSvcAptTrade DEAL_YMD 202503 → 29170 0 items; 12300 523 items, 31 with cdealType O
