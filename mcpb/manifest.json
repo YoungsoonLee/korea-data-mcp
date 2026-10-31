@@ -3,7 +3,7 @@
   "name": "korea-data-mcp",
   "display_name": "Korea Data MCP",
   "version": "0.0.0",
-  "description": "Korean public data for AI agents: corporate filings and financials, stock prices, apartment trades and rents, statutes and court rulings.",
+  "description": "Korean public data for AI agents: corporate filings, financials and dividends, stock prices, apartment trades and rents, statutes and court rulings.",
   "long_description": "Free, official Korean data from OpenDART, data.go.kr and law.go.kr, with the traps that make agents give wrong answers already handled: half-year revenue reported as one quarter, statutes that include amendments not in force yet, cancelled apartment deals, district codes that changed in 2026. Each source needs its own free key; enter the ones you have, and tools for the others are not offered.",
   "author": {
     "name": "YoungsoonLee",
@@ -39,7 +39,7 @@
     "opendart_api_key": {
       "type": "string",
       "title": "OpenDART API key",
-      "description": "Corporate filings and financials. Free at opendart.fss.or.kr (인증키 신청).",
+      "description": "Corporate filings, financials, dividends and shareholders. Free at opendart.fss.or.kr (인증키 신청).",
       "sensitive": true,
       "required": false
     },
@@ -64,6 +64,8 @@
     { "name": "opendart_get_company", "description": "Company profile: CEO, market, registration numbers, address" },
     { "name": "opendart_search_disclosures", "description": "Search corporate disclosures by company, date and type" },
     { "name": "opendart_get_financials", "description": "Key financial accounts for a year and report, with prior periods" },
+    { "name": "opendart_get_dividends", "description": "Dividends per share, yield, payout ratio, for three years" },
+    { "name": "opendart_get_major_shareholders", "description": "Largest shareholder and related parties, with stakes" },
     { "name": "datagokr_list_holidays", "description": "Korean public holidays for a year or month" },
     { "name": "datagokr_search_corporations", "description": "Find Korean corporations by name, listed or not" },
     { "name": "datagokr_get_corporation", "description": "Current corporation profile, employees, salary, auditor" },

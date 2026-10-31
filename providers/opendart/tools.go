@@ -41,6 +41,21 @@ func registerTools(r *hub.Registrar, c *client) {
 		Description: "Get key financial statement accounts (주요계정) for one company and period: assets, liabilities, equity, revenue, " +
 			"operating income, net income, with prior-period comparisons. Amounts are in KRW (원). Data is available from fiscal year 2015.",
 	}, c.getFinancials)
+
+	hub.AddTool(r, &mcp.Tool{
+		Name: "opendart_get_dividends",
+		Description: "Get dividends (배당에 관한 사항) from a periodic report: cash dividend per share, yield and total, payout ratio, " +
+			"net income and EPS, for common and preferred shares, for the report's period and the two prior fiscal years. Amounts are in KRW (원). " +
+			"In half and quarterly reports the current period is year-to-date, but the prior periods are full fiscal years. " +
+			"Per-share amounts are comparable across years only when par_value is the same (stock splits). Data is available from fiscal year 2015.",
+	}, c.getDividends)
+
+	hub.AddTool(r, &mcp.Tool{
+		Name: "opendart_get_major_shareholders",
+		Description: "Get the largest shareholder (최대주주) and its related parties (특수관계인) from a periodic report, " +
+			"with common and preferred shares held and stakes at the start and end of the period, and the group total. " +
+			"This is the controlling group only; other holders of 5% or more, such as the National Pension Service, are not listed. Data is available from fiscal year 2015.",
+	}, c.getMajorShareholders)
 }
 
 // ---- opendart_search_companies ----
@@ -335,6 +350,23 @@ var reportCodes = map[string]string{
 	"q3":     "11014", // 3분기보고서
 }
 
+// reportParams validates a fiscal year and report name and returns the
+// report name with its default and DART's reprt_code.
+func (c *client) reportParams(year int, report string) (string, string, error) {
+	if thisYear := c.now().In(kst).Year(); year < 2015 || year > thisYear {
+		return "", "", hub.Errorf(hub.CodeInvalidArgument, "year must be between 2015 and %d, got %d", thisYear, year)
+	}
+	report = cmp.Or(report, "annual")
+	reprt, ok := reportCodes[report]
+	if !ok {
+		return "", "", hub.Errorf(hub.CodeInvalidArgument, "unknown report %q; use one of %s", report, keys(reportCodes))
+	}
+	return report, reprt, nil
+}
+
+// notFiledHint explains an empty result for a periodic report.
+const notFiledHint = "the report may not be filed yet or the company does not file it; try an earlier year or report=annual"
+
 type getFinancialsInput struct {
 	CorpCode  string `json:"corp_code" jsonschema:"8-digit corp_code or 6-character stock code"`
 	Year      int    `json:"year" jsonschema:"fiscal year (사업연도), 2015 or later"`
@@ -390,13 +422,9 @@ func (c *client) getFinancials(ctx context.Context, in getFinancialsInput) (Fina
 	if err != nil {
 		return Financials{}, err
 	}
-	if thisYear := c.now().In(kst).Year(); in.Year < 2015 || in.Year > thisYear {
-		return Financials{}, hub.Errorf(hub.CodeInvalidArgument, "year must be between 2015 and %d, got %d", thisYear, in.Year)
-	}
-	report := cmp.Or(in.Report, "annual")
-	reprt, ok := reportCodes[report]
-	if !ok {
-		return Financials{}, hub.Errorf(hub.CodeInvalidArgument, "unknown report %q; use one of %s", report, keys(reportCodes))
+	report, reprt, err := c.reportParams(in.Year, in.Report)
+	if err != nil {
+		return Financials{}, err
 	}
 	statement := cmp.Or(in.Statement, "consolidated")
 	fsDiv := map[string]string{"consolidated": "CFS", "separate": "OFS"}[statement]
@@ -408,7 +436,7 @@ func (c *client) getFinancials(ctx context.Context, in getFinancialsInput) (Fina
 	q := url.Values{"corp_code": {code}, "bsns_year": {strconv.Itoa(in.Year)}, "reprt_code": {reprt}}
 	if err := c.getJSON(ctx, "fnlttSinglAcnt.json", q, &r); err != nil {
 		if he := hub.AsError(err); he.Code == hub.CodeNotFound {
-			he.Hint = "the report may not be filed yet or the company does not file it; try an earlier year or report=annual"
+			he.Hint = notFiledHint
 		}
 		return Financials{}, err
 	}

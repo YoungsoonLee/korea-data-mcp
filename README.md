@@ -8,12 +8,12 @@
 
 **Pass Korean public APIs straight to an AI agent and it gets answers wrong. korea-data-mcp gives it the right ones.**
 
-An MCP server for Korean corporate filings and financials, stock prices, apartment sale prices and rents, business registration status, public holidays, statutes and court rulings, from the official free APIs of OpenDART, data.go.kr and law.go.kr.
+An MCP server for Korean corporate filings, financials, dividends and major shareholders, stock prices, apartment sale prices and rents, business registration status, public holidays, statutes and court rulings, from the official free APIs of OpenDART, data.go.kr and law.go.kr.
 
-- **Correct, with evidence.** 47 traps found on the live APIs (wrong half-year revenue, laws not in force yet, cancelled deals, district codes that changed in 2026, and more) are handled, each covered by a test that uses the real response. The full list is public: [What korea-data-mcp handles for you](docs/QUIRKS.md). In a [small evaluation](eval/RESULTS.md), agents with korea-data-mcp answered 10 of 10 questions with one call each; with the raw APIs they hit the traps, needed about 3x the calls, and missed one.
+- **Correct, with evidence.** 52 traps found on the live APIs (wrong half-year revenue, laws not in force yet, cancelled deals, district codes that changed in 2026, and more) are handled, each covered by a test that uses the real response. The full list is public: [What korea-data-mcp handles for you](docs/QUIRKS.md). In a [small evaluation](eval/RESULTS.md), agents with korea-data-mcp answered 10 of 10 questions with one call each; with the raw APIs they hit the traps, needed about 3x the calls, and missed one.
 - **Installs in one click.** A single binary with nothing else to install. In Claude Desktop, open [korea-data-mcp.mcpb](https://github.com/YoungsoonLee/korea-data-mcp/releases/latest/download/korea-data-mcp.mcpb) and enter your keys. Also in the [official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.YoungsoonLee/korea-data-mcp).
 - **Private.** It runs on your machine. Your keys and questions go only to the government APIs, never through a third-party server, and there is no telemetry.
-- **Focused.** 16 tools with clear descriptions, so an agent picks the right one without filling its context with dozens of others.
+- **Focused.** 18 tools with clear descriptions, so an agent picks the right one without filling its context with dozens of others.
 
 ## Why it matters
 
@@ -45,13 +45,14 @@ Three more traps, each of which silently produces a wrong answer:
 - **Deals that never happened.** Apartment trade data keeps cancelled deals, marked only by a flag: 12 of 233 Gangnam trades in September 2025, including a ₩7.5 billion one. Averages that include them are wrong. korea-data-mcp leaves them out.
 - **Codes that quietly stop working.** In 2026, 광주광역시 and 전라남도 merged, 화성시 was split into four 구, and 인천 reorganized its districts. The old district codes, which most code tables still list, now return zero trades, **even for past months**. With korea-data-mcp, an agent just says `광주 북구` or `화성시`.
 
-There is more: errors returned as HTTP 200, stale records mixed with current ones, business numbers that fail when written with hyphens, stock history split by a company rename, and a TLS handshake that fails from Go. See all 47: **[What korea-data-mcp handles for you](docs/QUIRKS.md)**.
+There is more: errors returned as HTTP 200, stale records mixed with current ones, business numbers that fail when written with hyphens, stock history split by a company rename, and a TLS handshake that fails from Go. See all 52: **[What korea-data-mcp handles for you](docs/QUIRKS.md)**.
 
 ## What you can ask
 
 Connect korea-data-mcp to Claude (or any MCP client) and ask in English or Korean:
 
 - "What was Samsung Electronics' revenue in the first half of 2025, and what has it disclosed recently?"
+- "Who is SK hynix's largest shareholder, and how did its dividend per share change over the last three years?"
 - "What was the median apartment sale price in 분당구 in September 2025?"
 - "What was the median jeonse deposit for new contracts in 강남구 in September 2025?"
 - "Is 제44조의4 of the Labor Standards Act (근로기준법) in force yet?"
@@ -160,6 +161,8 @@ Step-by-step instructions and troubleshooting: [Getting API keys](docs/KEYS.md).
 | `opendart_get_company` | Company profile (기업개황): CEO, market, registration numbers, address, fiscal year-end |
 | `opendart_search_disclosures` | Search disclosures (공시) by company, date range, type, and market |
 | `opendart_get_financials` | Key financial accounts (주요계정) for a year and report, with prior-period comparisons |
+| `opendart_get_dividends` | Dividends (배당): cash dividend per share, yield, total and payout ratio for common and preferred shares, with EPS and net income, for the report's period and the two prior years. Year-to-date and full-year periods are labeled, and the par value shows stock splits |
+| `opendart_get_major_shareholders` | The largest shareholder (최대주주) and related parties: common and preferred shares and stakes at the start and end of the period, with the group total |
 
 Every OpenDART tool that takes `corp_code` also accepts a 6-character stock code (e.g. `005930`).
 

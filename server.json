@@ -21,7 +21,7 @@
       "environmentVariables": [
         {
           "name": "OPENDART_API_KEY",
-          "description": "OpenDART key for corporate filings and financials (opendart.fss.or.kr)",
+          "description": "OpenDART key for corporate filings, financials, dividends and shareholders (opendart.fss.or.kr)",
           "isSecret": true,
           "isRequired": false
         },
