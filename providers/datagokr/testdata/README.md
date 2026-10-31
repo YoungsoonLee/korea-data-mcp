@@ -1,6 +1,6 @@
 # data.go.kr test fixtures
 
-These files are **real data.go.kr responses** captured on 2026-10-25 and 2026-10-26. They contain no service key.
+These files are **real data.go.kr responses** captured between 2026-10-25 and 2026-10-30. They contain no service key.
 
 | File | Request | Shows |
 |---|---|---|
@@ -16,6 +16,7 @@ These files are **real data.go.kr responses** captured on 2026-10-25 and 2026-10
 | `holidays_single.xml` | Same, 2026-12 | One item (an object, not an array, in JSON) |
 | `holidays_none.xml` | Same, 2026-04 | No items (`"items": ""` in JSON) |
 | `apt_trades_gangnam_202509.xml` | 아파트 매매 실거래가, 강남구 (11680), 2025-09, all rows | 233 trades, 12 cancelled (`cdealType` O) |
+| `apt_rents_jongno_202509.xml` | 아파트 전월세 실거래가, 종로구 (11110), 2025-09, all rows | 217 contracts: 64 jeonse, 153 monthly; 103 new, 97 renewals, 17 unknown |
 | `apt_trades.xml` | 아파트 매매 실거래가, 종로구 (11110), 2025-09, 3 rows | Result code `000`, prices in 10,000 KRW |
 | `apt_trades_none.xml` | Same, 2030-01 | No items; an invalid `DEAL_YMD` returns exactly the same |
 | `stock_head.xml` | 주식시세 `getStockPriceInfo_V2`, no filters, 1 row (2026-10-26) | The newest day comes first |

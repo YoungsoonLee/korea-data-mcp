@@ -8,12 +8,12 @@
 
 **Pass Korean public APIs straight to an AI agent and it gets answers wrong. korea-data-mcp gives it the right ones.**
 
-An MCP server for Korean corporate filings and financials, stock prices, apartment sale prices, business registration status, public holidays, statutes and court rulings, from the official free APIs of OpenDART, data.go.kr and law.go.kr.
+An MCP server for Korean corporate filings and financials, stock prices, apartment sale prices and rents, business registration status, public holidays, statutes and court rulings, from the official free APIs of OpenDART, data.go.kr and law.go.kr.
 
 - **Correct, with evidence.** 47 traps found on the live APIs (wrong half-year revenue, laws not in force yet, cancelled deals, district codes that changed in 2026, and more) are handled, each covered by a test that uses the real response. The full list is public: [What korea-data-mcp handles for you](docs/QUIRKS.md). In a [small evaluation](eval/RESULTS.md), agents with korea-data-mcp answered 10 of 10 questions with one call each; with the raw APIs they hit the traps, needed about 3x the calls, and missed one.
 - **Installs in one click.** A single binary with nothing else to install. In Claude Desktop, open [korea-data-mcp.mcpb](https://github.com/YoungsoonLee/korea-data-mcp/releases/latest/download/korea-data-mcp.mcpb) and enter your keys. Also in the [official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.YoungsoonLee/korea-data-mcp).
 - **Private.** It runs on your machine. Your keys and questions go only to the government APIs, never through a third-party server, and there is no telemetry.
-- **Focused.** 15 tools with clear descriptions, so an agent picks the right one without filling its context with dozens of others.
+- **Focused.** 16 tools with clear descriptions, so an agent picks the right one without filling its context with dozens of others.
 
 ## Why it matters
 
@@ -53,6 +53,7 @@ Connect korea-data-mcp to Claude (or any MCP client) and ask in English or Korea
 
 - "What was Samsung Electronics' revenue in the first half of 2025, and what has it disclosed recently?"
 - "What was the median apartment sale price in 분당구 in September 2025?"
+- "What was the median jeonse deposit for new contracts in 강남구 in September 2025?"
 - "Is 제44조의4 of the Labor Standards Act (근로기준법) in force yet?"
 - "Find recent Supreme Court rulings on unfair dismissal (부당해고) and summarize the holding of the latest one."
 - "Is business registration number 124-81-00998 still active?"
@@ -171,6 +172,7 @@ Every OpenDART tool that takes `corp_code` also accepts a 6-character stock code
 | `datagokr_get_corporation` | Current company profile: CEO, market, registration numbers, founding and listing dates, address, industry, employees, average tenure and salary, auditor and audit opinion | Same as above |
 | `datagokr_check_business_status` | Check up to 100 business registration numbers (사업자등록번호) with the National Tax Service: registered or not, active, suspended or closed (with date), and VAT type. Hyphens are fine | [국세청_사업자등록정보 진위확인 및 상태조회](https://www.data.go.kr/data/15081808/openapi.do) |
 | `datagokr_list_apartment_trades` | Apartment sale transactions for a district and month, newest first, with a median/min/max price summary. Prices in KRW; cancelled deals excluded by default; filter by apartment name or neighborhood. The region is a name (`강남구`, `서울 중구`, `분당구`, `광주 북구`) or a 5-digit code; a city with wards, such as `수원시` or `화성시`, covers all of them | [국토교통부_아파트 매매 실거래가 자료](https://www.data.go.kr/data/15126469/openapi.do) |
+| `datagokr_list_apartment_rents` | Apartment jeonse (전세) and monthly-rent (월세) contracts for a district and month, newest first, with deposit and rent medians for each. New contracts and renewals, which are often capped at +5%, are told apart and can be filtered. Amounts in KRW; same regions as above. Since 2011 | [국토교통부_아파트 전월세 실거래가 자료](https://www.data.go.kr/data/15126474/openapi.do) |
 | `datagokr_get_stock_prices` | Daily prices of a KOSPI, KOSDAQ or KONEX stock: close, change, open/high/low, volume, trading value, market cap. The stock is a name (`삼성전자`, `naver`), a 6-digit code or an ISIN; history follows the code across renames. Since 2020 | [금융위원회_주식시세정보](https://www.data.go.kr/data/15094808/openapi.do) |
 
 **law.go.kr** (`LAWGOKR_OC`)
@@ -194,7 +196,7 @@ Every OpenDART tool that takes `corp_code` also accepts a 6-character stock code
 ## Roadmap
 
 - [x] OpenDART: companies, disclosures, financials
-- [x] data.go.kr: holidays, corporation info, business status, apartment trades, stock prices
+- [x] data.go.kr: holidays, corporation info, business status, apartment trades and rents, stock prices
 - [x] law.go.kr: statutes, court rulings
 - [ ] Bank of Korea ECOS, KOSIS (Korean Statistical Information Service)
 - [ ] A sibling server for Japan, starting with EDINET (corporate disclosures)

@@ -37,6 +37,7 @@ One key for the whole portal, but **each API must be applied for separately** (�
    | [금융위원회_기업기본정보](https://www.data.go.kr/data/15043184/openapi.do) | `datagokr_search_corporations`, `datagokr_get_corporation` |
    | [국세청_사업자등록정보 진위확인 및 상태조회](https://www.data.go.kr/data/15081808/openapi.do) | `datagokr_check_business_status` |
    | [국토교통부_아파트 매매 실거래가 자료](https://www.data.go.kr/data/15126469/openapi.do) | `datagokr_list_apartment_trades` |
+   | [국토교통부_아파트 전월세 실거래가 자료](https://www.data.go.kr/data/15126474/openapi.do) | `datagokr_list_apartment_rents` |
    | [금융위원회_주식시세정보](https://www.data.go.kr/data/15094808/openapi.do) | `datagokr_get_stock_prices` |
 
 3. On **마이페이지** (My Page), open the approved API to see the key. Two keys are shown, **Encoding** and **Decoding**: copy the **Decoding** key into `DATAGOKR_SERVICE_KEY`.

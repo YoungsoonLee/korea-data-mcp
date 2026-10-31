@@ -3,7 +3,7 @@
   "name": "korea-data-mcp",
   "display_name": "Korea Data MCP",
   "version": "0.0.0",
-  "description": "Korean public data for AI agents: corporate filings and financials, stock prices, apartment trades, statutes and court rulings.",
+  "description": "Korean public data for AI agents: corporate filings and financials, stock prices, apartment trades and rents, statutes and court rulings.",
   "long_description": "Free, official Korean data from OpenDART, data.go.kr and law.go.kr, with the traps that make agents give wrong answers already handled: half-year revenue reported as one quarter, statutes that include amendments not in force yet, cancelled apartment deals, district codes that changed in 2026. Each source needs its own free key; enter the ones you have, and tools for the others are not offered.",
   "author": {
     "name": "YoungsoonLee",
@@ -46,7 +46,7 @@
     "datagokr_service_key": {
       "type": "string",
       "title": "data.go.kr service key (Decoding)",
-      "description": "Holidays, corporations, business status, apartment trades, stock prices. Use the Decoding key from data.go.kr, and apply for each API (links in the README).",
+      "description": "Holidays, corporations, business status, apartment trades and rents, stock prices. Use the Decoding key from data.go.kr, and apply for each API (links in the README).",
       "sensitive": true,
       "required": false
     },
@@ -69,6 +69,7 @@
     { "name": "datagokr_get_corporation", "description": "Current corporation profile, employees, salary, auditor" },
     { "name": "datagokr_check_business_status", "description": "Business registration status with the National Tax Service" },
     { "name": "datagokr_list_apartment_trades", "description": "Apartment sale prices by district and month, with a median" },
+    { "name": "datagokr_list_apartment_rents", "description": "Apartment jeonse and monthly rents by district and month" },
     { "name": "datagokr_get_stock_prices", "description": "Daily KOSPI/KOSDAQ/KONEX stock prices since 2020" },
     { "name": "lawgokr_search_laws", "description": "Search Korean statutes in force by name or text" },
     { "name": "lawgokr_get_law", "description": "A statute or article as in force on a date, with upcoming amendments" },

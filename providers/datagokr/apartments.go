@@ -31,8 +31,8 @@ import (
 //     return nothing even for past months; see regions.go.
 const aptTradePath = "/1613000/RTMSDataSvcAptTrade/getRTMSDataSvcAptTrade"
 
-// Transactions are published from January 2006. A busy district has about
-// 1,000 trades a month; maxAptPages bounds the fetch at 10,000.
+// Sales are published from January 2006. A busy district has about 1,000
+// trades or 2,000 rentals a month; maxAptPages bounds the fetch at 10,000.
 var firstAptMonth = time.Date(2006, 1, 1, 0, 0, 0, 0, kst)
 
 const (
@@ -139,18 +139,13 @@ func (c *client) listApartmentTrades(ctx context.Context, in listApartmentTrades
 	if err != nil {
 		return ApartmentTrades{}, err
 	}
-	month, err := c.parseYearMonth(in.YearMonth)
+	month, err := c.parseYearMonth(in.YearMonth, firstAptMonth)
 	if err != nil {
 		return ApartmentTrades{}, err
 	}
-
-	var items []aptTradeItem
-	for _, code := range codes {
-		got, err := c.allAptTrades(ctx, code, month.Format("200601"))
-		if err != nil {
-			return ApartmentTrades{}, err
-		}
-		items = append(items, got...)
+	items, err := allAptMonth[aptTradeItem](ctx, c, aptTradePath, codes, month)
+	if err != nil {
+		return ApartmentTrades{}, err
 	}
 
 	aptQuery := normalize.CompanyName(in.Apartment) // strips spaces and punctuation
@@ -182,15 +177,7 @@ func (c *client) listApartmentTrades(ctx context.Context, in listApartmentTrades
 	slices.SortStableFunc(trades, func(a, b ApartmentTrade) int {
 		return cmp.Or(cmp.Compare(b.Date, a.Date), cmp.Compare(a.Apartment, b.Apartment))
 	})
-	if len(prices) > 0 {
-		slices.Sort(prices)
-		out.Summary.MinPrice, out.Summary.MaxPrice = &prices[0], &prices[len(prices)-1]
-		median := prices[len(prices)/2]
-		if len(prices)%2 == 0 {
-			median = (prices[len(prices)/2-1] + median) / 2
-		}
-		out.Summary.MedianPrice = &median
-	}
+	out.Summary.MinPrice, out.Summary.MedianPrice, out.Summary.MaxPrice = spread(prices)
 
 	out.PageInfo = hub.NewPageInfo(page, size, len(trades))
 	out.Items = []ApartmentTrade{}
@@ -200,12 +187,25 @@ func (c *client) listApartmentTrades(ctx context.Context, in listApartmentTrades
 	return out, nil
 }
 
-// parseYearMonth accepts YYYY-MM or YYYYMM between January 2006 and the
-// current month. The upstream answers anything else with zero results.
-func (c *client) parseYearMonth(s string) (time.Time, error) {
+// spread returns the minimum, median and maximum, or nils for no values.
+func spread(xs []int64) (lo, median, hi *int64) {
+	if len(xs) == 0 {
+		return nil, nil, nil
+	}
+	xs = slices.Sorted(slices.Values(xs))
+	m := xs[len(xs)/2]
+	if len(xs)%2 == 0 {
+		m = (xs[len(xs)/2-1] + m) / 2
+	}
+	return &xs[0], &m, &xs[len(xs)-1]
+}
+
+// parseYearMonth accepts YYYY-MM or YYYYMM between first and the current
+// month. The upstream answers anything else with zero results.
+func (c *client) parseYearMonth(s string, first time.Time) (time.Time, error) {
 	now := c.now().In(kst)
 	last := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, kst)
-	bad := hub.Errorf(hub.CodeInvalidArgument, "year_month must be YYYY-MM between 2006-01 and %s, got %q", last.Format("2006-01"), s)
+	bad := hub.Errorf(hub.CodeInvalidArgument, "year_month must be YYYY-MM between %s and %s, got %q", first.Format("2006-01"), last.Format("2006-01"), s)
 	m := yearMonthPattern.FindStringSubmatch(strings.TrimSpace(s))
 	if m == nil {
 		return time.Time{}, bad
@@ -213,18 +213,31 @@ func (c *client) parseYearMonth(s string) (time.Time, error) {
 	y, _ := strconv.Atoi(m[1])
 	mo, _ := strconv.Atoi(m[2])
 	t := time.Date(y, time.Month(mo), 1, 0, 0, 0, 0, kst)
-	if mo < 1 || mo > 12 || t.Before(firstAptMonth) || t.After(last) {
+	if mo < 1 || mo > 12 || t.Before(first) || t.After(last) {
 		return time.Time{}, bad
 	}
 	return t, nil
 }
 
-// allAptTrades fetches every trade of one district and month.
-func (c *client) allAptTrades(ctx context.Context, region, ym string) ([]aptTradeItem, error) {
-	var all []aptTradeItem
+// allAptMonth fetches every record of the given districts for one month.
+func allAptMonth[T any](ctx context.Context, c *client, path string, codes []string, month time.Time) ([]T, error) {
+	var all []T
+	ym := month.Format("200601")
+	for _, region := range codes {
+		got, err := allAptPages[T](ctx, c, path, region, ym)
+		if err != nil {
+			return nil, err
+		}
+		all = append(all, got...)
+	}
+	return all, nil
+}
+
+func allAptPages[T any](ctx context.Context, c *client, path, region, ym string) ([]T, error) {
+	var all []T
 	for page := 1; page <= maxAptPages; page++ {
 		q := url.Values{"LAWD_CD": {region}, "DEAL_YMD": {ym}}
-		items, total, err := getList[aptTradeItem](ctx, c, aptTradePath, q, page, aptPageRows)
+		items, total, err := getList[T](ctx, c, path, q, page, aptPageRows)
 		if err != nil {
 			return nil, err
 		}
@@ -233,7 +246,7 @@ func (c *client) allAptTrades(ctx context.Context, region, ym string) ([]aptTrad
 			return all, nil
 		}
 	}
-	return nil, hub.Errorf(hub.CodeUpstream, "more than %d trades in %s for %s", maxAptPages*aptPageRows, ym, region)
+	return nil, hub.Errorf(hub.CodeUpstream, "more than %d records in %s for %s", maxAptPages*aptPageRows, ym, region)
 }
 
 func toTrade(it aptTradeItem) ApartmentTrade {
@@ -253,14 +266,11 @@ func toTrade(it aptTradeItem) ApartmentTrade {
 		Cancelled:       text(it.CdealType) == "O",
 		CancelledDate:   date(it.CdealDay),
 		AgentDistrictKo: text(it.EstateAgentSggNm),
+		Price:           manwon(it.DealAmount),
 	}
 	y, m, d := intPtr(it.DealYear), intPtr(it.DealMonth), intPtr(it.DealDay)
 	if y != nil && m != nil && d != nil {
 		t.Date = fmt.Sprintf("%04d-%02d-%02d", *y, *m, *d)
-	}
-	if p := normalize.Int(it.DealAmount); p != nil {
-		won := *p * 10000 // reported in units of 10,000 KRW (만원)
-		t.Price = &won
 	}
 	if a, err := strconv.ParseFloat(text(it.ExcluUseAr), 64); err == nil && a > 0 {
 		t.AreaM2 = &a

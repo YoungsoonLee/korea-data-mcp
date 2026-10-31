@@ -27,7 +27,7 @@
         },
         {
           "name": "DATAGOKR_SERVICE_KEY",
-          "description": "data.go.kr Decoding key for holidays, corporations, business status, apartment trades, stock prices",
+          "description": "data.go.kr Decoding key for holidays, corporations, business status, apartment trades and rents, stock prices",
           "isSecret": true,
           "isRequired": false
         },
