@@ -9,6 +9,7 @@ These files are **real OpenDART responses** captured on 2026-10-25 and 2026-10-3
 | `list.json` | `list.json` | First 2 of 5 items; `total_count` left as returned |
 | `fnlttSinglAcnt.json` | `fnlttSinglAcnt.json` | 2024 annual report, as captured |
 | `fnlttSinglAcnt_half.json` | `fnlttSinglAcnt.json` | 2025 half-year report, consolidated 자산총계 and 매출액 only |
+| `fnlttSinglAcnt_q3.json` | `fnlttSinglAcnt.json` | 2025 third-quarter report (captured 2026-11-01), consolidated 자산총계 and 매출액 only |
 | `alotMatter.json` | `alotMatter.json` | 2025 half-year report: year-to-date next to full prior years |
 | `alotMatter_2015.json` | `alotMatter.json` | 2015 annual report, before the 50:1 split; EPS label without `(연결)` |
 | `hyslrSttus.json` | `hyslrSttus.json` | 2024 annual report, as captured |

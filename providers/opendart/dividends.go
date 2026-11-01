@@ -48,7 +48,7 @@ type Dividends struct {
 	CorpCode  string           `json:"corp_code"`
 	Year      int              `json:"year"`
 	Report    string           `json:"report"`
-	ReceiptNo string           `json:"receipt_no"`
+	ReceiptNo string           `json:"receipt_no" jsonschema:"the filing the values come from (접수번호); after a correction (기재정정) it is the latest corrected filing"`
 	URL       string           `json:"url"`
 	Periods   []DividendPeriod `json:"periods" jsonschema:"the report's period first, then the two prior fiscal years"`
 }

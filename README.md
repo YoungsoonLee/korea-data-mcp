@@ -28,8 +28,8 @@ The period says January to June, so an agent reads `thstrm_amount` and answers *
 
 ```json
 { "name": "매출액", "statement_type": "income_statement",
-  "current_period": "2025-01-01 ~ 2025-06-30",
-  "current_amount": 153706820000000, "current_quarter_amount": 74566317000000 }
+  "current":         { "start": "2025-01-01", "end": "2025-06-30", "amount": 153706820000000 },
+  "current_quarter": { "start": "2025-04-01", "end": "2025-06-30", "amount": 74566317000000 } }
 ```
 
 So the agent gets it right, and can even split out the second quarter:

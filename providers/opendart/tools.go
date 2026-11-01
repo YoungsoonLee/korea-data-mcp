@@ -39,7 +39,8 @@ func registerTools(r *hub.Registrar, c *client) {
 	hub.AddTool(r, &mcp.Tool{
 		Name: "opendart_get_financials",
 		Description: "Get key financial statement accounts (주요계정) for one company and period: assets, liabilities, equity, revenue, " +
-			"operating income, net income, with prior-period comparisons. Amounts are in KRW (원). Data is available from fiscal year 2015.",
+			"operating income, net income, with prior-period comparisons. Every amount comes with the start and end of the period it covers; " +
+			"in half and third-quarter reports income statement items have both year-to-date and latest-quarter amounts. Amounts are in KRW (원). Data is available from fiscal year 2015.",
 	}, c.getFinancials)
 
 	hub.AddTool(r, &mcp.Tool{
@@ -387,6 +388,7 @@ type financialsResponse struct {
 		FrmtrmDt        string `json:"frmtrm_dt"`
 		FrmtrmAmount    string `json:"frmtrm_amount"`
 		FrmtrmAddAmount string `json:"frmtrm_add_amount"`
+		BfefrmtrmDt     string `json:"bfefrmtrm_dt"`
 		BfefrmtrmAmount string `json:"bfefrmtrm_amount"`
 		Currency        string `json:"currency"`
 	} `json:"list"`
@@ -398,21 +400,27 @@ type Financials struct {
 	Report    string    `json:"report"`
 	Statement string    `json:"statement"`
 	Currency  string    `json:"currency"`
-	ReceiptNo string    `json:"receipt_no"`
+	ReceiptNo string    `json:"receipt_no" jsonschema:"the filing the values come from (접수번호); after a correction (기재정정) it is the latest corrected filing"`
 	URL       string    `json:"url"`
 	Accounts  []Account `json:"accounts"`
 }
 
 type Account struct {
-	Name                 string `json:"name" jsonschema:"account name in Korean, e.g. 자산총계, 매출액, 영업이익, 당기순이익"`
-	StatementType        string `json:"statement_type" jsonschema:"balance_sheet or income_statement"`
-	CurrentPeriod        string `json:"current_period"`
-	CurrentAmount        *int64 `json:"current_amount" jsonschema:"amount for current_period; year-to-date for income statement items in interim reports"`
-	CurrentQuarterAmount *int64 `json:"current_quarter_amount,omitempty" jsonschema:"latest three months only, for income statement items in interim reports"`
-	PriorPeriod          string `json:"prior_period,omitempty"`
-	PriorAmount          *int64 `json:"prior_amount" jsonschema:"amount for prior_period"`
-	PriorQuarterAmount   *int64 `json:"prior_quarter_amount,omitempty" jsonschema:"same three months of the prior year, for income statement items in interim reports"`
-	BeforePriorAmount    *int64 `json:"before_prior_amount,omitempty" jsonschema:"two periods back, annual reports only"`
+	Name           string  `json:"name" jsonschema:"account name in Korean, e.g. 자산총계, 매출액, 영업이익, 당기순이익"`
+	StatementType  string  `json:"statement_type" jsonschema:"balance_sheet or income_statement"`
+	Current        Amount  `json:"current" jsonschema:"the report's period; year-to-date for income statement items in interim reports"`
+	CurrentQuarter *Amount `json:"current_quarter,omitempty" jsonschema:"the latest three months only, for income statement items in half and third-quarter reports"`
+	Prior          *Amount `json:"prior,omitempty" jsonschema:"the comparison period: the same months of the prior year for income statement items, the prior fiscal year-end for balance sheet items"`
+	PriorQuarter   *Amount `json:"prior_quarter,omitempty" jsonschema:"the same three months of the prior year"`
+	BeforePrior    *Amount `json:"before_prior,omitempty" jsonschema:"two fiscal years back, annual reports only"`
+}
+
+// Amount is a value with the period it covers.
+type Amount struct {
+	Start  string `json:"start,omitempty" jsonschema:"first day covered, YYYY-MM-DD; omitted for balance sheet items, which are positions on the end date"`
+	End    string `json:"end" jsonschema:"last day covered, or the date of a balance sheet position, YYYY-MM-DD"`
+	Amount *int64 `json:"amount"`
+	Note   string `json:"note,omitempty" jsonschema:"set when the period of the amount could not be confirmed"`
 }
 
 var statementTypes = map[string]string{"BS": "balance_sheet", "IS": "income_statement"}
@@ -458,21 +466,38 @@ func (c *client) getFinancials(ctx context.Context, in getFinancialsInput) (Fina
 		seen[k] = true
 		out.Currency, out.ReceiptNo = a.Currency, a.RceptNo
 		acct := Account{
-			Name:              a.AccountNm,
-			StatementType:     cmp.Or(statementTypes[a.SjDiv], a.SjDiv),
-			CurrentPeriod:     period(a.ThstrmDt),
-			CurrentAmount:     normalize.Int(a.ThstrmAmount),
-			PriorPeriod:       period(a.FrmtrmDt),
-			PriorAmount:       normalize.Int(a.FrmtrmAmount),
-			BeforePriorAmount: normalize.Int(a.BfefrmtrmAmount),
+			Name:          a.AccountNm,
+			StatementType: cmp.Or(statementTypes[a.SjDiv], a.SjDiv),
+			Current:       amountFor(a.ThstrmDt, a.ThstrmAmount),
+			Prior:         optional(amountFor(a.FrmtrmDt, a.FrmtrmAmount)),
+			BeforePrior:   optional(amountFor(a.BfefrmtrmDt, a.BfefrmtrmAmount)),
 		}
 		// In interim reports DART labels income statement items with the
 		// year-to-date range ("2025.01.01 ~ 2025.06.30") but puts the latest
 		// quarter in *_amount and the year-to-date figure in *_add_amount.
-		// Report the amount that matches the period label.
-		if a.ThstrmAddAmount != "" {
-			acct.CurrentQuarterAmount, acct.CurrentAmount = acct.CurrentAmount, normalize.Int(a.ThstrmAddAmount)
-			acct.PriorQuarterAmount, acct.PriorAmount = acct.PriorAmount, normalize.Int(a.FrmtrmAddAmount)
+		// Each amount is reported with the period it actually covers.
+		if acct.Current.Start != "" && report != "annual" {
+			quarter := quarterOf(acct.Current)
+			switch {
+			case strings.TrimSpace(a.ThstrmAddAmount) != "":
+				if quarter.Start != acct.Current.Start { // a first-quarter report has one quarter only
+					quarter.Amount = acct.Current.Amount
+					acct.CurrentQuarter = &quarter
+					if acct.Prior != nil {
+						pq := quarterOf(*acct.Prior)
+						pq.Amount = acct.Prior.Amount
+						acct.PriorQuarter = &pq
+					}
+				}
+				acct.Current.Amount = normalize.Int(a.ThstrmAddAmount)
+				if acct.Prior != nil {
+					acct.Prior.Amount = normalize.Int(a.FrmtrmAddAmount)
+				}
+			case quarter.Start != acct.Current.Start:
+				// Not seen in any filing checked, but without a separate
+				// year-to-date figure the one amount given could be either.
+				acct.Current.Note = "DART gave no separate year-to-date amount; this may cover only " + quarter.Start + " ~ " + quarter.End
+			}
 		}
 		out.Accounts = append(out.Accounts, acct)
 	}
@@ -490,9 +515,37 @@ func (c *client) getFinancials(ctx context.Context, in getFinancialsInput) (Fina
 
 var dotDate = regexp.MustCompile(`\d{4}\.\d{2}\.\d{2}`)
 
-// period turns "2023.12.31 현재" into "2023-12-31" and
-// "2023.01.01 ~ 2023.12.31" into "2023-01-01 ~ 2023-12-31".
-func period(s string) string {
-	s = strings.TrimSpace(strings.TrimSuffix(strings.TrimSpace(s), "현재"))
-	return dotDate.ReplaceAllStringFunc(s, normalize.Date)
+// amountFor reads a DART period label, "2023.12.31 현재" (a balance sheet
+// position) or "2023.01.01 ~ 2023.12.31", with its amount.
+func amountFor(label, amount string) Amount {
+	dates := dotDate.FindAllString(label, 2)
+	for i := range dates {
+		dates[i] = normalize.Date(dates[i])
+	}
+	a := Amount{Amount: normalize.Int(amount)}
+	switch len(dates) {
+	case 1:
+		a.End = dates[0]
+	case 2:
+		a.Start, a.End = dates[0], dates[1]
+	}
+	return a
+}
+
+// optional drops a comparison column that DART left empty.
+func optional(a Amount) *Amount {
+	if a.End == "" && a.Amount == nil {
+		return nil
+	}
+	return &a
+}
+
+// quarterOf returns the last three months of a period, without an amount.
+func quarterOf(a Amount) Amount {
+	end, err := time.Parse("2006-01-02", a.End)
+	if err != nil {
+		return Amount{}
+	}
+	start := time.Date(end.Year(), end.Month()-2, 1, 0, 0, 0, 0, time.UTC)
+	return Amount{Start: start.Format("2006-01-02"), End: a.End}
 }

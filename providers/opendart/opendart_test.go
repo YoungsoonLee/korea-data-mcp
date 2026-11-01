@@ -266,15 +266,17 @@ func TestGetFinancials(t *testing.T) {
 		t.Fatalf("got %+v", got)
 	}
 	assets, ni := account(t, got, "자산총계"), account(t, got, "당기순이익(손실)")
-	if assets.StatementType != "balance_sheet" || assets.CurrentPeriod != "2024-12-31" || *assets.CurrentAmount != 514531948000000 {
+	if assets.StatementType != "balance_sheet" || assets.Current != (Amount{End: "2024-12-31", Amount: assets.Current.Amount}) || *assets.Current.Amount != 514531948000000 ||
+		assets.BeforePrior.End != "2022-12-31" {
 		t.Fatalf("assets: %+v", assets)
 	}
-	if ni.StatementType != "income_statement" || ni.CurrentPeriod != "2024-01-01 ~ 2024-12-31" || *ni.PriorAmount != 15487100000000 || *ni.BeforePriorAmount != 55654077000000 || ni.CurrentQuarterAmount != nil {
+	if ni.StatementType != "income_statement" || ni.Current.Start != "2024-01-01" || ni.Current.End != "2024-12-31" || *ni.Prior.Amount != 15487100000000 ||
+		ni.Prior.Start != "2023-01-01" || *ni.BeforePrior.Amount != 55654077000000 || ni.BeforePrior.End != "2022-12-31" || ni.CurrentQuarter != nil || ni.PriorQuarter != nil {
 		t.Fatalf("net income: %+v", ni)
 	}
 
 	mustOK(t, call(t, cs, "opendart_get_financials", map[string]any{"corp_code": "00126380", "year": 2024, "statement": "separate"}, &got))
-	if len(got.Accounts) != 14 || *account(t, got, "자산총계").CurrentAmount != 324966127000000 {
+	if len(got.Accounts) != 14 || *account(t, got, "자산총계").Current.Amount != 324966127000000 {
 		t.Fatalf("separate: %+v", got)
 	}
 }
@@ -289,15 +291,65 @@ func TestGetFinancialsInterim(t *testing.T) {
 	var got Financials
 	mustOK(t, call(t, cs, "opendart_get_financials", map[string]any{"corp_code": "005930", "year": 2025, "report": "half"}, &got))
 
+	// A balance sheet position is compared with the prior year-end, not June 2024.
 	assets := account(t, got, "자산총계")
-	if assets.CurrentPeriod != "2025-06-30" || *assets.CurrentAmount != 504875185000000 || assets.CurrentQuarterAmount != nil {
+	if assets.Current.End != "2025-06-30" || assets.Current.Start != "" || *assets.Current.Amount != 504875185000000 || assets.CurrentQuarter != nil ||
+		assets.Prior.End != "2024-12-31" {
 		t.Fatalf("assets: %+v", assets)
 	}
-	// The period label is year-to-date, so current_amount must be too.
+	// The same row holds the second quarter (thstrm_amount) and the half year
+	// (thstrm_add_amount); each is returned with its own period.
 	rev := account(t, got, "매출액")
-	if rev.CurrentPeriod != "2025-01-01 ~ 2025-06-30" || *rev.CurrentAmount != 153706820000000 || *rev.CurrentQuarterAmount != 74566317000000 ||
-		*rev.PriorAmount != 145983903000000 || *rev.PriorQuarterAmount != 74068302000000 {
+	if rev.Current != (Amount{Start: "2025-01-01", End: "2025-06-30", Amount: rev.Current.Amount}) || *rev.Current.Amount != 153706820000000 ||
+		rev.CurrentQuarter.Start != "2025-04-01" || rev.CurrentQuarter.End != "2025-06-30" || *rev.CurrentQuarter.Amount != 74566317000000 ||
+		rev.Prior.Start != "2024-01-01" || rev.Prior.End != "2024-06-30" || *rev.Prior.Amount != 145983903000000 ||
+		rev.PriorQuarter.Start != "2024-04-01" || *rev.PriorQuarter.Amount != 74068302000000 {
 		t.Fatalf("revenue: %+v", rev)
+	}
+}
+
+// Third quarter: labeled January to September, with July to September in
+// thstrm_amount.
+func TestGetFinancialsThirdQuarter(t *testing.T) {
+	f, cs := setup(t, testKey)
+	b, err := os.ReadFile("testdata/fnlttSinglAcnt_q3.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	f.set("fnlttSinglAcnt.json", string(b))
+	var got Financials
+	mustOK(t, call(t, cs, "opendart_get_financials", map[string]any{"corp_code": "005930", "year": 2025, "report": "q3"}, &got))
+	rev := account(t, got, "매출액")
+	if rev.Current.Start != "2025-01-01" || rev.Current.End != "2025-09-30" || *rev.Current.Amount != 239768567000000 ||
+		rev.CurrentQuarter.Start != "2025-07-01" || *rev.CurrentQuarter.Amount != 86061747000000 || *rev.PriorQuarter.Amount != 79098731000000 {
+		t.Fatalf("revenue: %+v %+v", rev.Current, rev.CurrentQuarter)
+	}
+}
+
+// No filing checked lacks the year-to-date amount, but if one does, the
+// amount is kept and marked instead of silently labeled year-to-date.
+// The response is the half-year fixture with thstrm_add_amount removed.
+func TestGetFinancialsMissingYearToDate(t *testing.T) {
+	f, cs := setup(t, testKey)
+	b, err := os.ReadFile("testdata/fnlttSinglAcnt_half.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var doc map[string]any
+	json.Unmarshal(b, &doc)
+	for _, row := range doc["list"].([]any) {
+		delete(row.(map[string]any), "thstrm_add_amount")
+	}
+	b, _ = json.Marshal(doc)
+	f.set("fnlttSinglAcnt.json", string(b))
+	var got Financials
+	mustOK(t, call(t, cs, "opendart_get_financials", map[string]any{"corp_code": "005930", "year": 2025, "report": "half"}, &got))
+	rev := account(t, got, "매출액")
+	if *rev.Current.Amount != 74566317000000 || !strings.Contains(rev.Current.Note, "2025-04-01 ~ 2025-06-30") || rev.CurrentQuarter != nil {
+		t.Fatalf("revenue: %+v", rev)
+	}
+	if account(t, got, "자산총계").Current.Note != "" {
+		t.Errorf("balance sheet marked")
 	}
 }
 

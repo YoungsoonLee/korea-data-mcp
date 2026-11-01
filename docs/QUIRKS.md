@@ -14,7 +14,7 @@ These are the most dangerous ones: nothing fails, the agent simply gets the wron
 
 | Source | What the API does | What korea-data-mcp does | |
 |---|---|---|---|
-| OpenDART | In half-year and quarterly reports, income statement items are labeled with the year-to-date range (`2025.01.01 ~ 2025.06.30`) but `thstrm_amount` holds **only the latest quarter**. The year-to-date figure is in a separate `thstrm_add_amount`. | `current_amount` always matches `current_period`; the quarter is in `current_quarter_amount`. | ✅ |
+| OpenDART | In half-year and quarterly reports, income statement items are labeled with the year-to-date range (`2025.01.01 ~ 2025.06.30`) but `thstrm_amount` holds **only the latest quarter**. The year-to-date figure is in a separate `thstrm_add_amount`. | Every amount is returned with the period it covers: `current` is year-to-date, `current_quarter` the latest three months, each with its own `start` and `end`. If a filing ever lacks the year-to-date figure, the amount is marked instead of being labeled year-to-date. | ✅ |
 | OpenDART (dividends) | In half-year and quarterly reports the current column is year-to-date, but **the two other columns are full prior years**, not the same months: Samsung's 2025 half-year report puts ₩732 per share next to ₩1,446 for all of 2024. | Each period says whether it is a full year and, for the report's own period, the last day covered. | ✅ |
 | OpenDART (dividends) | Per-share figures are not adjusted for stock splits: Samsung paid ₩21,000 a share for 2015 and ₩1,446 for 2024, before and after its 50:1 split. Units are only in the row labels (`(백만원)`, `(원)`, `(%)`). | Amounts in KRW, with the par value of each year so a split is visible. | ✅ |
 | OpenDART (major shareholders) | Relations are free text (`본인`, `최대주주`, `최대주주 본인`, `본인(최대주주)`), rows can be `"` (ditto) for the row above, names carry layout spaces (`김   식`), and group totals are rows named `계`. | The largest shareholder is identified, ditto rows resolved, names cleaned, and each holder's common and preferred rows merged; totals are separate. | ✅ |
@@ -94,6 +94,12 @@ These are the most dangerous ones: nothing fails, the agent simply gets the wron
 |---|---|---|---|
 | OpenDART | The server only offers TLS 1.2 RSA key exchange ciphers, which Go has disabled by default since 1.22. Go clients fail with `tls: handshake failure` while curl works. | Enables those ciphers for OpenDART only. | ✅ |
 | data.go.kr | The portal issues an "Encoding" and a "Decoding" key. The Encoding key is already URL-encoded, so most HTTP clients encode it twice and authentication fails. | Documented: use the Decoding key. The error hint says the same. | ✅ |
+
+## Checked, and fine
+
+Things we suspected, tested on the live APIs, and found to behave correctly.
+
+- **OpenDART corrections (기재정정).** A periodic report can be corrected several times, months or years later. For 43 corrected reports of listed companies filed in September and October 2025, the financials, dividends and major shareholder APIs returned the latest correction every time. `receipt_no` identifies the filing the values come from.
 
 ## Found another one?
 

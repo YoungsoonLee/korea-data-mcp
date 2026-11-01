@@ -28,8 +28,8 @@
 
 ```json
 { "name": "매출액", "statement_type": "income_statement",
-  "current_period": "2025-01-01 ~ 2025-06-30",
-  "current_amount": 153706820000000, "current_quarter_amount": 74566317000000 }
+  "current":         { "start": "2025-01-01", "end": "2025-06-30", "amount": 153706820000000 },
+  "current_quarter": { "start": "2025-04-01", "end": "2025-06-30", "amount": 74566317000000 } }
 ```
 
 그래서 에이전트가 올바르게 답하고, 2분기 매출도 따로 짚어 줍니다.

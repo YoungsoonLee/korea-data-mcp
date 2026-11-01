@@ -53,7 +53,7 @@ type MajorShareholders struct {
 	Year               int           `json:"year"`
 	Report             string        `json:"report"`
 	AsOf               string        `json:"as_of" jsonschema:"end of the period, YYYY-MM-DD"`
-	ReceiptNo          string        `json:"receipt_no"`
+	ReceiptNo          string        `json:"receipt_no" jsonschema:"the filing the values come from (접수번호); after a correction (기재정정) it is the latest corrected filing"`
 	URL                string        `json:"url"`
 	LargestShareholder string        `json:"largest_shareholder,omitempty" jsonschema:"최대주주"`
 	Total              ShareHoldings `json:"total" jsonschema:"the largest shareholder and related parties together"`
