@@ -1,7 +1,8 @@
 // Package httpx is the shared upstream HTTP client: timeouts, retries with
 // backoff, response caching, and mapping of HTTP failures to hub.Error.
 // Error messages never include query strings, since those often carry API keys
-// (OpenDART crtfc_key, data.go.kr serviceKey).
+// (OpenDART crtfc_key, data.go.kr serviceKey); keys in the path are masked
+// with WithPathSecret.
 package httpx
 
 import (
@@ -16,6 +17,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/YoungsoonLee/korea-data-mcp/cache"
@@ -33,6 +35,7 @@ type Client struct {
 	cacheTTL   time.Duration
 	cacheable  func(body []byte) bool
 	errorBody  func(status int, body []byte) error
+	pathSecret string
 }
 
 type Option func(*Client)
@@ -62,6 +65,12 @@ func WithCacheCheck(ok func(body []byte) bool) Option {
 // so, which is UNAUTHENTICATED rather than PERMISSION_DENIED.
 func WithErrorBody(decode func(status int, body []byte) error) Option {
 	return func(c *Client) { c.errorBody = decode }
+}
+
+// WithPathSecret masks secret wherever it appears in the URL path of error
+// messages, for APIs that put the key in the path (ECOS: /api/<service>/<key>/…).
+func WithPathSecret(secret string) Option {
+	return func(c *Client) { c.pathSecret = secret }
 }
 
 // WithLegacyRSATLS additionally offers TLS 1.2 cipher suites with RSA key
@@ -186,6 +195,9 @@ func (c *Client) GetXML(ctx context.Context, rawURL string, query url.Values, he
 
 func (c *Client) do(ctx context.Context, method string, u *url.URL, header http.Header, body []byte) ([]byte, error) {
 	safe := u.Scheme + "://" + u.Host + u.Path
+	if c.pathSecret != "" {
+		safe = strings.ReplaceAll(safe, c.pathSecret, "***")
+	}
 	var lastErr error
 	for attempt := 0; attempt <= c.maxRetries; attempt++ {
 		if attempt > 0 {

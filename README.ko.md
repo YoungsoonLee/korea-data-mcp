@@ -8,12 +8,12 @@
 
 **한국 공공 API를 AI 에이전트에 그대로 넘기면 틀린 답이 나옵니다. korea-data-mcp는 정답을 줍니다.**
 
-기업 공시와 재무제표, 배당과 최대주주, 주가, 아파트 매매·전월세 실거래가, 사업자 상태, 공휴일, 법령과 판례를 OpenDART, 공공데이터포털, 국가법령정보의 무료 공식 API로 제공하는 MCP 서버입니다.
+기업 공시와 재무제표, 배당과 최대주주, 주가, 아파트 매매·전월세 실거래가, 사업자 상태, 공휴일, 법령과 판례, 한국은행 경제통계를 OpenDART, 공공데이터포털, 국가법령정보, 한국은행 ECOS의 무료 공식 API로 제공하는 MCP 서버입니다.
 
-- **증거가 있는 정확성.** 실제 API에서 찾은 함정 52개(반기 매출 오독, 아직 시행 전인 법령, 해제된 거래, 2026년에 바뀐 시군구 코드 등)를 처리하고, 하나하나를 실제 응답으로 테스트합니다. 전체 목록을 공개합니다: [korea-data-mcp가 대신 처리하는 것들](docs/QUIRKS.ko.md). [작은 평가](eval/RESULTS.md)에서 korea-data-mcp를 쓴 에이전트는 10문항을 모두 한 번의 호출로 맞혔고, 원본 API를 쓴 에이전트는 함정에 부딪혀 호출이 약 3배 들었으며 1문항을 놓쳤습니다.
+- **증거가 있는 정확성.** 실제 API에서 찾은 함정 60개(반기 매출 오독, 아직 시행 전인 법령, 해제된 거래, 2026년에 바뀐 시군구 코드 등)를 처리하고, 하나하나를 실제 응답으로 테스트합니다. 전체 목록을 공개합니다: [korea-data-mcp가 대신 처리하는 것들](docs/QUIRKS.ko.md). [작은 평가](eval/RESULTS.md)에서 korea-data-mcp를 쓴 에이전트는 10문항을 모두 한 번의 호출로 맞혔고, 원본 API를 쓴 에이전트는 함정에 부딪혀 호출이 약 3배 들었으며 1문항을 놓쳤습니다.
 - **클릭 한 번으로 설치.** 실행 파일 하나뿐이라 따로 설치할 것이 없습니다. Claude Desktop에서는 [korea-data-mcp.mcpb](https://github.com/YoungsoonLee/korea-data-mcp/releases/latest/download/korea-data-mcp.mcpb)를 열고 키만 넣으면 됩니다. [공식 MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.YoungsoonLee/korea-data-mcp)에도 등록되어 있습니다.
 - **프라이버시.** 내 컴퓨터에서 실행됩니다. 키와 질문은 정부 API로만 가고 제3자 서버를 거치지 않으며, 텔레메트리도 없습니다.
-- **집중.** 설명이 명확한 tool 18개라서, 에이전트가 컨텍스트를 수십 개의 tool로 채우지 않고도 맞는 tool을 고릅니다.
+- **집중.** 설명이 명확한 tool 20개라서, 에이전트가 컨텍스트를 수십 개의 tool로 채우지 않고도 맞는 tool을 고릅니다.
 
 ## 왜 중요한가
 
@@ -45,7 +45,7 @@
 - **없던 일이 된 거래.** 아파트 실거래가 데이터에는 해제된 계약이 표시만 된 채 남아 있습니다. 2025년 9월 강남구 거래 233건 중 12건이고, 75억 원짜리 거래도 있습니다. 이를 포함해 평균을 내면 틀립니다. korea-data-mcp는 이를 뺍니다.
 - **조용히 멈추는 코드.** 2026년에 광주광역시와 전라남도가 통합되고, 화성시가 4개 구로 나뉘고, 인천의 구가 개편됐습니다. 대부분의 코드표에 아직 남아 있는 옛 시군구 코드로 조회하면 거래가 0건으로 나옵니다. **과거 달을 조회해도 마찬가지입니다.** korea-data-mcp에서는 에이전트가 `광주 북구`나 `화성시`라고만 하면 됩니다.
 
-이 밖에도 HTTP 200으로 오는 에러, 최신 레코드에 섞인 옛 레코드, 하이픈을 넣으면 실패하는 사업자번호, 사명 변경으로 끊기는 주가 이력, Go에서 실패하는 TLS 핸드셰이크 등을 처리합니다. 52개 전체: **[korea-data-mcp가 대신 처리하는 것들](docs/QUIRKS.ko.md)**
+이 밖에도 HTTP 200으로 오는 에러, 최신 레코드에 섞인 옛 레코드, 하이픈을 넣으면 실패하는 사업자번호, 사명 변경으로 끊기는 주가 이력, Go에서 실패하는 TLS 핸드셰이크 등을 처리합니다. 60개 전체: **[korea-data-mcp가 대신 처리하는 것들](docs/QUIRKS.ko.md)**
 
 ## 이런 질문을 할 수 있습니다
 
@@ -60,14 +60,16 @@ korea-data-mcp를 Claude(또는 다른 MCP 클라이언트)에 연결하고 한�
 - "사업자번호 124-81-00998 아직 영업 중이야?"
 - "NAVER 주가 지난달에 어떻게 움직였어?"
 - "올해 남은 공휴일 알려줘"
+- "최근 2년 기준금리와 원/달러 환율 흐름 알려줘"
 
 | 데이터 소스 | 다루는 데이터 | 키 |
 |---|---|---|
 | [OpenDART](https://opendart.fss.or.kr) (전자공시) | 약 12만 개 회사의 기업개황, 공시, 재무제표 | `OPENDART_API_KEY` |
 | [공공데이터포털](https://www.data.go.kr) | 공휴일, 기업 정보, 사업자 상태, 아파트 실거래가, 주가 | `DATAGOKR_SERVICE_KEY` |
 | [국가법령정보](https://open.law.go.kr) | 원하는 날짜 기준으로 시행 중인 법령, 판례 | `LAWGOKR_OC` |
+| [한국은행 ECOS](https://ecos.bok.or.kr/api/) | 금리, 환율, 물가, GDP, 고용, 국제수지 등 수천 개 경제통계 | `ECOS_API_KEY` |
 
-세 키 모두 무료이고, 하나만 있어도 시작할 수 있습니다.
+네 키 모두 무료이고, 하나만 있어도 시작할 수 있습니다.
 
 ## 빠른 시작
 
@@ -94,7 +96,7 @@ go install github.com/YoungsoonLee/korea-data-mcp/cmd/korea-data-mcp@latest
 
 ### 2. 키 발급
 
-**OpenDART**부터 시작하세요. [opendart.fss.or.kr](https://opendart.fss.or.kr)에 가입하고 인증키를 신청하면 바로 발급됩니다. 세 키 모두 단계별 발급 방법은 **[API 키 발급 가이드](docs/KEYS.ko.md)**에 있습니다. 일부 키만 있어도 되고, 키가 없는 tool은 목록에 나오지 않을 뿐입니다.
+**OpenDART**부터 시작하세요. [opendart.fss.or.kr](https://opendart.fss.or.kr)에 가입하고 인증키를 신청하면 바로 발급됩니다. 네 키 모두 단계별 발급 방법은 **[API 키 발급 가이드](docs/KEYS.ko.md)**에 있습니다. 일부 키만 있어도 되고, 키가 없는 tool은 목록에 나오지 않을 뿐입니다.
 
 > **키 발급이 번거롭다면:** 키 없이 URL만으로 연결하는 호스팅 버전을 준비하고 있습니다. **[대기 명단에 등록](https://github.com/YoungsoonLee/korea-data-mcp/issues/new?template=hosted-access.yml)**해 주세요. 해외에 계셔서 한국 본인인증이 어려운 분도 마찬가지입니다.
 
@@ -109,6 +111,7 @@ claude mcp add korea-data-mcp \
   -e OPENDART_API_KEY=... \
   -e DATAGOKR_SERVICE_KEY=... \
   -e LAWGOKR_OC=... \
+  -e ECOS_API_KEY=... \
   -- /absolute/path/to/korea-data-mcp
 ```
 
@@ -122,7 +125,8 @@ claude mcp add korea-data-mcp \
       "env": {
         "OPENDART_API_KEY": "...",
         "DATAGOKR_SERVICE_KEY": "...",
-        "LAWGOKR_OC": "..."
+        "LAWGOKR_OC": "...",
+        "ECOS_API_KEY": "..."
       }
     }
   }
@@ -146,6 +150,7 @@ claude mcp add korea-data-mcp \
 | `OPENDART_API_KEY` | OpenDART | [opendart.fss.or.kr](https://opendart.fss.or.kr) → 인증키 신청 |
 | `DATAGOKR_SERVICE_KEY` | 공공데이터포털 | [data.go.kr](https://www.data.go.kr) → 회원가입 → API별 활용신청([Tool 목록](#tool-목록)의 링크) → 마이페이지 |
 | `LAWGOKR_OC` | 국가법령정보 | [open.law.go.kr](https://open.law.go.kr) → OPEN API 신청 → 마이페이지 → API인증키관리(OC) |
+| `ECOS_API_KEY` | 한국은행 ECOS | [ecos.bok.or.kr/api](https://ecos.bok.or.kr/api/) → 인증키 신청 |
 
 > **공공데이터포털**: 키가 Encoding과 Decoding 두 가지로 발급됩니다. **Decoding 키**를 넣으세요. Encoding 키를 넣으면 인코딩이 두 번 되어 `SERVICE_KEY_IS_NOT_REGISTERED_ERROR`가 납니다. 키 하나로 활용신청한 모든 API를 쓸 수 있습니다.
 
@@ -187,6 +192,13 @@ claude mcp add korea-data-mcp \
 | `lawgokr_search_precedents` | 판례를 최신순으로 사건명, 본문, 사건번호(`2020다296604`, 띄어 써도 됨), 법원, 선고일로 검색합니다. 기본으로 법원 판례만 검색해서 모든 결과의 본문을 읽을 수 있습니다 |
 | `lawgokr_get_precedent` | id나 사건번호로 판례를 조회합니다. 판시사항, 판결요지, 참조조문, 참조판례를 주고, `include_full_text`를 켜면 판결문 전문도 줍니다 |
 
+**한국은행 ECOS** (`ECOS_API_KEY`)
+
+| Tool | 기능 |
+|---|---|
+| `ecos_get_series` | 이름 붙은 지표(`base_rate` 기준금리, `usd_krw` 등 환율 4종, `treasury_3y`·`treasury_10y` 국고채, `cd_91d`, `corporate_bond_3y`, `kospi`, `kosdaq`, `cpi` 소비자물가, `gdp_growth`·`gdp_growth_yoy` 성장률, `gdp`, `gdp_per_capita_usd`, `unemployment_rate` 실업률, `employment_rate` 고용률, `current_account` 경상수지, `house_price_index` KB 주택가격지수)나 통계표 코드로 일·월·분기·반기·연 시계열을 받습니다. 기간 값이 평균인지, 기말 값인지, 합계인지 표시하고, 금액은 원·달러 단위로 바꾸며, 지수에는 전년 대비 변화율(금리·비율은 %p 차이)을 붙입니다 |
+| `ecos_search_series` | 한국어나 영어(`수출물가`, `housing price`)로 통계표를 찾거나, 통계표의 항목과 주기별 수록 기간을 보여줍니다 |
+
 **Hub**: `hub_list_providers`는 활성화된 provider와 빠진 키를 알려줍니다.
 
 ## 보안, 한도, 데이터 시점
@@ -201,7 +213,8 @@ claude mcp add korea-data-mcp \
 - [x] OpenDART: 기업, 공시, 재무제표
 - [x] 공공데이터포털: 공휴일, 기업 정보, 사업자 상태, 아파트 매매·전월세 실거래가, 주가
 - [x] 국가법령정보: 법령, 판례
-- [ ] 한국은행 ECOS, KOSIS(국가통계포털)
+- [x] 한국은행 ECOS: 금리, 물가, GDP, 고용 등 모든 ECOS 통계표
+- [ ] KOSIS(국가통계포털)
 - [ ] 같은 방식의 일본 서버: EDINET(전자공시)부터
 
 추가했으면 하는 데이터 소스는 [요청해 주세요](https://github.com/YoungsoonLee/korea-data-mcp/issues/new?template=data-source.yml). 이상하게 동작하는 API를 발견하면 [이슈를 열어 주세요](https://github.com/YoungsoonLee/korea-data-mcp/issues). 키 없이 쓰고 싶다면 [호스팅 대기 명단](https://github.com/YoungsoonLee/korea-data-mcp/issues/new?template=hosted-access.yml)에 등록해 주세요. 빌드, 테스트, provider 추가 방법은 [docs/DEVELOPMENT.ko.md](docs/DEVELOPMENT.ko.md)에 있습니다.

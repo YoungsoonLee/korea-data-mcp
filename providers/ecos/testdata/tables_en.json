@@ -1,0 +1,807 @@
+{
+ "StatisticTableList": {
+  "list_total_count": 100,
+  "row": [
+   {
+    "P_STAT_CODE": "*",
+    "STAT_CODE": "0000000001",
+    "STAT_NAME": "1. Monetary Financial Statistics",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000001",
+    "STAT_CODE": "0000000620",
+    "STAT_NAME": "1.1. Monetary and Liquidity Aggregates(New series)",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000620",
+    "STAT_CODE": "0000000621",
+    "STAT_NAME": "1.1.1. Monetary Base",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000621",
+    "STAT_CODE": "0000000622",
+    "STAT_NAME": "1.1.1.1. Components of Monetary Base",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000622",
+    "STAT_CODE": "102Y004",
+    "STAT_NAME": "1.1.1.1.1. Components of Monetary Base(Average, SA)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000622",
+    "STAT_CODE": "102Y002",
+    "STAT_NAME": "1.1.1.1.2. Components of Monetary Base(Average)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000622",
+    "STAT_CODE": "102Y003",
+    "STAT_NAME": "1.1.1.1.3. Components of Monetary Base(End of, SA)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000622",
+    "STAT_CODE": "102Y001",
+    "STAT_NAME": "1.1.1.1.4. Components of Monetary Base(End of) ",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000620",
+    "STAT_CODE": "0000000623",
+    "STAT_NAME": "1.1.2. M1(Narrow Money)",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000623",
+    "STAT_CODE": "0000000624",
+    "STAT_NAME": "1.1.2.1. M1 By Type",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000624",
+    "STAT_CODE": "161Y001",
+    "STAT_NAME": "1.1.2.1.1. M1 By Type (Average, SA)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000624",
+    "STAT_CODE": "161Y002",
+    "STAT_NAME": "1.1.2.1.2. M1 By Type (Average)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000624",
+    "STAT_CODE": "161Y003",
+    "STAT_NAME": "1.1.2.1.3. M1 By Type (End of, SA)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000624",
+    "STAT_CODE": "161Y004",
+    "STAT_NAME": "1.1.2.1.4. M1 By Type (End of)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000620",
+    "STAT_CODE": "0000000625",
+    "STAT_NAME": "1.1.3. M2(Broad Money)",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000625",
+    "STAT_CODE": "0000000626",
+    "STAT_NAME": "1.1.3.1. M2 By Type",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000626",
+    "STAT_CODE": "161Y005",
+    "STAT_NAME": "1.1.3.1.1. M2 By Type (Average, SA)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000626",
+    "STAT_CODE": "161Y006",
+    "STAT_NAME": "1.1.3.1.2. M2 By Type (Average)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000626",
+    "STAT_CODE": "161Y007",
+    "STAT_NAME": "1.1.3.1.3. M2 By Type (End of, SA)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000626",
+    "STAT_CODE": "161Y008",
+    "STAT_NAME": "1.1.3.1.4. M2 By Type (End of)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000625",
+    "STAT_CODE": "0000000627",
+    "STAT_NAME": "1.1.3.2. M2 Sectoral Money Holdings",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000627",
+    "STAT_CODE": "161Y009",
+    "STAT_NAME": "1.1.3.2.1. Sectoral Money Holdings(Average, S.A.)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000627",
+    "STAT_CODE": "161Y010",
+    "STAT_NAME": "1.1.3.2.2. Sectoral Money Holdings(Average)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000627",
+    "STAT_CODE": "161Y011",
+    "STAT_NAME": "1.1.3.2.3. Sectoral Money Holdings(End of, S.A.)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000627",
+    "STAT_CODE": "161Y012",
+    "STAT_NAME": "1.1.3.2.4. Sectoral Money Holdings(End of)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000625",
+    "STAT_CODE": "0000000628",
+    "STAT_NAME": "1.1.3.3. M2 By Money Issuers",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000628",
+    "STAT_CODE": "161Y013",
+    "STAT_NAME": "1.1.3.3.1. M2 By Money Issuers (Average)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000628",
+    "STAT_CODE": "161Y014",
+    "STAT_NAME": "1.1.3.3.2. M2 By Money Issuers (End of)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000620",
+    "STAT_CODE": "0000000629",
+    "STAT_NAME": "1.1.4. Lf By Type",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000629",
+    "STAT_CODE": "0000000630",
+    "STAT_NAME": "1.1.4.1. Lf By Type",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000630",
+    "STAT_CODE": "171Y003",
+    "STAT_NAME": "1.1.4.1.1. Lf By Type(Average, SA)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000630",
+    "STAT_CODE": "171Y004",
+    "STAT_NAME": "1.1.4.1.2. Lf By Type(Average)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000630",
+    "STAT_CODE": "171Y001",
+    "STAT_NAME": "1.1.4.1.3. Lf By Type(End of, SA)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000630",
+    "STAT_CODE": "171Y002",
+    "STAT_NAME": "1.1.4.1.4. Lf By Type(End of)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000620",
+    "STAT_CODE": "0000000631",
+    "STAT_NAME": "1.1.5. L(Liquidity Aggregates)",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000631",
+    "STAT_CODE": "172Y001",
+    "STAT_NAME": "1.1.5.1. L(Liquidity Aggregates)(End of, SA)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000631",
+    "STAT_CODE": "172Y002",
+    "STAT_NAME": "1.1.5.2. L(Liquidity Aggregates)(End of)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000620",
+    "STAT_CODE": "0000000632",
+    "STAT_NAME": "1.1.6. Depository Corporations Survey",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000632",
+    "STAT_CODE": "161Y015",
+    "STAT_NAME": "1.1.6.1. Depository Corporations Survey(End of)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000632",
+    "STAT_CODE": "161Y016",
+    "STAT_NAME": "1.1.6.2. Central Bank Survey (End of)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000632",
+    "STAT_CODE": "161Y017",
+    "STAT_NAME": "1.1.6.3. Other Depository Corporations Survey (End of)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000001",
+    "STAT_CODE": "0000000020",
+    "STAT_NAME": "1.2. Deposits, Loans & Discounts",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000020",
+    "STAT_CODE": "0000000021",
+    "STAT_NAME": "1.2.1. Deposits",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000021",
+    "STAT_CODE": "0000000022",
+    "STAT_NAME": "1.2.1.1. Deposits at CBs and SBs",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000022",
+    "STAT_CODE": "104Y014",
+    "STAT_NAME": "1.2.1.1.1. Total Deposits(Average)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000022",
+    "STAT_CODE": "104Y013",
+    "STAT_NAME": "1.2.1.1.2. Total Deposits(End of)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000022",
+    "STAT_CODE": "104Y008",
+    "STAT_NAME": "1.2.1.1.3. Deposits in Domestic Currency at CBs and SBs By Type (Average)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000022",
+    "STAT_CODE": "104Y015",
+    "STAT_NAME": "1.2.1.1.4. Deposits in Domestic Currency at CBs and SBs By Type (End of)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000022",
+    "STAT_CODE": "104Y009",
+    "STAT_NAME": "1.2.1.1.5. Deposits in Domestic Currency at CBs and SBs By Depositors (End Of)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000022",
+    "STAT_CODE": "104Y010",
+    "STAT_NAME": "1.2.1.1.6. Time Deposits in Domestic Currency at CBs and SBs By Term (End Of)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000021",
+    "STAT_CODE": "0000000023",
+    "STAT_NAME": "1.2.1.2. Deposits at Non-Bank Financial Corporations",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000023",
+    "STAT_CODE": "111Y008",
+    "STAT_NAME": "1.2.1.2.1. Deposits at Non-Bank Financial Corporations (Average)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000023",
+    "STAT_CODE": "111Y007",
+    "STAT_NAME": "1.2.1.2.2. Deposits at Non-Bank Financial Corporations (End of)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000020",
+    "STAT_CODE": "0000000024",
+    "STAT_NAME": "1.2.2. Loans & Discounts",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000024",
+    "STAT_CODE": "104Y016",
+    "STAT_NAME": "1.2.2.1. Loans & Discounts of CBs and SBs (End of)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000024",
+    "STAT_CODE": "111Y009",
+    "STAT_NAME": "1.2.2.2. Loans & Discounts of Non-Bank Financial Corporations (End of)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000020",
+    "STAT_CODE": "0000000027",
+    "STAT_NAME": "1.2.3. Total Deposits & Loans and Discounts by Region",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000027",
+    "STAT_CODE": "141Y002",
+    "STAT_NAME": "1.2.3.1. Total Deposits at CBs and SBs (End of)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000027",
+    "STAT_CODE": "141Y006",
+    "STAT_NAME": "1.2.3.2. Total Deposits at Non-Bank Financial Corporations (End of)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000027",
+    "STAT_CODE": "141Y008",
+    "STAT_NAME": "1.2.3.3. Total Deposits of Life Insurance Companies (End of)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000027",
+    "STAT_CODE": "0000000031",
+    "STAT_NAME": "1.2.3.4. Loans & Discounts By Region (CBs & SBs, End of)",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000031",
+    "STAT_CODE": "141Y003",
+    "STAT_NAME": "1.2.3.4.1. Loans & Discounts by Region (End of)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000031",
+    "STAT_CODE": "151Y003",
+    "STAT_NAME": "1.2.3.4.2. Loans to Households by Region (End of)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000031",
+    "STAT_CODE": "141Y004",
+    "STAT_NAME": "1.2.3.4.3. Loans to Enterprise by Region (End of)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000027",
+    "STAT_CODE": "0000000032",
+    "STAT_NAME": "1.2.3.5. Loans & Discounts of Non-Bank Financial Corporations (End of)",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000032",
+    "STAT_CODE": "141Y007",
+    "STAT_NAME": "1.2.3.5.1. Loans & Discounts of Non-Bank Financial Corporations by Region (End of)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000032",
+    "STAT_CODE": "151Y006",
+    "STAT_NAME": "1.2.3.5.2. Loans to Households of Non-Bank Financial Corporations by Region (End of)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000032",
+    "STAT_CODE": "141Y010",
+    "STAT_NAME": "1.2.3.5.3. Loans to Enterprise of Non-Bank Financial Corporations by Region (End of)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000027",
+    "STAT_CODE": "141Y009",
+    "STAT_NAME": "1.2.3.6. Loans & Discounts of Life Insurance Companies (End of)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000027",
+    "STAT_CODE": "141Y005",
+    "STAT_NAME": "1.2.3.7. Delinquency Rate by Region (CBs & SBs, End of)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000020",
+    "STAT_CODE": "0000000035",
+    "STAT_NAME": "1.2.4. Credit to Households",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000035",
+    "STAT_CODE": "0000000036",
+    "STAT_NAME": "1.2.4.1. Credit to Households(Quarterly)",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000036",
+    "STAT_CODE": "151Y001",
+    "STAT_NAME": "1.2.4.1.1. By Section",
+    "CYCLE": "Q",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000036",
+    "STAT_CODE": "151Y004",
+    "STAT_NAME": "1.2.4.1.2. By Purpose",
+    "CYCLE": "Q",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000035",
+    "STAT_CODE": "0000000037",
+    "STAT_NAME": "1.2.4.2. Loans to Households of Depository Corporations(Monthly)",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000037",
+    "STAT_CODE": "151Y002",
+    "STAT_NAME": "1.2.4.2.1. By Section",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000037",
+    "STAT_CODE": "151Y005",
+    "STAT_NAME": "1.2.4.2.2. By Purpose",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000020",
+    "STAT_CODE": "0000000038",
+    "STAT_NAME": "1.2.5. Loans & Discounts by Industry",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000038",
+    "STAT_CODE": "0000000039",
+    "STAT_NAME": "1.2.5.1. Depository corporations",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000039",
+    "STAT_CODE": "131Y016",
+    "STAT_NAME": "1.2.5.1.1. All Industries",
+    "CYCLE": "Q",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000039",
+    "STAT_CODE": "131Y017",
+    "STAT_NAME": "1.2.5.1.2. By Purpose (Working Capital, Facilities Investment)",
+    "CYCLE": "Q",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000038",
+    "STAT_CODE": "0000000040",
+    "STAT_NAME": "1.2.5.2. Commercial & Specialized Banks",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000040",
+    "STAT_CODE": "131Y013",
+    "STAT_NAME": "1.2.5.2.1. All Industries",
+    "CYCLE": "Q",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000040",
+    "STAT_CODE": "131Y011",
+    "STAT_NAME": "1.2.5.2.2. By Purpose (Working Capital, Facilities Investment)",
+    "CYCLE": "Q",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000040",
+    "STAT_CODE": "131Y010",
+    "STAT_NAME": "1.2.5.2.3. By Type (Incorporation, Unincorporation)",
+    "CYCLE": "Q",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000040",
+    "STAT_CODE": "131Y018",
+    "STAT_NAME": "1.2.5.2.4. By Size",
+    "CYCLE": "Q",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000040",
+    "STAT_CODE": "132Y001",
+    "STAT_NAME": "1.2.5.2.5. By Region",
+    "CYCLE": "Q",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000040",
+    "STAT_CODE": "132Y003",
+    "STAT_NAME": "1.2.5.2.6. By Region & Purpose",
+    "CYCLE": "Q",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000038",
+    "STAT_CODE": "0000000041",
+    "STAT_NAME": "1.2.5.3. Non-Bank Fainancial Corporations",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000041",
+    "STAT_CODE": "131Y014",
+    "STAT_NAME": "1.2.5.3.1. All Industries",
+    "CYCLE": "Q",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000041",
+    "STAT_CODE": "131Y015",
+    "STAT_NAME": "1.2.5.3.2. By Purpose (Working Capital, Facilities Investment)",
+    "CYCLE": "Q",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000020",
+    "STAT_CODE": "0000000042",
+    "STAT_NAME": "1.2.6. Others Financial Statistics",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000042",
+    "STAT_CODE": "104Y017",
+    "STAT_NAME": "1.2.6.1. Turnover Ratios of Deposits of CBs & SBs",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000042",
+    "STAT_CODE": "901Y123",
+    "STAT_NAME": "1.2.6.2. Number of Branches and Employment by Financial Institution",
+    "CYCLE": "Q",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000042",
+    "STAT_CODE": "0000000043",
+    "STAT_NAME": "1.2.6.3. Delinquency Ratio for Bank Loans",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000043",
+    "STAT_CODE": "901Y054",
+    "STAT_NAME": "1.2.6.3.1. Delinquency Rate on Bank Loans(1+ days)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Financial Supervisory Service"
+   },
+   {
+    "P_STAT_CODE": "0000000043",
+    "STAT_CODE": "901Y124",
+    "STAT_NAME": "1.2.6.3.2. Delinquency Rate on Bank Loans(30+ days)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Financial Supervisory Service(+82-2-3705-5022)"
+   },
+   {
+    "P_STAT_CODE": "0000000042",
+    "STAT_CODE": "901Y059",
+    "STAT_NAME": "1.2.6.4. Business Results of Insurance Companies",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Korea Insurance Development Institute(+82-2-368-4000)"
+   },
+   {
+    "P_STAT_CODE": "0000000042",
+    "STAT_CODE": "105Y001",
+    "STAT_NAME": "1.2.6.5. The number of accounts and Outstanding amount by Size",
+    "CYCLE": "S",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "Bank of Korea"
+   },
+   {
+    "P_STAT_CODE": "0000000001",
+    "STAT_CODE": "0000000048",
+    "STAT_NAME": "1.3. Interest Rates",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   }
+  ]
+ }
+}

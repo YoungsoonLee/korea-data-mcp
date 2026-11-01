@@ -6,9 +6,10 @@ korea-data-mcp는 데이터 소스마다 무료 키가 필요합니다. **하나
 
 | 키 | 쓸 수 있는 것 | 걸리는 시간 | 난이도 |
 |---|---|---|---|
-| [OpenDART](#opendart-여기서-시작) | 기업, 공시, 재무제표 (tool 4개) | 몇 분 | 쉬움 |
-| [공공데이터포털](#공공데이터포털) | 공휴일, 기업 정보, 사업자 상태, 아파트 실거래가, 주가 (tool 6개) | 몇 분에서 몇 시간 | 보통: API마다 활용신청 |
+| [OpenDART](#opendart-여기서-시작) | 기업, 공시, 재무제표, 배당, 최대주주 (tool 6개) | 몇 분 | 쉬움 |
+| [공공데이터포털](#공공데이터포털) | 공휴일, 기업 정보, 사업자 상태, 아파트 매매·전월세 실거래가, 주가 (tool 7개) | 몇 분에서 몇 시간 | 보통: API마다 활용신청 |
 | [국가법령정보](#국가법령정보) | 법령, 판례 (tool 4개) | 몇 분 | 쉬움 |
+| [한국은행 ECOS](#한국은행-ecos) | 금리, 환율, 물가, GDP, 고용 등 경제통계 (tool 2개) | 몇 분 | 쉬움 |
 
 > **키 발급이 번거롭다면:** 키 없이 URL만으로 연결하는 호스팅 버전을 준비하고 있습니다. [대기 명단에 등록](https://github.com/YoungsoonLee/korea-data-mcp/issues/new?template=hosted-access.yml)해 주세요.
 
@@ -55,6 +56,12 @@ korea-data-mcp는 데이터 소스마다 무료 키가 필요합니다. **하나
 - OC가 틀리면 "사용자 정보 검증에 실패하였습니다" 에러가 납니다. korea-data-mcp는 이를 `UNAUTHENTICATED`로 알려주고, OC를 확인할 위치를 hint에 적습니다.
 - law.go.kr은 돌려주는 모든 링크에 OC를 넣습니다. 다른 키나 비밀번호를 재사용하지 말고 OC 전용 값을 정하세요. (korea-data-mcp는 그 링크를 넘기지 않습니다.)
 
+## 한국은행 ECOS
+
+1. [ecos.bok.or.kr](https://ecos.bok.or.kr)에 가입합니다.
+2. [Open API 페이지](https://ecos.bok.or.kr/api/)에서 **인증키 신청**을 합니다. 바로 발급됩니다.
+3. `ECOS_API_KEY`에 넣습니다.
+
 ## 설정 확인
 
 에이전트에게 "korea-data-mcp에서 어떤 provider가 활성화돼 있어?"라고 물어보세요. `hub_list_providers`를 호출해서 활성화된 데이터 소스와 빠진 키를 알려줍니다.
@@ -65,4 +72,5 @@ korea-data-mcp는 데이터 소스마다 무료 키가 필요합니다. **하나
 | 공공데이터포털의 `PERMISSION_DENIED` | 해당 API를 활용신청하지 않음 |
 | 국가법령정보의 `UNAUTHENTICATED` | OC가 마이페이지 → API인증키관리의 값과 다름 |
 | OpenDART의 `UNAUTHENTICATED` | 키를 잘못 입력했거나 비활성 상태임 |
+| 한국은행 ECOS의 `UNAUTHENTICATED` | 키를 잘못 입력했거나, 공개 샘플 키(`sample`)를 넣음 |
 | `RATE_LIMITED` | 하루 한도에 도달함. 다음 날 초기화됨 |

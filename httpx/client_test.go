@@ -72,6 +72,20 @@ func TestNetworkErrorDoesNotLeakKey(t *testing.T) {
 	}
 }
 
+func TestPathSecretIsMasked(t *testing.T) {
+	srv := httptest.NewServer(http.NotFoundHandler())
+	defer srv.Close()
+	_, err := New(WithPathSecret("SECRET")).Get(context.Background(), srv.URL+"/api/StatisticSearch/SECRET/json", nil, nil)
+	if he := hub.AsError(err); he.Code != hub.CodeNotFound || strings.Contains(err.Error(), "SECRET") || !strings.Contains(err.Error(), "/api/StatisticSearch/***/json") {
+		t.Fatalf("got %v", err)
+	}
+	srv.Close() // connection refused
+	_, err = New(WithRetries(0), WithPathSecret("SECRET")).Get(context.Background(), srv.URL+"/api/SECRET", nil, nil)
+	if strings.Contains(err.Error(), "SECRET") {
+		t.Fatalf("got %v", err)
+	}
+}
+
 func TestCache(t *testing.T) {
 	var calls atomic.Int32
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

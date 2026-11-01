@@ -1,0 +1,807 @@
+{
+ "StatisticTableList": {
+  "list_total_count": 100,
+  "row": [
+   {
+    "P_STAT_CODE": "*",
+    "STAT_CODE": "0000000001",
+    "STAT_NAME": "1. 통화/금융",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000001",
+    "STAT_CODE": "0000000620",
+    "STAT_NAME": "1.1. 통화/유동성(신지표)",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000620",
+    "STAT_CODE": "0000000621",
+    "STAT_NAME": "1.1.1. 본원통화",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000621",
+    "STAT_CODE": "0000000622",
+    "STAT_NAME": "1.1.1.1. 본원통화 구성내역",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000622",
+    "STAT_CODE": "102Y004",
+    "STAT_NAME": "1.1.1.1.1. 본원통화 구성내역(평잔, 계절조정계열)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000622",
+    "STAT_CODE": "102Y002",
+    "STAT_NAME": "1.1.1.1.2. 본원통화 구성내역(평잔, 원계열)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000622",
+    "STAT_CODE": "102Y003",
+    "STAT_NAME": "1.1.1.1.3. 본원통화 구성내역(말잔, 계절조정계열)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000622",
+    "STAT_CODE": "102Y001",
+    "STAT_NAME": "1.1.1.1.4. 본원통화 구성내역(말잔, 원계열)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "한국은행"
+   },
+   {
+    "P_STAT_CODE": "0000000620",
+    "STAT_CODE": "0000000623",
+    "STAT_NAME": "1.1.2. M1(협의통화)",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000623",
+    "STAT_CODE": "0000000624",
+    "STAT_NAME": "1.1.2.1. M1(협의통화) 상품별 구성내역",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000624",
+    "STAT_CODE": "161Y001",
+    "STAT_NAME": "1.1.2.1.1. M1 상품별 구성내역(평잔, 계절조정계열)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000624",
+    "STAT_CODE": "161Y002",
+    "STAT_NAME": "1.1.2.1.2. M1 상품별 구성내역(평잔, 원계열)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000624",
+    "STAT_CODE": "161Y003",
+    "STAT_NAME": "1.1.2.1.3. M1 상품별 구성내역(말잔, 계절조정계열)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000624",
+    "STAT_CODE": "161Y004",
+    "STAT_NAME": "1.1.2.1.4. M1 상품별 구성내역(말잔, 원계열)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000620",
+    "STAT_CODE": "0000000625",
+    "STAT_NAME": "1.1.3. M2(광의통화)",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000625",
+    "STAT_CODE": "0000000626",
+    "STAT_NAME": "1.1.3.1. M2(광의통화) 상품별 구성내역",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000626",
+    "STAT_CODE": "161Y005",
+    "STAT_NAME": "1.1.3.1.1. M2 상품별 구성내역(평잔, 계절조정계열)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000626",
+    "STAT_CODE": "161Y006",
+    "STAT_NAME": "1.1.3.1.2. M2 상품별 구성내역(평잔, 원계열)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000626",
+    "STAT_CODE": "161Y007",
+    "STAT_NAME": "1.1.3.1.3. M2 상품별 구성내역(말잔, 계절조정계열)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000626",
+    "STAT_CODE": "161Y008",
+    "STAT_NAME": "1.1.3.1.4. M2 상품별 구성내역(말잔, 원계열)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000625",
+    "STAT_CODE": "0000000627",
+    "STAT_NAME": "1.1.3.2. M2(광의통화) 경제주체별 보유현황",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000627",
+    "STAT_CODE": "161Y009",
+    "STAT_NAME": "1.1.3.2.1. M2 경제주체별 보유현황(평잔, 계절조정계열)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000627",
+    "STAT_CODE": "161Y010",
+    "STAT_NAME": "1.1.3.2.2. M2 경제주체별 보유현황(평잔, 원계열)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000627",
+    "STAT_CODE": "161Y011",
+    "STAT_NAME": "1.1.3.2.3. M2 경제주체별 보유현황(말잔, 계절조정계열)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000627",
+    "STAT_CODE": "161Y012",
+    "STAT_NAME": "1.1.3.2.4. M2 경제주체별 보유현황(말잔, 원계열)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000625",
+    "STAT_CODE": "0000000628",
+    "STAT_NAME": "1.1.3.3. M2 기관별 구성내역",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000628",
+    "STAT_CODE": "161Y013",
+    "STAT_NAME": "1.1.3.3.1. M2 기관별 구성내역(평잔)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000628",
+    "STAT_CODE": "161Y014",
+    "STAT_NAME": "1.1.3.3.2. M2 기관별 구성내역(말잔)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000620",
+    "STAT_CODE": "0000000629",
+    "STAT_NAME": "1.1.4. Lf(금융기관 유동성)",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000629",
+    "STAT_CODE": "0000000630",
+    "STAT_NAME": "1.1.4.1. Lf(금융기관 유동성) 구성내역",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000630",
+    "STAT_CODE": "171Y003",
+    "STAT_NAME": "1.1.4.1.1. Lf 구성내역(평잔, 계절조정계열)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000630",
+    "STAT_CODE": "171Y004",
+    "STAT_NAME": "1.1.4.1.2. Lf 구성내역(평잔, 원계열)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000630",
+    "STAT_CODE": "171Y001",
+    "STAT_NAME": "1.1.4.1.3. Lf 상품별 구성내역(말잔, 계절조정계열)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000630",
+    "STAT_CODE": "171Y002",
+    "STAT_NAME": "1.1.4.1.4. Lf 상품별 구성내역(말잔, 원계열)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000620",
+    "STAT_CODE": "0000000631",
+    "STAT_NAME": "1.1.5. L(광의유동성)",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000631",
+    "STAT_CODE": "172Y001",
+    "STAT_NAME": "1.1.5.1. L(광의유동성) 구성내역(말잔, 계절조정계열)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000631",
+    "STAT_CODE": "172Y002",
+    "STAT_NAME": "1.1.5.2. L(광의유동성) 구성내역(말잔, 원계열)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000620",
+    "STAT_CODE": "0000000632",
+    "STAT_NAME": "1.1.6. 예금취급기관 개관표",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000632",
+    "STAT_CODE": "161Y015",
+    "STAT_NAME": "1.1.6.1. 예금취급기관 개관표(말잔)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000632",
+    "STAT_CODE": "161Y016",
+    "STAT_NAME": "1.1.6.2. 중앙은행 개관표(말잔)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000632",
+    "STAT_CODE": "161Y017",
+    "STAT_NAME": "1.1.6.3. 기타예금취급기관 개관표(말잔)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000001",
+    "STAT_CODE": "0000000020",
+    "STAT_NAME": "1.2. 금융기관 여수신",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000020",
+    "STAT_CODE": "0000000021",
+    "STAT_NAME": "1.2.1. 수신",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000021",
+    "STAT_CODE": "0000000022",
+    "STAT_NAME": "1.2.1.1. 예금은행 수신",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000022",
+    "STAT_CODE": "104Y014",
+    "STAT_NAME": "1.2.1.1.1. 예금은행 총수신(평잔)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000022",
+    "STAT_CODE": "104Y013",
+    "STAT_NAME": "1.2.1.1.2. 예금은행 총수신(말잔)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000022",
+    "STAT_CODE": "104Y008",
+    "STAT_NAME": "1.2.1.1.3. 예금은행 원화예금(종별, 평잔)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000022",
+    "STAT_CODE": "104Y015",
+    "STAT_NAME": "1.2.1.1.4. 예금은행 원화예금(종별, 말잔)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "한국은행"
+   },
+   {
+    "P_STAT_CODE": "0000000022",
+    "STAT_CODE": "104Y009",
+    "STAT_NAME": "1.2.1.1.5. 예금은행 원화예금(예금주별,말잔)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000022",
+    "STAT_CODE": "104Y010",
+    "STAT_NAME": "1.2.1.1.6. 예금은행 정기예금(기간별, 말잔)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000021",
+    "STAT_CODE": "0000000023",
+    "STAT_NAME": "1.2.1.2. 비은행금융기관 수신",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000023",
+    "STAT_CODE": "111Y008",
+    "STAT_NAME": "1.2.1.2.1. 비은행금융기관 수신(평잔)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000023",
+    "STAT_CODE": "111Y007",
+    "STAT_NAME": "1.2.1.2.2. 비은행금융기관 수신(말잔)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000020",
+    "STAT_CODE": "0000000024",
+    "STAT_NAME": "1.2.2. 여신",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000024",
+    "STAT_CODE": "104Y016",
+    "STAT_NAME": "1.2.2.1. 예금은행 대출금(말잔)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000024",
+    "STAT_CODE": "111Y009",
+    "STAT_NAME": "1.2.2.2. 비은행금융기관 여신(말잔)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000020",
+    "STAT_CODE": "0000000027",
+    "STAT_NAME": "1.2.3. 지역별 여수신",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000027",
+    "STAT_CODE": "141Y002",
+    "STAT_NAME": "1.2.3.1. 예금은행 지역별 수신(말잔)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000027",
+    "STAT_CODE": "141Y006",
+    "STAT_NAME": "1.2.3.2. 비은행금융기관 지역별 수신(말잔)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000027",
+    "STAT_CODE": "141Y008",
+    "STAT_NAME": "1.2.3.3. 생명보험회사 지역별 수신(말잔)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "한국은행"
+   },
+   {
+    "P_STAT_CODE": "0000000027",
+    "STAT_CODE": "0000000031",
+    "STAT_NAME": "1.2.3.4. 예금은행 지역별 대출금(말잔)",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000031",
+    "STAT_CODE": "141Y003",
+    "STAT_NAME": "1.2.3.4.1. 예금은행 지역별 대출금(말잔)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000031",
+    "STAT_CODE": "151Y003",
+    "STAT_NAME": "1.2.3.4.2. 예금은행 지역별 가계대출(말잔)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000031",
+    "STAT_CODE": "141Y004",
+    "STAT_NAME": "1.2.3.4.3. 예금은행 지역별 기업대출(말잔)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000027",
+    "STAT_CODE": "0000000032",
+    "STAT_NAME": "1.2.3.5. 비은행금융기관 지역별 여신(말잔)",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000032",
+    "STAT_CODE": "141Y007",
+    "STAT_NAME": "1.2.3.5.1. 비은행금융기관 지역별 여신(말잔)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000032",
+    "STAT_CODE": "151Y006",
+    "STAT_NAME": "1.2.3.5.2. 비은행금융기관 지역별 가계대출(말잔)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000032",
+    "STAT_CODE": "141Y010",
+    "STAT_NAME": "1.2.3.5.3. 비은행금융기관 지역별 기업대출(말잔)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000027",
+    "STAT_CODE": "141Y009",
+    "STAT_NAME": "1.2.3.6. 생명보험회사 지역별 여신(말잔)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "한국은행"
+   },
+   {
+    "P_STAT_CODE": "0000000027",
+    "STAT_CODE": "141Y005",
+    "STAT_NAME": "1.2.3.7. 예금은행 지역별 연체율",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000020",
+    "STAT_CODE": "0000000035",
+    "STAT_NAME": "1.2.4. 가계신용",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000035",
+    "STAT_CODE": "0000000036",
+    "STAT_NAME": "1.2.4.1. 가계신용(분기)",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000036",
+    "STAT_CODE": "151Y001",
+    "STAT_NAME": "1.2.4.1.1. 가계신용(업권별, 분기)",
+    "CYCLE": "Q",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000036",
+    "STAT_CODE": "151Y004",
+    "STAT_NAME": "1.2.4.1.2. 가계신용(용도별, 분기)",
+    "CYCLE": "Q",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000035",
+    "STAT_CODE": "0000000037",
+    "STAT_NAME": "1.2.4.2. 예금취급기관 가계대출(월)",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000037",
+    "STAT_CODE": "151Y002",
+    "STAT_NAME": "1.2.4.2.1. 예금취급기관 가계대출(업권별, 월)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000037",
+    "STAT_CODE": "151Y005",
+    "STAT_NAME": "1.2.4.2.2. 예금취급기관 가계대출(용도별, 월)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000020",
+    "STAT_CODE": "0000000038",
+    "STAT_NAME": "1.2.5. 산업별대출금",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000038",
+    "STAT_CODE": "0000000039",
+    "STAT_NAME": "1.2.5.1. 예금취급기관 산업별대출금",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000039",
+    "STAT_CODE": "131Y016",
+    "STAT_NAME": "1.2.5.1.1. 산업별대출금(예금취급기관, 전산업)",
+    "CYCLE": "Q",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000039",
+    "STAT_CODE": "131Y017",
+    "STAT_NAME": "1.2.5.1.2. 산업별대출금(예금취급기관, 용도별)",
+    "CYCLE": "Q",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000038",
+    "STAT_CODE": "0000000040",
+    "STAT_NAME": "1.2.5.2. 예금은행 산업별대출금",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000040",
+    "STAT_CODE": "131Y013",
+    "STAT_NAME": "1.2.5.2.1. 산업별대출금(예금은행, 전산업)",
+    "CYCLE": "Q",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000040",
+    "STAT_CODE": "131Y011",
+    "STAT_NAME": "1.2.5.2.2. 산업별대출금(예금은행, 용도별)",
+    "CYCLE": "Q",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000040",
+    "STAT_CODE": "131Y010",
+    "STAT_NAME": "1.2.5.2.3. 산업별대출금(예금은행, 기업형태별)",
+    "CYCLE": "Q",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "한국은행"
+   },
+   {
+    "P_STAT_CODE": "0000000040",
+    "STAT_CODE": "131Y018",
+    "STAT_NAME": "1.2.5.2.4. 산업별대출금(예금은행, 기업규모별)",
+    "CYCLE": "Q",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000040",
+    "STAT_CODE": "132Y001",
+    "STAT_NAME": "1.2.5.2.5. 산업별대출금(예금은행, 지역별, 전산업)",
+    "CYCLE": "Q",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000040",
+    "STAT_CODE": "132Y003",
+    "STAT_NAME": "1.2.5.2.6. 산업별대출금(예금은행, 지역별, 용도별)",
+    "CYCLE": "Q",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000038",
+    "STAT_CODE": "0000000041",
+    "STAT_NAME": "1.2.5.3. 비은행예금취급기관 산업별대출금",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000041",
+    "STAT_CODE": "131Y014",
+    "STAT_NAME": "1.2.5.3.1. 산업별대출금(비은행예금취급기관, 전산업)",
+    "CYCLE": "Q",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000041",
+    "STAT_CODE": "131Y015",
+    "STAT_NAME": "1.2.5.3.2. 산업별대출금(비은행예금취급기관, 용도별)",
+    "CYCLE": "Q",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000020",
+    "STAT_CODE": "0000000042",
+    "STAT_NAME": "1.2.6. 기타 여수신 관련 통계",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000042",
+    "STAT_CODE": "104Y017",
+    "STAT_NAME": "1.2.6.1. 예금은행 예금회전율",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000042",
+    "STAT_CODE": "901Y123",
+    "STAT_NAME": "1.2.6.2. 금융기관 점포/인원 현황",
+    "CYCLE": "Q",
+    "SRCH_YN": "Y",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000042",
+    "STAT_CODE": "0000000043",
+    "STAT_NAME": "1.2.6.3. 은행대출금 연체율",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   },
+   {
+    "P_STAT_CODE": "0000000043",
+    "STAT_CODE": "901Y054",
+    "STAT_NAME": "1.2.6.3.1. 은행대출금 연체율(1일 이상)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "은행연합회"
+   },
+   {
+    "P_STAT_CODE": "0000000043",
+    "STAT_CODE": "901Y124",
+    "STAT_NAME": "1.2.6.3.2. 은행대출금 연체율(1개월 이상)",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "은행연합회(☎ 02-3705-5022)"
+   },
+   {
+    "P_STAT_CODE": "0000000042",
+    "STAT_CODE": "901Y059",
+    "STAT_NAME": "1.2.6.4. 보험계약실적",
+    "CYCLE": "M",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "보험개발원(02-368-4000)"
+   },
+   {
+    "P_STAT_CODE": "0000000042",
+    "STAT_CODE": "105Y001",
+    "STAT_NAME": "1.2.6.5. 예금규모별 계좌수 및 금액",
+    "CYCLE": "S",
+    "SRCH_YN": "Y",
+    "ORG_NAME": "한국은행"
+   },
+   {
+    "P_STAT_CODE": "0000000001",
+    "STAT_CODE": "0000000048",
+    "STAT_NAME": "1.3. 금리",
+    "CYCLE": null,
+    "SRCH_YN": "N",
+    "ORG_NAME": null
+   }
+  ]
+ }
+}

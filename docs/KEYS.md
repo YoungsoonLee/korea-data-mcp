@@ -6,9 +6,10 @@ korea-data-mcp needs your own free key for each data source. Get **one** to star
 
 | Key | Unlocks | Time to get it | Effort |
 |---|---|---|---|
-| [OpenDART](#opendart-start-here) | Companies, disclosures, financial statements (4 tools) | Minutes | Easy |
-| [data.go.kr](#datagokr) | Holidays, corporation info, business status, apartment trades, stock prices (6 tools) | Minutes to a few hours | Medium: one application per API |
+| [OpenDART](#opendart-start-here) | Companies, disclosures, financial statements, dividends, major shareholders (6 tools) | Minutes | Easy |
+| [data.go.kr](#datagokr) | Holidays, corporation info, business status, apartment trades and rents, stock prices (7 tools) | Minutes to a few hours | Medium: one application per API |
 | [law.go.kr](#lawgokr) | Statutes and court rulings (4 tools) | Minutes | Easy |
+| [ECOS](#ecos-bank-of-korea) | Interest and exchange rates, prices, GDP, employment and other economic statistics (2 tools) | Minutes | Easy |
 
 > **Outside Korea?** Signing up for these portals usually requires Korean identity verification (a Korean mobile number). If you can't, [join the waitlist for the hosted version](https://github.com/YoungsoonLee/korea-data-mcp/issues/new?template=hosted-access.yml), which needs no keys of your own.
 
@@ -57,6 +58,12 @@ Things to know:
 - A wrong OC gives the error "사용자 정보 검증에 실패하였습니다". korea-data-mcp reports it as `UNAUTHENTICATED` with a hint on where to find the OC.
 - law.go.kr puts the OC in every link it returns, so choose a value of its own; do not reuse another key or password. (korea-data-mcp never passes those links on.)
 
+## ECOS (Bank of Korea)
+
+1. Sign up at [ecos.bok.or.kr](https://ecos.bok.or.kr).
+2. On the [Open API page](https://ecos.bok.or.kr/api/), request a key (**인증키 신청**). It is issued right away.
+3. Set it as `ECOS_API_KEY`.
+
 ## Check your setup
 
 Ask your agent "Which korea-data-mcp providers are enabled?". It calls `hub_list_providers`, which lists the enabled sources and the keys that are missing.
@@ -67,4 +74,5 @@ Ask your agent "Which korea-data-mcp providers are enabled?". It calls `hub_list
 | `PERMISSION_DENIED` from data.go.kr | That API is not applied for (활용신청) |
 | `UNAUTHENTICATED` from law.go.kr | The OC does not match the one under 마이페이지 → API인증키관리 |
 | `UNAUTHENTICATED` from OpenDART | The key is mistyped or not active |
+| `UNAUTHENTICATED` from ECOS | The key is mistyped, or it is ECOS's public `sample` key |
 | `RATE_LIMITED` | Daily limit reached; it resets the next day |

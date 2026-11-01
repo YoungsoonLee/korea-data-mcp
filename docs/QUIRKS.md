@@ -4,7 +4,7 @@
 
 Korean public APIs work, but each one has its own surprises. An agent that calls them directly has to discover every one of these by failing, and some of them do not fail at all: they return a plausible but wrong answer.
 
-Everything below was **observed on the live APIs** (last checked 2026-10-28), and the real responses are kept in each provider's `testdata/` so the handling is tested.
+Everything below was **observed on the live APIs** (last checked 2026-10-31), and the real responses are kept in each provider's `testdata/` so the handling is tested.
 
 Status: ✅ handled · 🚧 handled when the tool that needs it ships
 
@@ -40,6 +40,10 @@ These are the most dangerous ones: nothing fails, the agent simply gets the wron
 | law.go.kr | The "current law" text (`target=law`) **includes amendments that are promulgated but not in effect yet**, every article labeled with the current effective date: the Labor Standards Act shows 제44조의4 "in effect since 2026-10-08", but it takes effect on 2027-01-01, and 제13조 and 제101조 already show text from 2026-12-08. | The text is always read by effective date (`target=eflaw`) for the version in force on `as_of` (default today); later amendments are listed in `upcoming`. An article that is not in force yet is returned marked `not_yet_in_force`, with the date it takes effect. | ✅ |
 | law.go.kr | Searching `민법` returns 난민법, 난민법 시행규칙 and 난민법 시행령 **before 민법**: results are sorted by name only. | Exact matches first, then prefixes, then acts before decrees and ordinances. | ✅ |
 | law.go.kr (precedents) | A case number with spaces (`2020 다 296604`) or a date range as `2026-01-01~2026-12-31` is **success with zero results**. | Spaces are removed; dates are taken as `YYYY-MM-DD` and validated. | ✅ |
+| ECOS | Asking a table for its first item only returns **every combination of the other item dimensions under the same dates**: monthly KRW/USD (`731Y004`) gives January 2025 as both 1,455.79 (monthly average) and 1,433.3 (month-end). | Rows are grouped into one series per item combination, each labeled; `usd_krw` asks for the average explicitly. | ✅ |
+| ECOS | A period's value means different things per table: the monthly, quarterly and annual **base rate is the end-of-period level** (2024 annual: 3.00%, though it was 3.50% for most of the year), market rates are averages of daily values, and annual current account is a sum. | Every series has `aggregation`: period average, end of period or period total. | ✅ |
+| ECOS (employment) | The unemployment rate table returns **two series per month unless asked for one**: September 2026 is 2.0% (not seasonally adjusted, the headline figure) and 2.6% (seasonally adjusted). | Both are returned, labeled 원계열 and 계절조정, with a note saying which is the headline. | ✅ |
+| ECOS | CPI and house prices are **index levels** (2020=100, KB 2026.01=100), not inflation rates; a year-on-year change computed on a rate (unemployment 3.8% → 4.0%) as a percent gives 5.26% instead of 0.2 points. | Index indicators add `yoy_percent`; for rates the change is `yoy_points`. | ✅ |
 
 ## Errors that look like something else
 
@@ -55,6 +59,8 @@ These are the most dangerous ones: nothing fails, the agent simply gets the wron
 | data.go.kr | A superseded endpoint (the stock price API before `_V2`) also answers **"key not registered" (30)**, not "no such service" (12), so an approved key looks broken. | Every tool calls the endpoint shown on the API's page today. | ✅ |
 | law.go.kr | Errors are **HTTP 200** documents of different shapes: `<Response>` for a bad OC, `<Law>` with plain text for an unknown law. | `UNAUTHENTICATED` with a hint on where to find the OC; an unknown law is `NOT_FOUND`. | ✅ |
 | law.go.kr | Asking for a law version by a date (`efYd`) that is not exactly one of its effective dates returns an **empty document** `{}`, and a missing article returns the law without articles. | The version is chosen from the law's history, and a missing article is `NOT_FOUND` with a hint when an upcoming amendment may add it. | ✅ |
+| ECOS | Errors are **HTTP 200** with `{"RESULT":{"CODE":"INFO-200"}}`, and an unknown table code gives the same "no data" as a period with no data. | `NOT_FOUND`, and an unknown code is checked against the table list and reported as `unknown stat_code`. A bad key is `UNAUTHENTICATED`. | ✅ |
+| ECOS | The API key is **part of the URL path** (`/api/StatisticSearch/<key>/json/…`), not the query string, so the usual query stripping does not hide it. | The key is masked in every error message. | ✅ |
 
 ## Formats that differ per API
 
@@ -67,6 +73,8 @@ These are the most dangerous ones: nothing fails, the agent simply gets the wron
 | data.go.kr | Empty fields are `""` or a single space `" "`, and addresses have double spaces. Some dates are not dates at all (a founding date of `99`). | Whitespace is cleaned; empty and invalid values are omitted. | ✅ |
 | All | Pagination is `pageNo`/`numOfRows`, `page_no`/`page_count`, or none. | Always `page`/`page_size` in, `page_info` out. | ✅ |
 | law.go.kr (precedents) | National Tax Service records have no court name; the court is inside the case number (`서울행정법원-2025-구합-53785`). Text uses `<br/>`, some fields are the string `"null"`, and dates are `2025.10.16` in search and `20251016` in details. | `court` is filled from the case number, which becomes `2025구합53785`; text has plain line breaks; dates are ISO. | ✅ |
+| ECOS | Units are only in `UNIT_NAME` and differ per table (`십억원`, `백만달러`, `억원`, `천명`); yen is per 100; periods are `20251001`, `202510`, `2025Q3`, `2025S1` or `2025`. | Amounts become KRW or USD (`source_unit` keeps the original), labels say "per 100 yen", and periods are `2025-10-01`, `2025-10`, `2025-Q3`, `2025-H1`, `2025`. | ✅ |
+| ECOS | The daily and the monthly table of the same market rate use **different item codes** (3-year treasury: `010200000` daily, `5020000` monthly). | Named indicators pick the right table and code for each frequency. | ✅ |
 
 ## Missing features
 

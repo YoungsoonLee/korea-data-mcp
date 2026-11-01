@@ -8,12 +8,12 @@
 
 **Pass Korean public APIs straight to an AI agent and it gets answers wrong. korea-data-mcp gives it the right ones.**
 
-An MCP server for Korean corporate filings, financials, dividends and major shareholders, stock prices, apartment sale prices and rents, business registration status, public holidays, statutes and court rulings, from the official free APIs of OpenDART, data.go.kr and law.go.kr.
+An MCP server for Korean corporate filings, financials, dividends and major shareholders, stock prices, apartment sale prices and rents, business registration status, public holidays, statutes and court rulings, and Bank of Korea economic statistics, from the official free APIs of OpenDART, data.go.kr, law.go.kr and ECOS.
 
-- **Correct, with evidence.** 52 traps found on the live APIs (wrong half-year revenue, laws not in force yet, cancelled deals, district codes that changed in 2026, and more) are handled, each covered by a test that uses the real response. The full list is public: [What korea-data-mcp handles for you](docs/QUIRKS.md). In a [small evaluation](eval/RESULTS.md), agents with korea-data-mcp answered 10 of 10 questions with one call each; with the raw APIs they hit the traps, needed about 3x the calls, and missed one.
+- **Correct, with evidence.** 60 traps found on the live APIs (wrong half-year revenue, laws not in force yet, cancelled deals, district codes that changed in 2026, and more) are handled, each covered by a test that uses the real response. The full list is public: [What korea-data-mcp handles for you](docs/QUIRKS.md). In a [small evaluation](eval/RESULTS.md), agents with korea-data-mcp answered 10 of 10 questions with one call each; with the raw APIs they hit the traps, needed about 3x the calls, and missed one.
 - **Installs in one click.** A single binary with nothing else to install. In Claude Desktop, open [korea-data-mcp.mcpb](https://github.com/YoungsoonLee/korea-data-mcp/releases/latest/download/korea-data-mcp.mcpb) and enter your keys. Also in the [official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.YoungsoonLee/korea-data-mcp).
 - **Private.** It runs on your machine. Your keys and questions go only to the government APIs, never through a third-party server, and there is no telemetry.
-- **Focused.** 18 tools with clear descriptions, so an agent picks the right one without filling its context with dozens of others.
+- **Focused.** 20 tools with clear descriptions, so an agent picks the right one without filling its context with dozens of others.
 
 ## Why it matters
 
@@ -45,7 +45,7 @@ Three more traps, each of which silently produces a wrong answer:
 - **Deals that never happened.** Apartment trade data keeps cancelled deals, marked only by a flag: 12 of 233 Gangnam trades in September 2025, including a ₩7.5 billion one. Averages that include them are wrong. korea-data-mcp leaves them out.
 - **Codes that quietly stop working.** In 2026, 광주광역시 and 전라남도 merged, 화성시 was split into four 구, and 인천 reorganized its districts. The old district codes, which most code tables still list, now return zero trades, **even for past months**. With korea-data-mcp, an agent just says `광주 북구` or `화성시`.
 
-There is more: errors returned as HTTP 200, stale records mixed with current ones, business numbers that fail when written with hyphens, stock history split by a company rename, and a TLS handshake that fails from Go. See all 52: **[What korea-data-mcp handles for you](docs/QUIRKS.md)**.
+There is more: errors returned as HTTP 200, stale records mixed with current ones, business numbers that fail when written with hyphens, stock history split by a company rename, and a TLS handshake that fails from Go. See all 60: **[What korea-data-mcp handles for you](docs/QUIRKS.md)**.
 
 ## What you can ask
 
@@ -60,14 +60,16 @@ Connect korea-data-mcp to Claude (or any MCP client) and ask in English or Korea
 - "Is business registration number 124-81-00998 still active?"
 - "How did NAVER's stock price move last month?"
 - "Which public holidays are left in Korea this year?"
+- "How have the Bank of Korea base rate and the won-dollar rate moved over the last two years?"
 
 | Source | What it covers | Key |
 |---|---|---|
 | [OpenDART](https://opendart.fss.or.kr) (전자공시) | Company profiles, disclosures, financial statements of ~120,000 companies | `OPENDART_API_KEY` |
 | [data.go.kr](https://www.data.go.kr) (공공데이터포털) | Holidays, corporation info, business status, apartment trades, stock prices | `DATAGOKR_SERVICE_KEY` |
 | [law.go.kr](https://open.law.go.kr) (국가법령정보) | Statutes as in force on any date, court rulings | `LAWGOKR_OC` |
+| [ECOS](https://ecos.bok.or.kr/api/) (한국은행 경제통계) | Interest and exchange rates, prices, GDP, employment, balance of payments and thousands of other series | `ECOS_API_KEY` |
 
-All three keys are free. You can start with just one.
+All four keys are free. You can start with just one.
 
 ## Quick start
 
@@ -94,7 +96,7 @@ The binary is installed to `$(go env GOPATH)/bin/korea-data-mcp`.
 
 ### 2. Get a key
 
-Start with **OpenDART**: sign up at [opendart.fss.or.kr](https://opendart.fss.or.kr), request a key (인증키 신청), and it is issued right away. For all three, step by step with the Korean menu names: **[Getting API keys](docs/KEYS.md)**. Any subset works; tools whose key is missing are simply not offered.
+Start with **OpenDART**: sign up at [opendart.fss.or.kr](https://opendart.fss.or.kr), request a key (인증키 신청), and it is issued right away. For all four, step by step with the Korean menu names: **[Getting API keys](docs/KEYS.md)**. Any subset works; tools whose key is missing are simply not offered.
 
 > **Outside Korea?** These portals usually require Korean identity verification (a Korean mobile number) to sign up, so getting keys from abroad can be hard or impossible. A hosted version that needs no keys of your own is planned: **[join the waitlist](https://github.com/YoungsoonLee/korea-data-mcp/issues/new?template=hosted-access.yml)**.
 
@@ -109,6 +111,7 @@ claude mcp add korea-data-mcp \
   -e OPENDART_API_KEY=... \
   -e DATAGOKR_SERVICE_KEY=... \
   -e LAWGOKR_OC=... \
+  -e ECOS_API_KEY=... \
   -- /absolute/path/to/korea-data-mcp
 ```
 
@@ -122,7 +125,8 @@ claude mcp add korea-data-mcp \
       "env": {
         "OPENDART_API_KEY": "...",
         "DATAGOKR_SERVICE_KEY": "...",
-        "LAWGOKR_OC": "..."
+        "LAWGOKR_OC": "...",
+        "ECOS_API_KEY": "..."
       }
     }
   }
@@ -139,13 +143,14 @@ Ask your agent "Which korea-data-mcp providers are enabled?". It calls `hub_list
 
 ## API keys
 
-Step-by-step instructions and troubleshooting: [Getting API keys](docs/KEYS.md). All three are free, but signing up usually requires Korean identity verification. If you can't get them, [join the hosted waitlist](https://github.com/YoungsoonLee/korea-data-mcp/issues/new?template=hosted-access.yml).
+Step-by-step instructions and troubleshooting: [Getting API keys](docs/KEYS.md). All four are free, but signing up usually requires Korean identity verification. If you can't get them, [join the hosted waitlist](https://github.com/YoungsoonLee/korea-data-mcp/issues/new?template=hosted-access.yml).
 
 | Environment variable | Source | How to get it |
 |---|---|---|
 | `OPENDART_API_KEY` | OpenDART | [opendart.fss.or.kr](https://opendart.fss.or.kr) → 인증키 신청 (request a key) |
 | `DATAGOKR_SERVICE_KEY` | data.go.kr | [data.go.kr](https://www.data.go.kr) → sign up → apply for each API (활용신청; links in [Tools](#tools)) → My Page |
 | `LAWGOKR_OC` | law.go.kr | [open.law.go.kr](https://open.law.go.kr) → OPEN API 신청 (apply) → 마이페이지 → API인증키관리 (OC) |
+| `ECOS_API_KEY` | ECOS | [ecos.bok.or.kr/api](https://ecos.bok.or.kr/api/) → 인증키 신청 (request a key) |
 
 > **data.go.kr**: The portal issues two keys, Encoding and Decoding. Use the **Decoding key**. The Encoding key gets URL-encoded twice and fails with `SERVICE_KEY_IS_NOT_REGISTERED_ERROR`. One key covers every API you apply for.
 
@@ -187,13 +192,20 @@ Every OpenDART tool that takes `corp_code` also accepts a 6-character stock code
 | `lawgokr_search_precedents` | Search court rulings (판례), newest first, by case name, full text, case number (`2020다296604`, spaces are fine), court and decision date. Court records only by default, so every result can be read |
 | `lawgokr_get_precedent` | A ruling by id or case number: issues (판시사항), holding (판결요지), cited statutes and cases, and the full decision with `include_full_text` |
 
+**Bank of Korea ECOS** (`ECOS_API_KEY`)
+
+| Tool | What it does |
+|---|---|
+| `ecos_get_series` | A time series by named indicator (`base_rate`, `usd_krw`, `jpy_krw`, `eur_krw`, `cny_krw`, `treasury_3y`, `treasury_10y`, `cd_91d`, `corporate_bond_3y`, `kospi`, `kosdaq`, `cpi`, `gdp_growth`, `gdp_growth_yoy`, `gdp`, `gdp_per_capita_usd`, `unemployment_rate`, `employment_rate`, `current_account`, `house_price_index`) or by any table's code, daily to annual. Each series says whether a period's value is an average, the end-of-period level or a total; amounts are in KRW or USD; index series add the change from a year earlier (in points for rates) |
+| `ecos_search_series` | Find tables by Korean or English words (`수출물가`, `housing price`), or list a table's items with their frequencies and date ranges |
+
 **Hub**: `hub_list_providers` lists the enabled providers and the keys that are missing.
 
 ## Security, limits and freshness
 
 - **Your keys stay on your machine.** korea-data-mcp runs locally and sends each key only to the service that issued it. There is no telemetry. Error messages never include keys or query strings.
 - **HTTP mode has no authentication.** `-http` serves the tools to anyone who can reach the port, using your keys. Bind it to localhost (`-http 127.0.0.1:8080`) unless it is behind an authenticating proxy. The default stdio mode does not open a port.
-- **Upstream quotas apply.** A data.go.kr development account allows 10,000 calls per day for each API; OpenDART and law.go.kr have their own limits. korea-data-mcp caches responses for 10 minutes and the DART company list for 24 hours.
+- **Upstream quotas apply.** A data.go.kr development account allows 10,000 calls per day for each API; OpenDART, law.go.kr and ECOS have their own limits. korea-data-mcp caches responses for 10 minutes and the DART company list for 24 hours.
 - **Data is as fresh as the source.** Apartment deals can be reported up to 30 days after the contract, so the latest month fills in over time. Stock prices are daily, updated after each trading day.
 
 ## Roadmap
@@ -201,7 +213,8 @@ Every OpenDART tool that takes `corp_code` also accepts a 6-character stock code
 - [x] OpenDART: companies, disclosures, financials
 - [x] data.go.kr: holidays, corporation info, business status, apartment trades and rents, stock prices
 - [x] law.go.kr: statutes, court rulings
-- [ ] Bank of Korea ECOS, KOSIS (Korean Statistical Information Service)
+- [x] Bank of Korea ECOS: rates, prices, GDP, employment and any other ECOS table
+- [ ] KOSIS (Korean Statistical Information Service)
 - [ ] A sibling server for Japan, starting with EDINET (corporate disclosures)
 
 Want a data source added? [Request it](https://github.com/YoungsoonLee/korea-data-mcp/issues/new?template=data-source.yml). Found an API behaving oddly? [Open an issue](https://github.com/YoungsoonLee/korea-data-mcp/issues). No Korean API keys? [Join the hosted waitlist](https://github.com/YoungsoonLee/korea-data-mcp/issues/new?template=hosted-access.yml). To build, test or add a provider, see [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
