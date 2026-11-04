@@ -6,7 +6,7 @@ korea-data-mcp needs your own free key for each data source. Get **one** to star
 
 | Key | Unlocks | Time to get it | Effort |
 |---|---|---|---|
-| [OpenDART](#opendart-start-here) | Companies, disclosures, financial statements, dividends, major shareholders (6 tools) | Minutes | Easy |
+| [OpenDART](#opendart-start-here) | Companies, disclosures, financial statements, dividends, major shareholders, major decisions (7 tools) | Minutes | Easy |
 | [data.go.kr](#datagokr) | Holidays, corporation info, business status, apartment trades and rents, stock prices (7 tools) | Minutes to a few hours | Medium: one application per API |
 | [law.go.kr](#lawgokr) | Statutes and court rulings (4 tools) | Minutes | Easy |
 | [ECOS](#ecos-bank-of-korea) | Interest and exchange rates, prices, GDP, employment and other economic statistics (2 tools) | Minutes | Easy |

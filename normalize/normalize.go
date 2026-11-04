@@ -10,10 +10,13 @@ import (
 	"time"
 )
 
-var shortYearDate = regexp.MustCompile(`^(\d{2})[./-](\d{1,2})[./-](\d{1,2})\.?$`)
+var (
+	shortYearDate = regexp.MustCompile(`^(\d{2})[./-](\d{1,2})[./-](\d{1,2})\.?$`)
+	koreanDate    = regexp.MustCompile(`^(\d{4})\s*년\s*(\d{1,2})\s*월\s*(\d{1,2})\s*일$`)
+)
 
-// Date converts "20251019", "2025.10.19", "2025.10.19.", "2025/10/19" or
-// "2025-10-19" to "2025-10-19". Two-digit years ("75/06/11", "25.11.28") are
+// Date converts "20251019", "2025.10.19", "2025.10.19.", "2025/10/19",
+// "2025년 10월 19일" or "2025-10-19" to "2025-10-19". Two-digit years ("75/06/11", "25.11.28") are
 // read as the latest such year not after the current one. Unparseable input
 // is returned trimmed, so no data is lost; empty or placeholder input ("-")
 // becomes "".
@@ -29,6 +32,9 @@ func Date(s string) string {
 			y -= 100
 		}
 		return Date(strconv.Itoa(y) + "-" + m[2] + "-" + m[3])
+	}
+	if m := koreanDate.FindStringSubmatch(s); m != nil {
+		return Date(m[1] + "-" + m[2] + "-" + m[3])
 	}
 	d := strings.TrimSuffix(s, ".")
 	d = strings.NewReplacer(".", "-", "/", "-", " ", "").Replace(d)

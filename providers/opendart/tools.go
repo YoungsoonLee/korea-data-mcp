@@ -57,6 +57,16 @@ func registerTools(r *hub.Registrar, c *client) {
 			"with common and preferred shares held and stakes at the start and end of the period, and the group total. " +
 			"This is the controlling group only; other holders of 5% or more, such as the National Pension Service, are not listed. Data is available from fiscal year 2015.",
 	}, c.getMajorShareholders)
+
+	hub.AddTool(r, &mcp.Tool{
+		Name: "opendart_list_corporate_actions",
+		Description: "List one company's major decisions from 주요사항보고서: rights offerings and bonus issues, capital reductions, " +
+			"convertible bonds, bonds with warrants and exchangeable bonds, buybacks (direct and through a trust) and treasury stock disposals, mergers and splits. " +
+			"Each item has the terms as numbers: proceeds by purpose and an implied issue price, dilution, bond prices with the reset floor and shares at the floor, " +
+			"buyback amounts with common and preferred shares added up. start_date and end_date match the date a decision was first filed; " +
+			"receipt_no and filed_date are those of its latest correction, which can be months later. Latest filing first. " +
+			"To find these decisions across all companies, use opendart_search_disclosures with type major_report.",
+	}, c.listCorporateActions)
 }
 
 // ---- opendart_search_companies ----

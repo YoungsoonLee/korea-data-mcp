@@ -4,7 +4,7 @@
 
 Korean public APIs work, but each one has its own surprises. An agent that calls them directly has to discover every one of these by failing, and some of them do not fail at all: they return a plausible but wrong answer.
 
-Everything below was **observed on the live APIs** (last checked 2026-10-31), and the real responses are kept in each provider's `testdata/` so the handling is tested.
+Everything below was **observed on the live APIs** (last checked 2026-11-03), and the real responses are kept in each provider's `testdata/` so the handling is tested.
 
 Status: ✅ handled · 🚧 handled when the tool that needs it ships
 
@@ -18,6 +18,11 @@ These are the most dangerous ones: nothing fails, the agent simply gets the wron
 | OpenDART (dividends) | In half-year and quarterly reports the current column is year-to-date, but **the two other columns are full prior years**, not the same months: Samsung's 2025 half-year report puts ₩732 per share next to ₩1,446 for all of 2024. | Each period says whether it is a full year and, for the report's own period, the last day covered. | ✅ |
 | OpenDART (dividends) | Per-share figures are not adjusted for stock splits: Samsung paid ₩21,000 a share for 2015 and ₩1,446 for 2024, before and after its 50:1 split. Units are only in the row labels (`(백만원)`, `(원)`, `(%)`). | Amounts in KRW, with the par value of each year so a split is visible. | ✅ |
 | OpenDART (major shareholders) | Relations are free text (`본인`, `최대주주`, `최대주주 본인`, `본인(최대주주)`), rows can be `"` (ditto) for the row above, names carry layout spaces (`김   식`), and group totals are rows named `계`. | The largest shareholder is identified, ditto rows resolved, names cleaned, and each holder's common and preferred rows merged; totals are separate. | ✅ |
+| OpenDART (major decisions) | The date range selects decisions by the date they were **first filed**, but each row is the **latest correction**, with no date: 광진실업's rights offering filed on 2026-07-02 comes back as receipt `20261029000002` and only for a July range. Asking for October's decisions misses it, and reading the receipt number dates it to October. | `filed_date` is the latest filing, `board_date` the board resolution (when the filing has one), and the description says what the range matches. | ✅ |
+| OpenDART (buybacks) | Buyback amounts are **split by share class**: Samsung's ₩3 trillion buyback of November 2024 is ₩2.68 trillion in the common-share field and ₩0.32 trillion in the preferred one. | `amount.total` adds them up, next to each class. | ✅ |
+| OpenDART (buybacks) | A buyback through a trust (자기주식취득신탁계약) is a **different report and endpoint**: LG Chem's ₩300 billion trust of 2026-10 has no buyback decision at all, so "did LG Chem announce a buyback?" gets "no". | Trust contracts and their termination are listed with direct buybacks. | ✅ |
+| OpenDART (rights offerings) | The decision has **no issue price, no allottees and no board date**, only the new shares and the proceeds by purpose. | `implied_price` is the proceeds divided by the new shares (₩2,865 for 광진실업), and `new_shares_percent` the dilution. | ✅ |
+| OpenDART (convertible bonds) | The conversion price can be **reset down to a floor** (리픽싱), reported in a separate field: 파이온엑스's ₩557 bond can convert at ₩21, its par value of USD 0.015, which turns 4.3 million shares into 114 million. | `floor_price` and `shares_at_floor` next to the price and shares. | ✅ |
 | data.go.kr | An invalid parameter is not an error. `DEAL_YMD=2025` (instead of `202509`) or `solMonth=13` returns **success with zero results**, which looks like "no data". | Every tool validates its inputs and returns `INVALID_ARGUMENT` with the expected format. | ✅ |
 | data.go.kr (holidays) | Years without data (before 2004, or more than two years ahead) also return **success with zero results**, so "no holidays in 2030" looks like a fact. | The year range is checked, and the error message states it. | ✅ |
 | data.go.kr (holidays) | The "national holidays" (국경일) operation returns **all 22 public holidays** of 2026, the same as the "public holidays" operation, not the five national holidays. | That operation is not exposed. Public holidays come from the public holidays operation only. | ✅ |
@@ -75,6 +80,7 @@ These are the most dangerous ones: nothing fails, the agent simply gets the wron
 | law.go.kr (precedents) | National Tax Service records have no court name; the court is inside the case number (`서울행정법원-2025-구합-53785`). Text uses `<br/>`, some fields are the string `"null"`, and dates are `2025.10.16` in search and `20251016` in details. | `court` is filled from the case number, which becomes `2025구합53785`; text has plain line breaks; dates are ISO. | ✅ |
 | ECOS | Units are only in `UNIT_NAME` and differ per table (`십억원`, `백만달러`, `억원`, `천명`); yen is per 100; periods are `20251001`, `202510`, `2025Q3`, `2025S1` or `2025`. | Amounts become KRW or USD (`source_unit` keeps the original), labels say "per 100 yen", and periods are `2025-10-01`, `2025-10`, `2025-Q3`, `2025-H1`, `2025`. | ✅ |
 | ECOS | The daily and the monthly table of the same market rate use **different item codes** (3-year treasury: `010200000` daily, `5020000` monthly). | Named indicators pick the right table and code for each frequency. | ✅ |
+| OpenDART (major decisions) | Each kind of decision has its own field names (`cv_prc`, `ex_prc`; `bddd`, `aq_dd`, `dp_dd`), dates are text (`2026년 01월 30일`), rates are `100` or `100.0`, and rows are not sorted. | One output shape per kind, ISO dates, numbers, latest filing first. | ✅ |
 
 ## Missing features
 
@@ -82,6 +88,7 @@ These are the most dangerous ones: nothing fails, the agent simply gets the wron
 |---|---|---|---|
 | OpenDART | **No company search.** Every call needs an 8-digit `corp_code`, available only in a 3.6 MB zip of ~120,000 companies. | Downloads and indexes the list (refreshed daily). Search by Korean or English name, ignoring spacing and `(주)`; listed companies first. | ✅ |
 | OpenDART | Stock codes (`005930`) are not accepted. | Any `corp_code` input also accepts a stock code. | ✅ |
+| OpenDART (major decisions) | One endpoint per kind of decision (rights offering, convertible bond, buyback, merger and so on), each needing a company and a date range: "what did this company decide lately?" takes a dozen calls. | One call queries the twelve kinds most asked about and merges them. | ✅ |
 | data.go.kr (company info) | Company name search is a substring match with no ranking: `삼성전자` returns `삼성전자잠실판매` first, as one of 108 records for 37 companies. `삼성 전자` or `(주)삼성전자` finds nothing useful. | Spacing and corporate forms are stripped before searching, records are merged per company, and the exact match comes first, then listed companies. | ✅ |
 | data.go.kr (company info) | A broad name like `삼성` matches 3,158 records (5.8 MB). | Rejected with a hint to use a more specific name, instead of returning an arbitrary slice. | ✅ |
 | law.go.kr | Official abbreviations are not searched: `중대재해처벌법` finds nothing, although it is the official short name of 「중대재해 처벌 등에 관한 법률」. | Names and abbreviations are matched here, ignoring spaces. | ✅ |
@@ -100,6 +107,7 @@ These are the most dangerous ones: nothing fails, the agent simply gets the wron
 Things we suspected, tested on the live APIs, and found to behave correctly.
 
 - **OpenDART corrections (기재정정).** A periodic report can be corrected several times, months or years later. For 43 corrected reports of listed companies filed in September and October 2025, the financials, dividends and major shareholder APIs returned the latest correction every time. `receipt_no` identifies the filing the values come from.
+- **OpenDART corrections of major decisions.** The decision APIs also return only the latest correction of each decision (Samsung's three filings of its November 2024 buyback come back as one), but see the date range above.
 
 ## Found another one?
 
