@@ -27,5 +27,8 @@ These files are **real OpenDART responses** captured on 2026-10-25, 2026-10-30 a
 | `fricDecsn.json` | `fricDecsn.json` | 케이아이이 bonus issue |
 | `cmpMgDecsn.json` | `cmpMgDecsn.json` | 샘표 merger into 샘표식품 |
 | `cmpDvDecsn.json` | `cmpDvDecsn.json` | Hyundai Mobis spin-off of its lamp business (물적분할) |
+| `majorstock.json` | `majorstock.json` | SK hynix 5% reports: a holder below 5%, a 0% report on a change of representative reporter |
+| `list_D001.json` | `list.json` | SK hynix 5% filings since 2015 (`pblntf_detail_ty=D001`), including the National Pension Service's 2024-09 report |
+| `elestock.json` | `elestock.json` | 19 of Samsung's 3,368 insider reports: 이재용, executives filed as 10%이상주주, positions with trailing spaces |
 
 When re-capturing, never save the request URL: it contains `crtfc_key`.

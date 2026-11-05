@@ -74,6 +74,7 @@
     { "name": "opendart_get_financials", "description": "Key financial accounts for a year and report, with prior periods" },
     { "name": "opendart_get_dividends", "description": "Dividends per share, yield, payout ratio, for three years" },
     { "name": "opendart_get_major_shareholders", "description": "Largest shareholder and related parties, with stakes" },
+    { "name": "opendart_get_ownership_reports", "description": "Holders of 5% or more, and executives' own trades" },
     { "name": "opendart_list_corporate_actions", "description": "Rights offerings, convertible bonds, buybacks, mergers and splits" },
     { "name": "datagokr_list_holidays", "description": "Korean public holidays for a year or month" },
     { "name": "datagokr_search_corporations", "description": "Find Korean corporations by name, listed or not" },

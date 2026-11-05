@@ -55,7 +55,7 @@ func registerTools(r *hub.Registrar, c *client) {
 		Name: "opendart_get_major_shareholders",
 		Description: "Get the largest shareholder (최대주주) and its related parties (특수관계인) from a periodic report, " +
 			"with common and preferred shares held and stakes at the start and end of the period, and the group total. " +
-			"This is the controlling group only; other holders of 5% or more, such as the National Pension Service, are not listed. Data is available from fiscal year 2015.",
+			"This is the controlling group only; for other holders of 5% or more, such as the National Pension Service, use opendart_get_ownership_reports. Data is available from fiscal year 2015.",
 	}, c.getMajorShareholders)
 
 	hub.AddTool(r, &mcp.Tool{
@@ -67,6 +67,14 @@ func registerTools(r *hub.Registrar, c *client) {
 			"receipt_no and filed_date are those of its latest correction, which can be months later. Latest filing first. " +
 			"To find these decisions across all companies, use opendart_search_disclosures with type major_report.",
 	}, c.listCorporateActions)
+
+	hub.AddTool(r, &mcp.Tool{
+		Name: "opendart_get_ownership_reports",
+		Description: "Get ownership reports filed for a company. kind major_holders (default): holders of 5% or more (대량보유 상황보고) " +
+			"with each holder's latest stake and status, such as the National Pension Service, BlackRock or the controlling group, and the history of reports. " +
+			"kind insiders: executives' and major shareholders' own holdings and changes (임원·주요주주 소유보고), filterable by reporter and direction. " +
+			"OpenDART returns only about two years of reports; older 5% reporters are listed in older_reporters without their stake.",
+	}, c.getOwnershipReports)
 }
 
 // ---- opendart_search_companies ----
