@@ -1,3 +1,5 @@
 /korea-data-mcp
 .env
 /dist
+/docs/STRATEGY.md
+/docs/ENTITY_DESIGN.md

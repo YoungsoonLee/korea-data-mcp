@@ -99,6 +99,25 @@ func CompanyName(s string) string {
 	return strings.ToLower(StripCompanyForm(s))
 }
 
+var letterNames = strings.NewReplacer(
+	"a", "에이", "b", "비", "c", "씨", "d", "디", "e", "이", "f", "에프", "g", "지", "h", "에이치", "i", "아이",
+	"j", "제이", "k", "케이", "l", "엘", "m", "엠", "n", "엔", "o", "오", "p", "피", "q", "큐", "r", "알",
+	"s", "에스", "t", "티", "u", "유", "v", "브이", "w", "더블유", "x", "엑스", "y", "와이", "z", "지")
+
+// CompanyKey is CompanyName with Latin letters in a Korean name spelled out
+// as Korean letter names, because the same company is written both ways:
+// DART lists SK하이닉스 and 에스케이플래닛, while filings name them
+// 에스케이하이닉스㈜ and SK플래닛㈜. Names without Hangul are left as they are.
+func CompanyKey(s string) string {
+	s = CompanyName(strings.Join(strings.Fields(s), ""))
+	if !strings.ContainsFunc(s, isHangul) {
+		return s
+	}
+	return letterNames.Replace(s)
+}
+
+func isHangul(r rune) bool { return r >= '가' && r <= '힣' }
+
 func isPlaceholder(s string) bool {
 	return s == "" || s == "-" || s == "--"
 }

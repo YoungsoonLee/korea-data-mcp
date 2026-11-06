@@ -10,10 +10,10 @@
 
 An MCP server for Korean corporate filings, financials, dividends and major shareholders, stock prices, apartment sale prices and rents, business registration status, public holidays, statutes and court rulings, and Bank of Korea economic statistics, from the official free APIs of OpenDART, data.go.kr, law.go.kr and ECOS.
 
-- **Correct, with evidence.** 70 traps found on the live APIs (wrong half-year revenue, laws not in force yet, cancelled deals, district codes that changed in 2026, and more) are handled, each covered by a test that uses the real response. The full list is public: [What korea-data-mcp handles for you](docs/QUIRKS.md). In a [small evaluation](eval/RESULTS.md), agents with korea-data-mcp answered 10 of 10 questions with one call each; with the raw APIs they hit the traps, needed about 3x the calls, and missed one.
+- **Correct, with evidence.** 78 traps found on the live APIs (wrong half-year revenue, laws not in force yet, cancelled deals, district codes that changed in 2026, and more) are handled, each covered by a test that uses the real response. The full list is public: [What korea-data-mcp handles for you](docs/QUIRKS.md). In a [small evaluation](eval/RESULTS.md), agents with korea-data-mcp answered 10 of 10 questions with one call each; with the raw APIs they hit the traps, needed about 3x the calls, and missed one.
 - **Installs in one click.** A single binary with nothing else to install. In Claude Desktop, open [korea-data-mcp.mcpb](https://github.com/YoungsoonLee/korea-data-mcp/releases/latest/download/korea-data-mcp.mcpb) and enter your keys. Also in the [official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.YoungsoonLee/korea-data-mcp).
 - **Private.** It runs on your machine. Your keys and questions go only to the government APIs, never through a third-party server, and there is no telemetry.
-- **Focused.** 22 tools with clear descriptions, so an agent picks the right one without filling its context with dozens of others.
+- **Focused.** 23 tools with clear descriptions, so an agent picks the right one without filling its context with dozens of others.
 
 ## Why it matters
 
@@ -45,7 +45,7 @@ Three more traps, each of which silently produces a wrong answer:
 - **Deals that never happened.** Apartment trade data keeps cancelled deals, marked only by a flag: 12 of 233 Gangnam trades in September 2025, including a ₩7.5 billion one. Averages that include them are wrong. korea-data-mcp leaves them out.
 - **Codes that quietly stop working.** In 2026, 광주광역시 and 전라남도 merged, 화성시 was split into four 구, and 인천 reorganized its districts. The old district codes, which most code tables still list, now return zero trades, **even for past months**. With korea-data-mcp, an agent just says `광주 북구` or `화성시`.
 
-There is more: errors returned as HTTP 200, stale records mixed with current ones, business numbers that fail when written with hyphens, stock history split by a company rename, and a TLS handshake that fails from Go. See all 70: **[What korea-data-mcp handles for you](docs/QUIRKS.md)**.
+There is more: errors returned as HTTP 200, stale records mixed with current ones, business numbers that fail when written with hyphens, stock history split by a company rename, and a TLS handshake that fails from Go. See all 78: **[What korea-data-mcp handles for you](docs/QUIRKS.md)**.
 
 ## What you can ask
 
@@ -66,7 +66,7 @@ Connect korea-data-mcp to Claude (or any MCP client) and ask in English or Korea
 
 | Source | What it covers | Key |
 |---|---|---|
-| [OpenDART](https://opendart.fss.or.kr) (전자공시) | Company profiles, disclosures, financial statements, dividends, shareholders, 5% holders, insider trades and major decisions (rights offerings, convertible bonds, buybacks, mergers) of ~120,000 companies | `OPENDART_API_KEY` |
+| [OpenDART](https://opendart.fss.or.kr) (전자공시) | Company profiles, disclosures, financial statements, dividends, shareholders, 5% holders, insider trades, stakes in other companies and major decisions (rights offerings, convertible bonds, buybacks, mergers) of ~120,000 companies | `OPENDART_API_KEY` |
 | [data.go.kr](https://www.data.go.kr) (공공데이터포털) | Holidays, corporation info, business status, apartment trades, stock prices | `DATAGOKR_SERVICE_KEY` |
 | [law.go.kr](https://open.law.go.kr) (국가법령정보) | Statutes as in force on any date, court rulings | `LAWGOKR_OC` |
 | [ECOS](https://ecos.bok.or.kr/api/) (한국은행 경제통계) | Interest and exchange rates, prices, GDP, employment, balance of payments and thousands of other series | `ECOS_API_KEY` |
@@ -170,6 +170,7 @@ Step-by-step instructions and troubleshooting: [Getting API keys](docs/KEYS.md).
 | `opendart_get_financials` | Key financial accounts (주요계정) for a year and report, with prior-period comparisons |
 | `opendart_get_dividends` | Dividends (배당): cash dividend per share, yield, total and payout ratio for common and preferred shares, with EPS and net income, for the report's period and the two prior years. Year-to-date and full-year periods are labeled, and the par value shows stock splits |
 | `opendart_get_major_shareholders` | The largest shareholder (최대주주) and related parties: common and preferred shares and stakes at the start and end of the period, with the group total |
+| `opendart_get_investments` | Stakes in other companies (타법인출자): subsidiaries, affiliates and investments with shares, percent and book value, stakes sold during the year, the investee's assets and net income, and its corp_code when the name identifies one company |
 | `opendart_get_ownership_reports` | Ownership reports: holders of 5% or more (대량보유) with each holder's latest stake and status, including holders whose last report is older than the API returns; or executives' and major shareholders' own trades (임원·주요주주), by reporter, date and direction |
 | `opendart_list_corporate_actions` | Major decisions (주요사항보고서) of a company: rights and bonus issues, capital reductions, convertible bonds, bonds with warrants and exchangeable bonds, buybacks (direct and through a trust), treasury stock disposals, mergers and splits, as numbers: implied issue price and dilution, bond reset floors and the shares at the floor, buyback totals across share classes |
 
@@ -214,7 +215,7 @@ Every OpenDART tool that takes `corp_code` also accepts a 6-character stock code
 
 ## Roadmap
 
-- [x] OpenDART: companies, disclosures, financials, dividends, shareholders, ownership reports, major decisions
+- [x] OpenDART: companies, disclosures, financials, dividends, shareholders, ownership reports, stakes in other companies, major decisions
 - [x] data.go.kr: holidays, corporation info, business status, apartment trades and rents, stock prices
 - [x] law.go.kr: statutes, court rulings
 - [x] Bank of Korea ECOS: rates, prices, GDP, employment and any other ECOS table

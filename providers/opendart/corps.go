@@ -34,6 +34,8 @@ type corpIndex struct {
 	mu       sync.Mutex
 	corps    []corp
 	byStock  map[string]int
+	byCode   map[string]int
+	byKey    map[string][]int // normalize.CompanyKey of Name
 	loadedAt time.Time
 	ttl      time.Duration
 	load     func(context.Context) ([]corp, error)
@@ -47,6 +49,10 @@ func newCorpIndex(load func(context.Context) ([]corp, error), ttl time.Duration)
 func (ix *corpIndex) get(ctx context.Context) ([]corp, map[string]int, error) {
 	ix.mu.Lock()
 	defer ix.mu.Unlock()
+	return ix.getLocked(ctx)
+}
+
+func (ix *corpIndex) getLocked(ctx context.Context) ([]corp, map[string]int, error) {
 	if ix.corps != nil && ix.now().Sub(ix.loadedAt) < ix.ttl {
 		return ix.corps, ix.byStock, nil
 	}
@@ -57,16 +63,60 @@ func (ix *corpIndex) get(ctx context.Context) ([]corp, map[string]int, error) {
 		}
 		return nil, nil, err
 	}
-	byStock := make(map[string]int)
+	byStock, byCode, byKey := make(map[string]int), make(map[string]int), make(map[string][]int)
 	for i := range corps {
 		corps[i].norm = normName(corps[i].Name)
 		corps[i].normEng = normName(corps[i].EngName)
 		if corps[i].StockCode != "" {
 			byStock[corps[i].StockCode] = i
 		}
+		byCode[corps[i].Code] = i
+		k := normalize.CompanyKey(corps[i].Name)
+		byKey[k] = append(byKey[k], i)
 	}
-	ix.corps, ix.byStock, ix.loadedAt = corps, byStock, ix.now()
+	ix.corps, ix.byStock, ix.byCode, ix.byKey, ix.loadedAt = corps, byStock, byCode, byKey, ix.now()
 	return corps, byStock, nil
+}
+
+func (ix *corpIndex) byCorpCode(ctx context.Context, code string) (*corp, error) {
+	ix.mu.Lock()
+	defer ix.mu.Unlock()
+	corps, _, err := ix.getLocked(ctx)
+	if err != nil {
+		return nil, err
+	}
+	i, ok := ix.byCode[code]
+	if !ok {
+		return nil, nil
+	}
+	return &corps[i], nil
+}
+
+// byName finds the one company a name in a filing refers to: the only
+// company with that name, or else the only listed one. Names are matched
+// with normalize.CompanyKey, so SK플래닛 finds 에스케이플래닛.
+func (ix *corpIndex) byName(ctx context.Context, name string) (*corp, error) {
+	ix.mu.Lock()
+	defer ix.mu.Unlock()
+	corps, _, err := ix.getLocked(ctx)
+	if err != nil {
+		return nil, err
+	}
+	hits := ix.byKey[normalize.CompanyKey(name)]
+	if len(hits) == 1 {
+		return &corps[hits[0]], nil
+	}
+	var listed *corp
+	for _, i := range hits {
+		if corps[i].StockCode == "" {
+			continue
+		}
+		if listed != nil {
+			return nil, nil
+		}
+		listed = &corps[i]
+	}
+	return listed, nil
 }
 
 func (ix *corpIndex) byStockCode(ctx context.Context, code string) (*corp, error) {

@@ -59,6 +59,14 @@ func registerTools(r *hub.Registrar, c *client) {
 	}, c.getMajorShareholders)
 
 	hub.AddTool(r, &mcp.Tool{
+		Name: "opendart_get_investments",
+		Description: "Get a company's stakes in other companies (타법인출자 현황) from its annual or half-year report: subsidiaries, affiliates and " +
+			"investments, with shares, percent and book value at the start and end of the period, acquisitions and disposals, and the investee's total assets and net income. " +
+			"Stakes sold entirely during the period are marked exited. Each investee gets its DART corp_code when its name identifies one company, " +
+			"so it can be followed with other opendart tools; the match is by name, so check it for long-held stakes in companies that no longer exist. Amounts are in KRW (원) unless a note says otherwise. Data is available from fiscal year 2015.",
+	}, c.getInvestments)
+
+	hub.AddTool(r, &mcp.Tool{
 		Name: "opendart_list_corporate_actions",
 		Description: "List one company's major decisions from 주요사항보고서: rights offerings and bonus issues, capital reductions, " +
 			"convertible bonds, bonds with warrants and exchangeable bonds, buybacks (direct and through a trust) and treasury stock disposals, mergers and splits. " +

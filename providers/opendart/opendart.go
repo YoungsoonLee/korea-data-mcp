@@ -1,7 +1,7 @@
 // Package opendart provides OpenDART (금융감독원 전자공시시스템) tools:
 // company lookup, company profiles, disclosure search, key financials,
-// dividends, major shareholders, ownership reports and major decisions
-// (주요사항보고서).
+// dividends, major shareholders, ownership reports, stakes in other companies
+// (타법인출자) and major decisions (주요사항보고서).
 // API reference: https://opendart.fss.or.kr/guide/main.do
 package opendart
 
@@ -37,7 +37,7 @@ func (p *Provider) Info() hub.ProviderInfo {
 	return hub.ProviderInfo{
 		ID:          "opendart",
 		Title:       "OpenDART (전자공시)",
-		Description: "Korean corporate disclosures, company profiles, key financial statements, dividends, shareholders, 5% holders, insider trades and major decisions such as rights offerings, convertible bonds and buybacks from DART.",
+		Description: "Korean corporate disclosures, company profiles, key financial statements, dividends, shareholders, 5% holders, insider trades, stakes in other companies and major decisions such as rights offerings, convertible bonds and buybacks from DART.",
 		RequiredEnv: []string{envKey},
 		DocsURL:     "https://opendart.fss.or.kr",
 	}

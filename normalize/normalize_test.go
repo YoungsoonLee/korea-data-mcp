@@ -64,6 +64,18 @@ func TestCompanyName(t *testing.T) {
 			t.Errorf("CompanyName(%q) = %q, want %q", in, got, want)
 		}
 	}
+	for in, want := range map[string]string{
+		"SK하이닉스":        "에스케이하이닉스",
+		" 에스케이하이닉스㈜ ":   "에스케이하이닉스",
+		"원익IPS":         "원익아이피에스",
+		"KT&G":          "kt&g",
+		"SK hynix Inc.": "skhynixinc",
+		"미래에셋위반도체 제1호\n창업벤처": "미래에셋위반도체제1호창업벤처",
+	} {
+		if got := CompanyKey(in); got != want {
+			t.Errorf("CompanyKey(%q) = %q, want %q", in, got, want)
+		}
+	}
 	if got := StripCompanyForm("주식회사 SK하이닉스"); got != "SK하이닉스" {
 		t.Errorf("StripCompanyForm keeps case: got %q", got)
 	}
