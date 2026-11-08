@@ -38,9 +38,13 @@ func registerTools(r *hub.Registrar, c *client) {
 
 	hub.AddTool(r, &mcp.Tool{
 		Name: "opendart_get_financials",
-		Description: "Get key financial statement accounts (주요계정) for one company and period: assets, liabilities, equity, revenue, " +
-			"operating income, net income, with prior-period comparisons. Every amount comes with the start and end of the period it covers; " +
-			"in half and third-quarter reports income statement items have both year-to-date and latest-quarter amounts. Amounts are in KRW (원). Data is available from fiscal year 2015.",
+		Description: "Get financial statements for one company and period. scope key (default): main accounts (주요계정) such as assets, liabilities, equity, revenue, " +
+			"operating income and net income. scope full: every line of the balance sheet, income statement and cash flow statement (전체 재무제표), " +
+			"and on request the statement of changes in equity, in printed order for the main lines, filterable by account name. " +
+			"Every amount comes with the start and end of the period it covers, with prior-period comparisons; " +
+			"in half and third-quarter reports income statement items have both year-to-date and latest-quarter amounts. Amounts are in the currency field (KRW for most). " +
+			"For a fiscal year not ending in December, year is the fiscal year ending in it for annual reports but the one starting in it for half and quarterly reports. " +
+			"Annual data is available from fiscal year 2015, half and quarterly from 2016.",
 	}, c.getFinancials)
 
 	hub.AddTool(r, &mcp.Tool{
@@ -395,10 +399,13 @@ func (c *client) reportParams(year int, report string) (string, string, error) {
 const notFiledHint = "the report may not be filed yet or the company does not file it; try an earlier year or report=annual"
 
 type getFinancialsInput struct {
-	CorpCode  string `json:"corp_code" jsonschema:"8-digit corp_code or 6-character stock code"`
-	Year      int    `json:"year" jsonschema:"fiscal year (사업연도), 2015 or later"`
-	Report    string `json:"report,omitempty" jsonschema:"one of: annual (default, 사업보고서), half (반기), q1 (1분기), q3 (3분기)"`
-	Statement string `json:"statement,omitempty" jsonschema:"one of: consolidated (default, 연결재무제표), separate (별도/개별재무제표)"`
+	CorpCode   string   `json:"corp_code" jsonschema:"8-digit corp_code or 6-character stock code"`
+	Year       int      `json:"year" jsonschema:"fiscal year (사업연도), 2015 or later"`
+	Report     string   `json:"report,omitempty" jsonschema:"one of: annual (default, 사업보고서), half (반기), q1 (1분기), q3 (3분기)"`
+	Statement  string   `json:"statement,omitempty" jsonschema:"one of: consolidated (default, 연결재무제표), separate (별도/개별재무제표)"`
+	Scope      string   `json:"scope,omitempty" jsonschema:"key (default): about 15 main accounts; full: every line of the statements (전체 재무제표)"`
+	Statements []string `json:"statements,omitempty" jsonschema:"full only: any of balance_sheet, income_statement, cash_flow, equity (statement of changes in equity); default the first three"`
+	Account    string   `json:"account,omitempty" jsonschema:"full only: lines whose Korean name or account ID contains this, e.g. 차입금 or Revenue"`
 }
 
 type financialsResponse struct {
@@ -425,15 +432,20 @@ type Financials struct {
 	Year      int       `json:"year"`
 	Report    string    `json:"report"`
 	Statement string    `json:"statement"`
+	Scope     string    `json:"scope"`
 	Currency  string    `json:"currency"`
 	ReceiptNo string    `json:"receipt_no" jsonschema:"the filing the values come from (접수번호); after a correction (기재정정) it is the latest corrected filing"`
 	URL       string    `json:"url"`
+	Note      string    `json:"note,omitempty"`
 	Accounts  []Account `json:"accounts"`
 }
 
 type Account struct {
 	Name           string  `json:"name" jsonschema:"account name in Korean, e.g. 자산총계, 매출액, 영업이익, 당기순이익"`
-	StatementType  string  `json:"statement_type" jsonschema:"balance_sheet or income_statement"`
+	AccountID      string  `json:"account_id,omitempty" jsonschema:"full scope: IFRS or DART account ID, e.g. ifrs-full_Revenue; omitted for company-specific lines"`
+	StatementType  string  `json:"statement_type" jsonschema:"balance_sheet, income_statement, cash_flow or equity"`
+	Component      string  `json:"component,omitempty" jsonschema:"equity: the equity component, e.g. 이익잉여금"`
+	Flow           string  `json:"flow,omitempty" jsonschema:"cash_flow: outflow for money paid out, which DART gives as a positive amount"`
 	Current        Amount  `json:"current" jsonschema:"the report's period; year-to-date for income statement items in interim reports"`
 	CurrentQuarter *Amount `json:"current_quarter,omitempty" jsonschema:"the latest three months only, for income statement items in half and third-quarter reports"`
 	Prior          *Amount `json:"prior,omitempty" jsonschema:"the comparison period: the same months of the prior year for income statement items, the prior fiscal year-end for balance sheet items"`
@@ -443,10 +455,11 @@ type Account struct {
 
 // Amount is a value with the period it covers.
 type Amount struct {
-	Start  string `json:"start,omitempty" jsonschema:"first day covered, YYYY-MM-DD; omitted for balance sheet items, which are positions on the end date"`
-	End    string `json:"end" jsonschema:"last day covered, or the date of a balance sheet position, YYYY-MM-DD"`
-	Amount *int64 `json:"amount"`
-	Note   string `json:"note,omitempty" jsonschema:"set when the period of the amount could not be confirmed"`
+	Start   string   `json:"start,omitempty" jsonschema:"first day covered, YYYY-MM-DD; omitted for balance sheet items, which are positions on the end date"`
+	End     string   `json:"end" jsonschema:"last day covered, or the date of a balance sheet position, YYYY-MM-DD"`
+	Amount  *int64   `json:"amount"`
+	Decimal *float64 `json:"decimal,omitempty" jsonschema:"set instead of amount when it has decimals, e.g. earnings per share in USD"`
+	Note    string   `json:"note,omitempty" jsonschema:"set when the period of the amount could not be confirmed"`
 }
 
 var statementTypes = map[string]string{"BS": "balance_sheet", "IS": "income_statement"}
@@ -465,6 +478,16 @@ func (c *client) getFinancials(ctx context.Context, in getFinancialsInput) (Fina
 	if fsDiv == "" {
 		return Financials{}, hub.Errorf(hub.CodeInvalidArgument, "unknown statement %q; use consolidated or separate", statement)
 	}
+	switch cmp.Or(in.Scope, "key") {
+	case "full":
+		return c.getFullFinancials(ctx, in, code, report, reprt, statement, fsDiv)
+	case "key":
+		if len(in.Statements) > 0 || in.Account != "" {
+			return Financials{}, hub.Errorf(hub.CodeInvalidArgument, "statements and account need scope=full")
+		}
+	default:
+		return Financials{}, hub.Errorf(hub.CodeInvalidArgument, "unknown scope %q; use key or full", in.Scope)
+	}
 
 	var r financialsResponse
 	q := url.Values{"corp_code": {code}, "bsns_year": {strconv.Itoa(in.Year)}, "reprt_code": {reprt}}
@@ -475,7 +498,7 @@ func (c *client) getFinancials(ctx context.Context, in getFinancialsInput) (Fina
 		return Financials{}, err
 	}
 
-	out := Financials{CorpCode: code, Year: in.Year, Report: report, Statement: statement, Accounts: []Account{}}
+	out := Financials{CorpCode: code, Year: in.Year, Report: report, Statement: statement, Scope: "key", Accounts: []Account{}}
 	other := 0
 	seen := map[[4]string]bool{}
 	for _, a := range r.List {

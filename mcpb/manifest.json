@@ -71,7 +71,7 @@
     { "name": "opendart_search_companies", "description": "Find a company's DART corp_code by name or stock code" },
     { "name": "opendart_get_company", "description": "Company profile: CEO, market, registration numbers, address" },
     { "name": "opendart_search_disclosures", "description": "Search corporate disclosures by company, date and type" },
-    { "name": "opendart_get_financials", "description": "Key financial accounts for a year and report, with prior periods" },
+    { "name": "opendart_get_financials", "description": "Key accounts or full financial statements, with prior periods" },
     { "name": "opendart_get_dividends", "description": "Dividends per share, yield, payout ratio, for three years" },
     { "name": "opendart_get_major_shareholders", "description": "Largest shareholder and related parties, with stakes" },
     { "name": "opendart_get_investments", "description": "Stakes in other companies: subsidiaries, affiliates, investments" },

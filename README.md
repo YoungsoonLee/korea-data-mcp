@@ -10,7 +10,7 @@
 
 An MCP server for Korean corporate filings, financials, dividends and major shareholders, stock prices, apartment sale prices and rents, business registration status, public holidays, statutes and court rulings, and Bank of Korea economic statistics, from the official free APIs of OpenDART, data.go.kr, law.go.kr and ECOS.
 
-- **Correct, with evidence.** 78 traps found on the live APIs (wrong half-year revenue, laws not in force yet, cancelled deals, district codes that changed in 2026, and more) are handled, each covered by a test that uses the real response. The full list is public: [What korea-data-mcp handles for you](docs/QUIRKS.md). In a [small evaluation](eval/RESULTS.md), agents with korea-data-mcp answered 10 of 10 questions with one call each; with the raw APIs they hit the traps, needed about 3x the calls, and missed one.
+- **Correct, with evidence.** 87 traps found on the live APIs (wrong half-year revenue, laws not in force yet, cancelled deals, district codes that changed in 2026, and more) are handled, each covered by a test that uses the real response. The full list is public: [What korea-data-mcp handles for you](docs/QUIRKS.md). In a [small evaluation](eval/RESULTS.md), agents with korea-data-mcp answered 10 of 10 questions with one call each; with the raw APIs they hit the traps, needed about 3x the calls, and missed one.
 - **Installs in one click.** A single binary with nothing else to install. In Claude Desktop, open [korea-data-mcp.mcpb](https://github.com/YoungsoonLee/korea-data-mcp/releases/latest/download/korea-data-mcp.mcpb) and enter your keys. Also in the [official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.YoungsoonLee/korea-data-mcp).
 - **Private.** It runs on your machine. Your keys and questions go only to the government APIs, never through a third-party server, and there is no telemetry.
 - **Focused.** 23 tools with clear descriptions, so an agent picks the right one without filling its context with dozens of others.
@@ -45,7 +45,7 @@ Three more traps, each of which silently produces a wrong answer:
 - **Deals that never happened.** Apartment trade data keeps cancelled deals, marked only by a flag: 12 of 233 Gangnam trades in September 2025, including a ₩7.5 billion one. Averages that include them are wrong. korea-data-mcp leaves them out.
 - **Codes that quietly stop working.** In 2026, 광주광역시 and 전라남도 merged, 화성시 was split into four 구, and 인천 reorganized its districts. The old district codes, which most code tables still list, now return zero trades, **even for past months**. With korea-data-mcp, an agent just says `광주 북구` or `화성시`.
 
-There is more: errors returned as HTTP 200, stale records mixed with current ones, business numbers that fail when written with hyphens, stock history split by a company rename, and a TLS handshake that fails from Go. See all 78: **[What korea-data-mcp handles for you](docs/QUIRKS.md)**.
+There is more: errors returned as HTTP 200, stale records mixed with current ones, business numbers that fail when written with hyphens, stock history split by a company rename, and a TLS handshake that fails from Go. See all 87: **[What korea-data-mcp handles for you](docs/QUIRKS.md)**.
 
 ## What you can ask
 
@@ -55,6 +55,9 @@ Connect korea-data-mcp to Claude (or any MCP client) and ask in English or Korea
 - "Who is SK hynix's largest shareholder, and how did its dividend per share change over the last three years?"
 - "Who else holds 5% or more of SK hynix, and have any of them sold recently?"
 - "How much did Samsung Electronics spend on buybacks in the last two years, and has 광진실업 diluted its shareholders?"
+- "Which stakes did SK Square sell last year, and what is its largest holding now?"
+- "Which listed companies does Samsung Electronics hold stakes in, and how did their shares move last month?"
+- "Check whether our supplier Kakao Games is still in business, with its latest results and largest shareholder."
 - "What was the median apartment sale price in 분당구 in September 2025?"
 - "What was the median jeonse deposit for new contracts in 강남구 in September 2025?"
 - "Is 제44조의4 of the Labor Standards Act (근로기준법) in force yet?"
@@ -63,6 +66,7 @@ Connect korea-data-mcp to Claude (or any MCP client) and ask in English or Korea
 - "How did NAVER's stock price move last month?"
 - "Which public holidays are left in Korea this year?"
 - "How have the Bank of Korea base rate and the won-dollar rate moved over the last two years?"
+- "Show the base rate over the last year next to the median apartment sale price in 강남구."
 
 | Source | What it covers | Key |
 |---|---|---|
@@ -167,7 +171,7 @@ Step-by-step instructions and troubleshooting: [Getting API keys](docs/KEYS.md).
 | `opendart_search_companies` | Find a company's `corp_code` by Korean/English name, stock code, or corp_code |
 | `opendart_get_company` | Company profile (기업개황): CEO, market, registration numbers, address, fiscal year-end |
 | `opendart_search_disclosures` | Search disclosures (공시) by company, date range, type, and market |
-| `opendart_get_financials` | Key financial accounts (주요계정) for a year and report, with prior-period comparisons |
+| `opendart_get_financials` | Key financial accounts (주요계정), or every line of the balance sheet, income statement, cash flow and equity statements (전체 재무제표) in printed order, each amount with its period and prior-period comparisons |
 | `opendart_get_dividends` | Dividends (배당): cash dividend per share, yield, total and payout ratio for common and preferred shares, with EPS and net income, for the report's period and the two prior years. Year-to-date and full-year periods are labeled, and the par value shows stock splits |
 | `opendart_get_major_shareholders` | The largest shareholder (최대주주) and related parties: common and preferred shares and stakes at the start and end of the period, with the group total |
 | `opendart_get_investments` | Stakes in other companies (타법인출자): subsidiaries, affiliates and investments with shares, percent and book value, stakes sold during the year, the investee's assets and net income, and its corp_code when the name identifies one company |

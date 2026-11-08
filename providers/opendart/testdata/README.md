@@ -1,6 +1,6 @@
 # OpenDART test fixtures
 
-These files are **real OpenDART responses** captured on 2026-10-25, 2026-10-30, 2026-11-03 and 2026-11-05, mostly for Samsung Electronics (`00126380`). They contain no API key. Some are trimmed to keep them small.
+These files are **real OpenDART responses** captured on 2026-10-25, 2026-10-30, 2026-11-03, 2026-11-05 and 2026-11-06, mostly for Samsung Electronics (`00126380`). They contain no API key. Some are trimmed to keep them small.
 
 | File | Endpoint | Notes |
 |---|---|---|
@@ -12,6 +12,12 @@ These files are **real OpenDART responses** captured on 2026-10-25, 2026-10-30, 
 | `fnlttSinglAcnt_q3.json` | `fnlttSinglAcnt.json` | 2025 third-quarter report (captured 2026-11-01), consolidated 자산총계 and 매출액 only |
 | `alotMatter.json` | `alotMatter.json` | 2025 half-year report: year-to-date next to full prior years |
 | `alotMatter_2015.json` | `alotMatter.json` | 2015 annual report, before the 50:1 split; EPS label without `(연결)` |
+| `fnlttSinglAcntAll.json` | `fnlttSinglAcntAll.json` | Samsung Electronics, 2025 annual, consolidated: rows ordered by account ID, IS and CIS, cash flow outflows as positive amounts; 14 of 105 equity rows |
+| `fnlttSinglAcntAll_half.json` | `fnlttSinglAcntAll.json` | SK hynix, 2026 half-year: 8 accounts; income items by quarter and year-to-date, cash flows year-to-date (tests ask for 2025, the test clock's year) |
+| `fnlttSinglAcntAll_march.json` | `fnlttSinglAcntAll.json` | 동원모빌리티 (March year-end), 2025 first quarter (April to June 2025), separate, 9 accounts |
+| `company_march.json` | `company.json` | 동원모빌리티, `acc_mt` 03 |
+| `fnlttSinglAcntAll_financial.json` | `fnlttSinglAcntAll.json` | KB Financial Group, 2025: income statement and total assets only; no revenue line |
+| `fnlttSinglAcntAll_usd.json` | `fnlttSinglAcntAll.json` | 소마젠, 2025: USD, per-share amounts with decimals |
 | `hyslrSttus.json` | `hyslrSttus.json` | 2024 annual report, as captured |
 | `hyslrSttus_tym.json` | `hyslrSttus.json` | TYM, 2024: `김   식` with layout spaces, a `합계` row |
 | `hyslrSttus_ditto.json` | `hyslrSttus.json` | 삼환기업, 2017: `"` (ditto) rows for preferred shares |

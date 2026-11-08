@@ -1,7 +1,7 @@
 // Package opendart provides OpenDART (금융감독원 전자공시시스템) tools:
-// company lookup, company profiles, disclosure search, key financials,
-// dividends, major shareholders, ownership reports, stakes in other companies
-// (타법인출자) and major decisions (주요사항보고서).
+// company lookup, company profiles, disclosure search, key financials and
+// full statements, dividends, major shareholders, ownership reports, stakes
+// in other companies (타법인출자) and major decisions (주요사항보고서).
 // API reference: https://opendart.fss.or.kr/guide/main.do
 package opendart
 
