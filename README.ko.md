@@ -15,6 +15,17 @@
 - **프라이버시.** 내 컴퓨터에서 실행됩니다. 키와 질문은 정부 API로만 가고 제3자 서버를 거치지 않으며, 텔레메트리도 없습니다.
 - **집중.** 설명이 명확한 tool 23개라서, 에이전트가 컨텍스트를 수십 개의 tool로 채우지 않고도 맞는 tool을 고릅니다.
 
+## 업데이트 소식
+
+- **2026-11-08 [v0.1.8](https://github.com/YoungsoonLee/korea-data-mcp/releases/tag/v0.1.8)**: 전체 재무제표(`opendart_get_financials`의 `scope: "full"`)와 타법인출자 현황(`opendart_get_investments`)을 추가했습니다. 계정은 공시에 인쇄된 순서로, 금액은 3월·6월 결산 회사도 실제 기간과 함께 나옵니다. 출자 대상 회사에는 DART 회사 코드가 붙습니다.
+- **2026-11-04 [v0.1.7](https://github.com/YoungsoonLee/korea-data-mcp/releases/tag/v0.1.7)**: 주요사항보고서(`opendart_list_corporate_actions`: 유상증자, 감자, 전환사채, 자사주 취득·처분, 합병·분할)와 5% 대량보유·임원 지분 보고(`opendart_get_ownership_reports`)를 추가했습니다.
+- **2026-10-31 [v0.1.6](https://github.com/YoungsoonLee/korea-data-mcp/releases/tag/v0.1.6)**: 재무제표의 모든 금액에 그 금액이 가리키는 기간을 붙였습니다. 출력 형식이 바뀌었습니다.
+- **2026-10-31 [v0.1.5](https://github.com/YoungsoonLee/korea-data-mcp/releases/tag/v0.1.5)**: 한국은행 ECOS 경제통계(`ecos_get_series`, `ecos_search_series`)를 추가했습니다.
+- **2026-10-30 [v0.1.4](https://github.com/YoungsoonLee/korea-data-mcp/releases/tag/v0.1.4)**: 배당(`opendart_get_dividends`)과 최대주주(`opendart_get_major_shareholders`)를 추가했습니다.
+- **2026-10-30 [v0.1.3](https://github.com/YoungsoonLee/korea-data-mcp/releases/tag/v0.1.3)**: 아파트 전월세 실거래가(`datagokr_list_apartment_rents`)를 추가했습니다.
+
+전체 내역: [Releases](https://github.com/YoungsoonLee/korea-data-mcp/releases)
+
 ## 왜 중요한가
 
 **예시:** "삼성전자 2025년 상반기 매출은?"이라는 질문에 OpenDART가 실제로 돌려주는 값입니다.

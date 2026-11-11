@@ -15,6 +15,17 @@ An MCP server for Korean corporate filings, financials, dividends and major shar
 - **Private.** It runs on your machine. Your keys and questions go only to the government APIs, never through a third-party server, and there is no telemetry.
 - **Focused.** 23 tools with clear descriptions, so an agent picks the right one without filling its context with dozens of others.
 
+## News
+
+- **2026-11-08 [v0.1.8](https://github.com/YoungsoonLee/korea-data-mcp/releases/tag/v0.1.8)**: Full financial statements (`opendart_get_financials` with `scope: "full"`) and stakes in other companies (`opendart_get_investments`). Lines come in the order printed in the filing, and amounts carry their real dates, including for companies whose fiscal year ends in March or June. Investees come with their DART company code.
+- **2026-11-04 [v0.1.7](https://github.com/YoungsoonLee/korea-data-mcp/releases/tag/v0.1.7)**: Major decisions (`opendart_list_corporate_actions`: rights issues, capital reductions, convertible bonds, buybacks and disposals of treasury stock, mergers and splits) and reports by 5% holders and insiders (`opendart_get_ownership_reports`).
+- **2026-10-31 [v0.1.6](https://github.com/YoungsoonLee/korea-data-mcp/releases/tag/v0.1.6)**: Every financial amount comes with the period it covers. The output format changed.
+- **2026-10-31 [v0.1.5](https://github.com/YoungsoonLee/korea-data-mcp/releases/tag/v0.1.5)**: Bank of Korea ECOS statistics (`ecos_get_series`, `ecos_search_series`).
+- **2026-10-30 [v0.1.4](https://github.com/YoungsoonLee/korea-data-mcp/releases/tag/v0.1.4)**: Dividends (`opendart_get_dividends`) and largest shareholders (`opendart_get_major_shareholders`).
+- **2026-10-30 [v0.1.3](https://github.com/YoungsoonLee/korea-data-mcp/releases/tag/v0.1.3)**: Apartment rents (`datagokr_list_apartment_rents`).
+
+All releases: [Releases](https://github.com/YoungsoonLee/korea-data-mcp/releases)
+
 ## Why it matters
 
 **Example:** "What was Samsung Electronics' revenue in the first half of 2025?" Here is what OpenDART actually returns:
