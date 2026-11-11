@@ -3,3 +3,7 @@
 /dist
 /docs/STRATEGY.md
 /docs/ENTITY_DESIGN.md
+/korea-data-collect
+*.db
+*.db-shm
+*.db-wal

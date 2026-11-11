@@ -402,3 +402,30 @@ func TestAPIKeyNeverInErrors(t *testing.T) {
 		t.Fatalf("got %+v", e)
 	}
 }
+
+func TestCompanies(t *testing.T) {
+	f := &fakeDART{t: t, hits: map[string]int{}, last: map[string]url.Values{}, override: map[string]string{}}
+	srv := httptest.NewServer(f)
+	t.Cleanup(srv.Close)
+	p := &Provider{BaseURL: srv.URL}
+
+	list, err := p.Companies(context.Background(), testKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(list) != 7 {
+		t.Fatalf("got %d companies, want 7", len(list))
+	}
+	want := CorpEntry{CorpCode: "00126380", Name: "삼성전자", EngName: "SAMSUNG ELECTRONICS CO,.LTD", StockCode: "005930", ModifyDate: "2025-12-01"}
+	if list[0] != want {
+		t.Errorf("first = %+v, want %+v", list[0], want)
+	}
+	if list[1].StockCode != "" {
+		t.Errorf("unlisted stock code = %q, want empty", list[1].StockCode)
+	}
+
+	_, err = p.Companies(context.Background(), "WRONG")
+	if he := hub.AsError(err); he.Code != hub.CodeUnauthenticated || strings.Contains(he.Error(), "WRONG") {
+		t.Errorf("bad key: %v", err)
+	}
+}

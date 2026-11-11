@@ -75,6 +75,20 @@ Inspector에서 **Transport Type**을 `Streamable HTTP`로, URL을 `http://127.0
 
 HTTP 서버에는 **인증이 없습니다.** 접속할 수 있는 사람은 누구나 내 API 키로 tool을 호출할 수 있습니다. 인증 프록시 뒤에 두는 경우가 아니라면 `:8080`이 아니라 `127.0.0.1`에 바인딩하세요.
 
+## 5. 이력 수집기
+
+OpenDART는 잊어버립니다. 지분 보고서는 약 2년이 지나면 API에서 빠지고, 정정공시가 원본을 대체하며, 회사 목록은 오늘 것만 보여 줍니다. `korea-data-collect`는 이것들을 SQLite 파일에 쌓습니다. 같은 tool을 프로세스 안에서 호출하므로 저장 데이터도 똑같이 정규화됩니다.
+
+```sh
+go build -o korea-data-collect ./cmd/korea-data-collect
+./korea-data-collect -db korea-data.db -env-file .env daily               # 하루 한 번, 예를 들어 cron으로
+./korea-data-collect -db korea-data.db -env-file .env -limit 2000 backfill # 상장사 전체, 며칠에 나눠서
+```
+
+- `daily`: 회사 목록을 비교하고(신규, 이름 변경, 상장, 상장폐지, 종목코드 변경, 목록에서 사라짐), 최근 7일(`-days`) 안에 지분공시가 있는 회사의 5% 대량보유·임원 지분 보고를 저장합니다. OpenDART 호출은 수백 회입니다.
+- `backfill`: 아직 수집하지 않은 상장사의 보고서를 `-limit`개씩 저장합니다. 회사당 3~4회 호출합니다. OpenDART는 키 하나에 하루 약 20,000회를 허용하고, 같은 키의 다른 사용량과 한도를 나눠 씁니다.
+- 실행마다 `run` 테이블에 상태가 남습니다(`ok`, 한도에 걸려 멈춘 `partial`, `failed`). 보고서는 접수번호로 저장하므로 다시 실행해도 안전합니다.
+
 ## 릴리스
 
 태그를 푸시하면 GitHub Actions([release.yml](../.github/workflows/release.yml))가 [GoReleaser](https://goreleaser.com)로 macOS, Linux, Windows(amd64, arm64)용 실행 파일을 빌드하고, MCP 번들(`korea-data-mcp.mcpb`, [mcpb/manifest.json](../mcpb/manifest.json)으로 [mcpb/build.sh](../mcpb/build.sh)가 만듭니다)로 묶어 GitHub 릴리스로 올린 뒤, 릴리스 버전과 번들 해시를 채운 [server.json](../server.json)을 [MCP Registry](https://registry.modelcontextprotocol.io)에 게시합니다.
@@ -94,7 +108,10 @@ git tag v0.1.0 && git push origin v0.1.0
 | `normalize/` | 날짜, 금액, 회사명, HTML 텍스트 정규화 |
 | `cache/` | TTL 메모리 캐시 |
 | `providers/` | 데이터 소스마다 패키지 하나. `providers.go`에 목록이 있습니다 |
-| `cmd/korea-data-mcp/` | 실행 파일 |
+| `store/` | 이력 DB(SQLite): 회사 목록 변경, 지분 보고서, 실행 기록 |
+| `collect/` | tool을 프로세스 안에서 호출해 store를 채움 |
+| `cmd/korea-data-mcp/` | MCP 서버 |
+| `cmd/korea-data-collect/` | 이력 수집기 |
 | `docs/QUIRKS.ko.md` | korea-data-mcp가 처리하는 upstream 특이 동작 전체와 처리 상태 |
 
 ## 새 특이 동작 기록하기

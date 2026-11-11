@@ -1,4 +1,5 @@
-package main
+// Package envfile reads API keys from a .env file for the commands.
+package envfile
 
 import (
 	"bufio"
@@ -7,9 +8,9 @@ import (
 	"strings"
 )
 
-// loadEnvFile parses a .env-style file: KEY=VALUE lines, optional "export "
+// Load parses a .env-style file: KEY=VALUE lines, optional "export "
 // prefix, # comments, and optional single or double quotes around the value.
-func loadEnvFile(path string) (map[string]string, error) {
+func Load(path string) (map[string]string, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, err
@@ -38,12 +39,12 @@ func loadEnvFile(path string) (map[string]string, error) {
 	return env, sc.Err()
 }
 
-// envLookup prefers non-empty process environment values, falling back to
+// Lookup prefers non-empty process environment values, falling back to
 // file values, so a key set in the shell or MCP client config overrides the
 // file but an empty placeholder (KEY=) does not hide it. A variable a client
 // left unexpanded, such as ${user_config.lawgokr_oc} for an optional key the
 // user skipped in an MCPB install, counts as empty, not as a key.
-func envLookup(file map[string]string) func(string) string {
+func Lookup(file map[string]string) func(string) string {
 	return func(key string) string {
 		if v := os.Getenv(key); v != "" && !unexpanded(v) {
 			return v

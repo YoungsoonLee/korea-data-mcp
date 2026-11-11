@@ -75,6 +75,20 @@ In Inspector, set **Transport Type** to `Streamable HTTP` and the URL to `http:/
 
 The HTTP server has **no authentication**: anyone who can reach it can call the tools with your API keys. Bind it to `127.0.0.1`, not `:8080`, unless it is behind an authenticating proxy.
 
+## 5. History collector
+
+OpenDART forgets: ownership reports drop out of the API after about two years, a correction replaces the original, and the company list shows only today. `korea-data-collect` keeps them in a SQLite file. It calls the same tools in process, so the stored data is normalized the same way.
+
+```sh
+go build -o korea-data-collect ./cmd/korea-data-collect
+./korea-data-collect -db korea-data.db -env-file .env daily               # once a day, e.g. from cron
+./korea-data-collect -db korea-data.db -env-file .env -limit 2000 backfill # all listed companies, over a few days
+```
+
+- `daily`: diffs the company list (new, renamed, listed, delisted, stock code changed, removed) and stores the 5% holder and insider reports of every company with an ownership filing in the last 7 days (`-days`). A few hundred OpenDART calls.
+- `backfill`: stores the reports of listed companies not collected yet, `-limit` at a time, about 3 to 4 calls each. OpenDART allows about 20,000 calls a day per key, shared with any other use of the key.
+- Each run is recorded in the `run` table with its status (`ok`, `partial` when it stopped at the quota, `failed`). Reports are keyed by receipt number, so running again is safe.
+
 ## Releasing
 
 Push a tag, and GitHub Actions ([release.yml](../.github/workflows/release.yml)) builds binaries for macOS, Linux and Windows (amd64, arm64) with [GoReleaser](https://goreleaser.com) packs them into an MCP Bundle (`korea-data-mcp.mcpb`, built by [mcpb/build.sh](../mcpb/build.sh) from [mcpb/manifest.json](../mcpb/manifest.json)), publishes everything as a GitHub release, and publishes [server.json](../server.json) to the [MCP Registry](https://registry.modelcontextprotocol.io) with the release's version and bundle hash:
@@ -94,7 +108,10 @@ To try the build locally without publishing: `goreleaser release --snapshot --cl
 | `normalize/` | Normalization of dates, amounts, company names and HTML text |
 | `cache/` | In-memory TTL cache |
 | `providers/` | One package per data source; `providers.go` lists them |
-| `cmd/korea-data-mcp/` | Executable |
+| `store/` | History database (SQLite): company list changes, ownership reports, runs |
+| `collect/` | Fills the store by calling the tools in process |
+| `cmd/korea-data-mcp/` | The MCP server |
+| `cmd/korea-data-collect/` | The history collector |
 | `docs/QUIRKS.md` | Every upstream quirk korea-data-mcp handles, with its status |
 
 ## Recording a new quirk

@@ -1,4 +1,4 @@
-package main
+package envfile
 
 import (
 	"os"
@@ -16,7 +16,7 @@ NAVER_CLIENT_SECRET='s3cr=t'
 DATAGOKR_SERVICE_KEY = k+ey/==
 `), 0o600)
 
-	env, err := loadEnvFile(path)
+	env, err := Load(path)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -39,7 +39,7 @@ DATAGOKR_SERVICE_KEY = k+ey/==
 func TestLoadEnvFileInvalidLine(t *testing.T) {
 	path := filepath.Join(t.TempDir(), ".env")
 	os.WriteFile(path, []byte("OK=1\nnot a pair\n"), 0o600)
-	if _, err := loadEnvFile(path); err == nil {
+	if _, err := Load(path); err == nil {
 		t.Fatal("expected error")
 	}
 }
@@ -47,7 +47,7 @@ func TestLoadEnvFileInvalidLine(t *testing.T) {
 func TestEnvLookupPrefersProcessEnv(t *testing.T) {
 	t.Setenv("KOREADATA_TEST_KEY", "from-shell")
 	t.Setenv("KOREADATA_EMPTY", "")
-	get := envLookup(map[string]string{"KOREADATA_TEST_KEY": "from-file", "KOREADATA_FILE_ONLY": "file", "KOREADATA_EMPTY": "file"})
+	get := Lookup(map[string]string{"KOREADATA_TEST_KEY": "from-file", "KOREADATA_FILE_ONLY": "file", "KOREADATA_EMPTY": "file"})
 	if get("KOREADATA_TEST_KEY") != "from-shell" || get("KOREADATA_FILE_ONLY") != "file" || get("KOREADATA_EMPTY") != "file" {
 		t.Fatal("wrong precedence")
 	}
@@ -58,7 +58,7 @@ func TestEnvLookupPrefersProcessEnv(t *testing.T) {
 func TestEnvLookupUnexpanded(t *testing.T) {
 	t.Setenv("KOREADATA_SKIPPED", "${user_config.lawgokr_oc}")
 	t.Setenv("KOREADATA_SHADOWED", "${user_config.opendart_api_key}")
-	get := envLookup(map[string]string{"KOREADATA_SHADOWED": "file"})
+	get := Lookup(map[string]string{"KOREADATA_SHADOWED": "file"})
 	if get("KOREADATA_SKIPPED") != "" || get("KOREADATA_SHADOWED") != "file" {
 		t.Fatalf("got %q, %q", get("KOREADATA_SKIPPED"), get("KOREADATA_SHADOWED"))
 	}

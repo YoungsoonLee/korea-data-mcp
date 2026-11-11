@@ -3,15 +3,18 @@ package opendart
 import (
 	"archive/zip"
 	"bytes"
+	"cmp"
 	"context"
 	"encoding/xml"
 	"io"
+	"net/http"
 	"net/url"
 	"sort"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/YoungsoonLee/korea-data-mcp/httpx"
 	"github.com/YoungsoonLee/korea-data-mcp/hub"
 	"github.com/YoungsoonLee/korea-data-mcp/normalize"
 )
@@ -185,6 +188,37 @@ func (ix *corpIndex) search(ctx context.Context, query string, listedOnly bool) 
 }
 
 func normName(s string) string { return normalize.CompanyName(s) }
+
+// CorpEntry is one entry of DART's company list, for the collector.
+type CorpEntry struct {
+	CorpCode   string
+	Name       string
+	EngName    string
+	StockCode  string // empty for unlisted companies
+	ModifyDate string // YYYY-MM-DD
+}
+
+// Companies downloads DART's full company list (corpCode.xml, ~120k
+// entries). The collector diffs it daily; the tools keep their own index.
+func (p *Provider) Companies(ctx context.Context, key string) ([]CorpEntry, error) {
+	c := &client{
+		base: p.BaseURL,
+		key:  key,
+		// The zip is about 3.6 MB, and from abroad OpenDART can send under
+		// 20 KB/s. One retry: each attempt can take minutes.
+		raw: httpx.New(httpx.WithHTTPClient(&http.Client{Timeout: cmp.Or(p.Timeout, 30*time.Minute)}),
+			httpx.WithLegacyRSATLS(), httpx.WithRetries(1)),
+	}
+	corps, err := c.downloadCorps(ctx)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]CorpEntry, len(corps))
+	for i, c := range corps {
+		out[i] = CorpEntry{CorpCode: c.Code, Name: c.Name, EngName: c.EngName, StockCode: c.StockCode, ModifyDate: c.ModifyDate}
+	}
+	return out, nil
+}
 
 type corpCodeXML struct {
 	Status  string `xml:"status"`

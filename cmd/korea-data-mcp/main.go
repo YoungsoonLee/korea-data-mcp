@@ -16,6 +16,7 @@ import (
 	"syscall"
 
 	"github.com/YoungsoonLee/korea-data-mcp/hub"
+	"github.com/YoungsoonLee/korea-data-mcp/internal/envfile"
 	"github.com/YoungsoonLee/korea-data-mcp/providers"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -52,12 +53,12 @@ func main() {
 	var fileEnv map[string]string
 	if *envFile != "" {
 		var err error
-		if fileEnv, err = loadEnvFile(*envFile); err != nil {
+		if fileEnv, err = envfile.Load(*envFile); err != nil {
 			logger.Error("cannot read env file", "err", err)
 			os.Exit(1)
 		}
 	}
-	getenv := envLookup(fileEnv)
+	getenv := envfile.Lookup(fileEnv)
 
 	h := hub.New(&mcp.Implementation{
 		Name:    "korea-data-mcp",
