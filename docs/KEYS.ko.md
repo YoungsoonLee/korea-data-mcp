@@ -38,6 +38,7 @@ korea-data-mcp는 데이터 소스마다 무료 키가 필요합니다. **하나
    | [국토교통부_아파트 매매 실거래가 자료](https://www.data.go.kr/data/15126469/openapi.do) | `datagokr_list_apartment_trades` |
    | [국토교통부_아파트 전월세 실거래가 자료](https://www.data.go.kr/data/15126474/openapi.do) | `datagokr_list_apartment_rents` |
    | [금융위원회_주식시세정보](https://www.data.go.kr/data/15094808/openapi.do) | `datagokr_get_stock_prices` |
+   | [국민연금공단_국민연금 가입 사업장 내역](https://www.data.go.kr/data/3046071/openapi.do) | `datagokr_get_pension_workplaces` |
 
 3. **마이페이지**에서 승인된 API를 열면 키가 보입니다. **Encoding**과 **Decoding** 두 가지가 나오는데, **Decoding** 키를 `DATAGOKR_SERVICE_KEY`에 넣습니다.
 4. 방금 승인된 API는 실제로 동작하기까지 몇 분에서 몇 시간이 걸릴 수 있습니다. 그 전에는 키가 틀린 것처럼 응답합니다.

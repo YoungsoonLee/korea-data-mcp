@@ -23,7 +23,7 @@ func (p *Provider) Info() hub.ProviderInfo {
 		Title: "공공데이터포털 (data.go.kr)",
 		Description: "Korean government open data from the Public Data Portal: public holidays and special days, " +
 			"the Financial Services Commission's corporation registry, National Tax Service business status, " +
-			"apartment sale and rental prices, and daily stock prices. " +
+			"apartment sale and rental prices, daily stock prices, and National Pension Service workplaces (employee counts). " +
 			"Each API must be applied for (활용신청) separately on data.go.kr with the same service key.",
 		RequiredEnv: []string{envKey},
 		DocsURL:     "https://www.data.go.kr",
@@ -45,5 +45,6 @@ func (p *Provider) Register(r *hub.Registrar) error {
 	registerApartments(r, c)
 	registerRents(r, c)
 	registerStocks(r, c)
+	registerPension(r, c)
 	return nil
 }

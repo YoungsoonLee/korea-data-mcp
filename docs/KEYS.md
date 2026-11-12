@@ -40,6 +40,7 @@ One key for the whole portal, but **each API must be applied for separately** (�
    | [국토교통부_아파트 매매 실거래가 자료](https://www.data.go.kr/data/15126469/openapi.do) | `datagokr_list_apartment_trades` |
    | [국토교통부_아파트 전월세 실거래가 자료](https://www.data.go.kr/data/15126474/openapi.do) | `datagokr_list_apartment_rents` |
    | [금융위원회_주식시세정보](https://www.data.go.kr/data/15094808/openapi.do) | `datagokr_get_stock_prices` |
+   | [국민연금공단_국민연금 가입 사업장 내역](https://www.data.go.kr/data/3046071/openapi.do) | `datagokr_get_pension_workplaces` |
 
 3. On **마이페이지** (My Page), open the approved API to see the key. Two keys are shown, **Encoding** and **Decoding**: copy the **Decoding** key into `DATAGOKR_SERVICE_KEY`.
 4. A newly approved API can take from a few minutes to a few hours to start working. Until then it answers as if the key were wrong.

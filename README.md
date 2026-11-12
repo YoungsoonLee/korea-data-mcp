@@ -10,10 +10,10 @@
 
 An MCP server for Korean corporate filings, financials, dividends and major shareholders, stock prices, apartment sale prices and rents, business registration status, public holidays, statutes and court rulings, and Bank of Korea economic statistics, from the official free APIs of OpenDART, data.go.kr, law.go.kr and ECOS.
 
-- **Correct, with evidence.** 87 traps found on the live APIs (wrong half-year revenue, laws not in force yet, cancelled deals, district codes that changed in 2026, and more) are handled, each covered by a test that uses the real response. The full list is public: [What korea-data-mcp handles for you](docs/QUIRKS.md). In a [small evaluation](eval/RESULTS.md), agents with korea-data-mcp answered 10 of 10 questions with one call each; with the raw APIs they hit the traps, needed about 3x the calls, and missed one.
+- **Correct, with evidence.** 92 traps found on the live APIs (wrong half-year revenue, laws not in force yet, cancelled deals, district codes that changed in 2026, and more) are handled, each covered by a test that uses the real response. The full list is public: [What korea-data-mcp handles for you](docs/QUIRKS.md). In a [small evaluation](eval/RESULTS.md), agents with korea-data-mcp answered 10 of 10 questions with one call each; with the raw APIs they hit the traps, needed about 3x the calls, and missed one.
 - **Installs in one click.** A single binary with nothing else to install. In Claude Desktop, open [korea-data-mcp.mcpb](https://github.com/YoungsoonLee/korea-data-mcp/releases/latest/download/korea-data-mcp.mcpb) and enter your keys. Also in the [official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.YoungsoonLee/korea-data-mcp).
 - **Private.** It runs on your machine. Your keys and questions go only to the government APIs, never through a third-party server, and there is no telemetry.
-- **Focused.** 23 tools with clear descriptions, so an agent picks the right one without filling its context with dozens of others.
+- **Focused.** 24 tools with clear descriptions, so an agent picks the right one without filling its context with dozens of others.
 
 ## News
 
@@ -56,7 +56,7 @@ Three more traps, each of which silently produces a wrong answer:
 - **Deals that never happened.** Apartment trade data keeps cancelled deals, marked only by a flag: 12 of 233 Gangnam trades in September 2025, including a ₩7.5 billion one. Averages that include them are wrong. korea-data-mcp leaves them out.
 - **Codes that quietly stop working.** In 2026, 광주광역시 and 전라남도 merged, 화성시 was split into four 구, and 인천 reorganized its districts. The old district codes, which most code tables still list, now return zero trades, **even for past months**. With korea-data-mcp, an agent just says `광주 북구` or `화성시`.
 
-There is more: errors returned as HTTP 200, stale records mixed with current ones, business numbers that fail when written with hyphens, stock history split by a company rename, and a TLS handshake that fails from Go. See all 87: **[What korea-data-mcp handles for you](docs/QUIRKS.md)**.
+There is more: errors returned as HTTP 200, stale records mixed with current ones, business numbers that fail when written with hyphens, stock history split by a company rename, and a TLS handshake that fails from Go. See all 92: **[What korea-data-mcp handles for you](docs/QUIRKS.md)**.
 
 ## What you can ask
 
@@ -201,6 +201,7 @@ Every OpenDART tool that takes `corp_code` also accepts a 6-character stock code
 | `datagokr_check_business_status` | Check up to 100 business registration numbers (사업자등록번호) with the National Tax Service: registered or not, active, suspended or closed (with date), and VAT type. Hyphens are fine | [국세청_사업자등록정보 진위확인 및 상태조회](https://www.data.go.kr/data/15081808/openapi.do) |
 | `datagokr_list_apartment_trades` | Apartment sale transactions for a district and month, newest first, with a median/min/max price summary. Prices in KRW; cancelled deals excluded by default; filter by apartment name or neighborhood. The region is a name (`강남구`, `서울 중구`, `분당구`, `광주 북구`) or a 5-digit code; a city with wards, such as `수원시` or `화성시`, covers all of them | [국토교통부_아파트 매매 실거래가 자료](https://www.data.go.kr/data/15126469/openapi.do) |
 | `datagokr_list_apartment_rents` | Apartment jeonse (전세) and monthly-rent (월세) contracts for a district and month, newest first, with deposit and rent medians for each. New contracts and renewals, which are often capped at +5%, are told apart and can be filtered. Amounts in KRW; same regions as above. Since 2011 | [국토교통부_아파트 전월세 실거래가 자료](https://www.data.go.kr/data/15126474/openapi.do) |
+| `datagokr_get_pension_workplaces` | National Pension Service workplaces: subscribers (close to employees, unlisted companies too), contributions billed, hires and departures that month, industry, address, enrollment dates, and a 12-month subscriber history on request. Take the business registration number and name, since only the first 6 digits are published; short-term sites are told apart from the company's own workplaces | [국민연금공단_국민연금 가입 사업장 내역](https://www.data.go.kr/data/3046071/openapi.do) |
 | `datagokr_get_stock_prices` | Daily prices of a KOSPI, KOSDAQ or KONEX stock: close, change, open/high/low, volume, trading value, market cap. The stock is a name (`삼성전자`, `naver`), a 6-digit code or an ISIN; history follows the code across renames. Since 2020 | [금융위원회_주식시세정보](https://www.data.go.kr/data/15094808/openapi.do) |
 
 **law.go.kr** (`LAWGOKR_OC`)

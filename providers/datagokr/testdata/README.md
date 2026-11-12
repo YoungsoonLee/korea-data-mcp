@@ -27,5 +27,12 @@ These files are **real data.go.kr responses** captured between 2026-10-25 and 20
 | `error_key_not_registered.xml` | Any API with an unregistered key, XML | HTTP 403, `returnReasonCode` 30 |
 | `error_key_not_registered.json` | Same, JSON | HTTP 403, `returnReasonCode` 30 |
 | `error_http_200.json` | 기업기본정보 with `numOfRows=abc` | Error document with HTTP 200, `returnReasonCode` 04 |
+| `nps_search_samsung.xml` | 국민연금 가입 사업장 `getBassInfoSearchV2`, `bzowrRgstNo=124810&wkplNm=삼성전자`, 2026-11-11 | 58 records: the head office in each of 12 months (2025-10 to 2026-09) and 46 short-term sites |
+| `nps_search_name_only.xml` | Same, `wkplNm=삼성전자` only, first page | 1,739 records, mostly other companies (cafés, daycare centers, contractors' sites) |
+| `nps_search_none.xml` | Same, `bzowrRgstNo=220816&wkplNm=NAVER` | 0 records (Naver is filed as 네이버 주식회사) |
+| `nps_error_rows.xml` | Same, `numOfRows=101` | `resultCode` 97 CLIENT_ERROR |
+| `nps_detail_samsung_202609.xml`, `nps_detail_samsung_202608.xml` | `getDetailInfoSearchV2`, Samsung head office, seq 6509296 and 5919467 | 126,090 and 125,843 subscribers; no month in the record |
+| `nps_detail_site_withdrawn.xml` | Same, seq 6416987 | A withdrawn site: 0 subscribers, withdrawn 2026-07-01 |
+| `nps_status_samsung_202609.xml`, `nps_status_site.xml` | `getPdAcctoSttusInfoSearchV2`, seq 6509296 and 6416987 | 656 joined and 341 left; 0 and 0 |
 
 When re-capturing, never save the request URL: it contains `serviceKey`.
