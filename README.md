@@ -17,6 +17,7 @@ An MCP server for Korean corporate filings, financials, dividends and major shar
 
 ## News
 
+- **2026-11-11 [v0.1.9](https://github.com/YoungsoonLee/korea-data-mcp/releases/tag/v0.1.9)**: National Pension Service workplaces (`datagokr_get_pension_workplaces`): subscriber counts close to employee counts, unlisted companies included, with a 12-month history. Also `korea-data-collect`, which keeps the ownership reports and company list changes that OpenDART forgets ([how](docs/DEVELOPMENT.md#5-history-collector)).
 - **2026-11-08 [v0.1.8](https://github.com/YoungsoonLee/korea-data-mcp/releases/tag/v0.1.8)**: Full financial statements (`opendart_get_financials` with `scope: "full"`) and stakes in other companies (`opendart_get_investments`). Lines come in the order printed in the filing, and amounts carry their real dates, including for companies whose fiscal year ends in March or June. Investees come with their DART company code.
 - **2026-11-04 [v0.1.7](https://github.com/YoungsoonLee/korea-data-mcp/releases/tag/v0.1.7)**: Major decisions (`opendart_list_corporate_actions`: rights issues, capital reductions, convertible bonds, buybacks and disposals of treasury stock, mergers and splits) and reports by 5% holders and insiders (`opendart_get_ownership_reports`).
 - **2026-10-31 [v0.1.6](https://github.com/YoungsoonLee/korea-data-mcp/releases/tag/v0.1.6)**: Every financial amount comes with the period it covers. The output format changed.
