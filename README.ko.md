@@ -17,6 +17,7 @@
 
 ## 업데이트 소식
 
+- **2026-11-14 [v0.1.10](https://github.com/YoungsoonLee/korea-data-mcp/releases/tag/v0.1.10)**: 회사명이나 어떤 번호로든 회사를 식별하는 `entity_resolve_company`를 추가했습니다. 모든 식별자, 옛 이름, 현재 상장 여부, 영업·폐업 상태를 줍니다. 같은 이름의 회사가 많고(DART에 공시하는 `(주)카카오`가 둘이고 하나는 2014년 폐업), DART는 상장폐지된 회사의 종목코드도 남겨 두기 때문에 `opendart_search_companies`도 이제 회사마다 기업개황으로 상장 여부를 확인합니다.
 - **2026-11-11 [v0.1.9](https://github.com/YoungsoonLee/korea-data-mcp/releases/tag/v0.1.9)**: 국민연금 가입 사업장(`datagokr_get_pension_workplaces`)을 추가했습니다. 비상장사까지 직원 수에 가까운 가입자 수와 12개월 추이를 줍니다. OpenDART가 잊어버리는 지분 보고서와 회사 목록 변경을 쌓는 `korea-data-collect`도 추가했습니다([사용법](docs/DEVELOPMENT.ko.md#5-이력-수집기)).
 - **2026-11-08 [v0.1.8](https://github.com/YoungsoonLee/korea-data-mcp/releases/tag/v0.1.8)**: 전체 재무제표(`opendart_get_financials`의 `scope: "full"`)와 타법인출자 현황(`opendart_get_investments`)을 추가했습니다. 계정은 공시에 인쇄된 순서로, 금액은 3월·6월 결산 회사도 실제 기간과 함께 나옵니다. 출자 대상 회사에는 DART 회사 코드가 붙습니다.
 - **2026-11-04 [v0.1.7](https://github.com/YoungsoonLee/korea-data-mcp/releases/tag/v0.1.7)**: 주요사항보고서(`opendart_list_corporate_actions`: 유상증자, 감자, 전환사채, 자사주 취득·처분, 합병·분할)와 5% 대량보유·임원 지분 보고(`opendart_get_ownership_reports`)를 추가했습니다.
