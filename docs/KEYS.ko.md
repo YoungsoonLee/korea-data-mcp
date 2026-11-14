@@ -45,6 +45,8 @@ korea-data-mcp는 데이터 소스마다 무료 키가 필요합니다. **하나
 
 개발계정은 API마다 하루 10,000건까지 호출할 수 있습니다.
 
+`entity_resolve_company`는 별도 키가 필요 없습니다. OpenDART와 위 API 중 기업기본정보, 사업자등록정보 상태조회, 주식시세정보 세 가지를 씁니다. 일부만 있으면 확인할 수 있는 정보만 돌려주고, 확인하지 못한 소스는 `incomplete`에 적습니다.
+
 ## 국가법령정보
 
 1. [open.law.go.kr](https://open.law.go.kr)에 가입합니다.

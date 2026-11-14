@@ -71,12 +71,13 @@ func (p *Provider) Register(r *hub.Registrar) error {
 }
 
 type client struct {
-	base  string
-	key   string
-	api   *httpx.Client
-	raw   *httpx.Client
-	corps *corpIndex
-	now   func() time.Time
+	base    string
+	key     string
+	api     *httpx.Client
+	raw     *httpx.Client
+	corps   *corpIndex
+	classes classCache
+	now     func() time.Time
 }
 
 // apiStatus is embedded in every DART JSON response.
@@ -146,12 +147,19 @@ func (c *client) resolveCorpCode(ctx context.Context, s string) (string, error) 
 	}
 	if stockCodePattern.MatchString(s) {
 		corp, err := c.corps.byStockCode(ctx, s)
+		if err == nil && corp == nil && s[5] != '0' {
+			// DART lists common shares only. A preferred share's code is
+			// its common share's with another last character: 005935 for
+			// 005930, 00680K for 006800.
+			corp, err = c.corps.byStockCode(ctx, s[:5]+"0")
+		}
 		if err != nil {
 			return "", err
 		}
 		if corp == nil {
-			return "", hub.Errorf(hub.CodeNotFound, "no listed company with stock code %s", s).
-				WithHint("use opendart_search_companies to find the corp_code")
+			return "", hub.Errorf(hub.CodeNotFound, "no company with stock code %s in DART's company list", s).
+				WithHint("a company listed in the last few weeks can be missing its stock code there; " +
+					"find it by name with opendart_search_companies (datagokr_get_stock_prices gives the name for a code)")
 		}
 		return corp.Code, nil
 	}

@@ -194,7 +194,7 @@ func (c *client) getInvestments(ctx context.Context, in getInvestmentsInput) (In
 		}
 		inv.Exited = zeroOrNil(inv.End.Shares) && (inv.End.Percent == nil || *inv.End.Percent == 0) && zeroOrNil(inv.End.BookValue) &&
 			inv.SharesChange != nil && *inv.SharesChange < 0
-		if corp, err := c.corps.byName(ctx, inv.Name); err == nil && corp != nil && corp.Code != code {
+		if corp, err := c.byName(ctx, inv.Name); err == nil && corp != nil && corp.Code != code {
 			inv.CorpCode, inv.StockCode = corp.Code, corp.StockCode
 			out.Summary.CorpCodes++
 		}

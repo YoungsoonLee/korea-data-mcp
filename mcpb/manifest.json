@@ -79,7 +79,7 @@
     { "name": "opendart_list_corporate_actions", "description": "Rights offerings, convertible bonds, buybacks, mergers and splits" },
     { "name": "datagokr_list_holidays", "description": "Korean public holidays for a year or month" },
     { "name": "datagokr_search_corporations", "description": "Find Korean corporations by name, listed or not" },
-    { "name": "datagokr_get_corporation", "description": "Current corporation profile, employees, salary, auditor" },
+    { "name": "datagokr_get_corporation", "description": "Current corporation profile and former names, by crno or business number" },
     { "name": "datagokr_check_business_status", "description": "Business registration status with the National Tax Service" },
     { "name": "datagokr_list_apartment_trades", "description": "Apartment sale prices by district and month, with a median" },
     { "name": "datagokr_list_apartment_rents", "description": "Apartment jeonse and monthly rents by district and month" },
@@ -90,7 +90,8 @@
     { "name": "lawgokr_search_precedents", "description": "Search court rulings by words, case number, court and date" },
     { "name": "lawgokr_get_precedent", "description": "A ruling's issues, holding, cited statutes and full text" },
     { "name": "ecos_get_series", "description": "Bank of Korea time series: base rate, FX, yields, CPI, GDP, jobs, or any table" },
-    { "name": "ecos_search_series", "description": "Find Bank of Korea statistics tables and their items" }
+    { "name": "ecos_search_series", "description": "Find Bank of Korea statistics tables and their items" },
+    { "name": "entity_resolve_company", "description": "One company from any name or number: all IDs, former names, listed, active or closed" }
   ],
   "compatibility": {
     "platforms": ["darwin", "win32", "linux"]

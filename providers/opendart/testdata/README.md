@@ -4,8 +4,9 @@ These files are **real OpenDART responses** captured on 2026-10-25, 2026-10-30, 
 
 | File | Endpoint | Notes |
 |---|---|---|
-| `CORPCODE.xml` | `corpCode.xml` (served zipped by the test) | 7 entries picked from the full list (~120,000 entries) |
+| `CORPCODE.xml` | `corpCode.xml` (served zipped by the test) | 10 entries picked from the full list (~120,000 entries), including two 삼성물산 and the delisted 삼성수산, which keep their stock codes (captured 2026-11-12) |
 | `company.json` | `company.json` | As captured |
+| `company_<corp_code>.json` | `company.json` | Served for that `corp_code` (captured 2026-11-12): 삼성에스디에스, both 삼성물산 (`corp_cls` Y and E) and 삼성수산 (E) |
 | `list.json` | `list.json` | First 2 of 5 items; `total_count` left as returned |
 | `fnlttSinglAcnt.json` | `fnlttSinglAcnt.json` | 2024 annual report, as captured |
 | `fnlttSinglAcnt_half.json` | `fnlttSinglAcnt.json` | 2025 half-year report, consolidated 자산총계 and 매출액 only |

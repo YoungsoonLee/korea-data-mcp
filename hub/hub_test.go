@@ -148,3 +148,43 @@ func TestAsError(t *testing.T) {
 		t.Error("wrapped *Error not preserved")
 	}
 }
+
+func TestCall(t *testing.T) {
+	h := New(&mcp.Implementation{Name: "t", Version: "0"}, nil)
+	var r *Registrar
+	h.Add(callerProvider{&r}, func(string) string { return "" })
+	h.Add(echoProvider{}, func(k string) string { return map[string]string{"ECHO_KEY": "k"}[k] })
+	ctx := context.Background()
+
+	var out List[string]
+	if err := r.Call(ctx, "echo_search_items", map[string]any{"query": "x", "page": 2}, &out); err != nil {
+		t.Fatal(err)
+	}
+	if out.Items[0] != "x:k" || out.PageInfo.Page != 2 {
+		t.Errorf("got %+v", out)
+	}
+	err := r.Call(ctx, "echo_search_items", map[string]any{}, &out)
+	if e := AsError(err); e.Code != CodeInvalidArgument || e.Provider != "echo" {
+		t.Errorf("tool error: %v", err)
+	}
+	if e := AsError(r.Call(ctx, "echo_search_items", map[string]any{"query": 1}, &out)); e.Code != CodeInvalidArgument {
+		t.Errorf("bad args: %v", e)
+	}
+
+	// A disabled provider names what is missing.
+	h2 := New(&mcp.Implementation{Name: "t", Version: "0"}, nil)
+	h2.Add(callerProvider{&r}, func(string) string { return "" })
+	h2.Add(echoProvider{}, func(string) string { return "" })
+	if e := AsError(r.Call(ctx, "echo_search_items", map[string]any{"query": "x"}, &out)); e.Code != CodeUnauthenticated || e.Provider != "echo" || !strings.Contains(e.Message, "ECHO_KEY") {
+		t.Errorf("disabled: %+v", e)
+	}
+}
+
+type callerProvider struct{ r **Registrar }
+
+func (callerProvider) Info() ProviderInfo { return ProviderInfo{ID: "caller", Title: "Caller"} }
+
+func (p callerProvider) Register(r *Registrar) error {
+	*p.r = r
+	return nil
+}

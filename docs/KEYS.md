@@ -47,6 +47,8 @@ One key for the whole portal, but **each API must be applied for separately** (�
 
 A development account allows 10,000 calls a day for each API.
 
+`entity_resolve_company` needs no key of its own. It uses OpenDART and three of the APIs above: 기업기본정보, 사업자등록정보 상태조회 and 주식시세정보. With only some of them, it returns what the others know and lists what it could not check in `incomplete`.
+
 ## law.go.kr
 
 1. Sign up at [open.law.go.kr](https://open.law.go.kr).

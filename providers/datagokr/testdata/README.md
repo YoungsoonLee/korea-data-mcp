@@ -7,6 +7,7 @@ These files are **real data.go.kr responses** captured between 2026-10-25 and 20
 | `holidays_2026.xml` | 특일 정보 `getRestDeInfo`, all of 2026 | 22 public holidays, including substitute holidays and an election day |
 | `solar_terms_2026.xml` | 특일 정보 `get24DivisionsInfo`, all of 2026 | 24 solar terms, `isHoliday` N |
 | `corp_history_samsung.xml` | 기업기본정보 `getCorpOutline_V2`, crno 1301110006246 | 19 history records for one company, unordered, some partial |
+| `corp_history_hanwha_ocean.xml` | Same, crno 1101112095837 (captured 2026-11-12; `bzno=1048157667` returns the same) | 17 records: 대우조선해양(주) until 2023-06-12, then 한화오션(주) |
 | `corp_search_samsung_electronics.xml` | Same, corpNm 삼성전자, 1,000 rows | 108 records for 37 companies; 삼성전자잠실판매 first |
 | `nts_status_mixed.json` | 국세청 상태조회, 1248100998 and 1234567890 | One active business, one not registered (message in `tax_type`) |
 | `nts_status_hyphenated.json` | Same, `124-81-00998` | A real number reported as not registered because of the hyphens |

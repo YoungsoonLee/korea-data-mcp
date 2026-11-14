@@ -5,6 +5,7 @@ package hub
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"regexp"
@@ -45,13 +46,14 @@ type Hub struct {
 	server    *mcp.Server
 	logger    *slog.Logger
 	providers []*ProviderStatus
+	tools     map[string]func(context.Context, []byte) (any, error) // for Registrar.Call
 }
 
 func New(impl *mcp.Implementation, logger *slog.Logger) *Hub {
 	if logger == nil {
 		logger = slog.Default()
 	}
-	h := &Hub{server: mcp.NewServer(impl, nil), logger: logger}
+	h := &Hub{server: mcp.NewServer(impl, nil), logger: logger, tools: map[string]func(context.Context, []byte) (any, error){}}
 	h.addBuiltinTools()
 	return h
 }
@@ -107,6 +109,41 @@ func (r *Registrar) Env(key string) string { return r.getenv(key) }
 func (r *Registrar) Logger() *slog.Logger  { return r.hub.logger.With("provider", r.info.ID) }
 func (r *Registrar) ProviderID() string    { return r.info.ID }
 
+// Call runs another provider's tool in process, for tools that combine
+// providers. args and out go through JSON as they would over MCP. A tool
+// whose provider is disabled fails with UNAUTHENTICATED, naming the missing
+// environment variables.
+func (r *Registrar) Call(ctx context.Context, name string, args, out any) error {
+	f, ok := r.hub.tools[name]
+	if !ok {
+		for _, st := range r.hub.providers {
+			if strings.HasPrefix(name, st.ID+"_") && !st.Enabled {
+				return &Error{Code: CodeUnauthenticated, Provider: st.ID,
+					Message: fmt.Sprintf("%s is not enabled: %s not set", st.ID, strings.Join(st.MissingEnv, ", ")),
+					Hint:    "get a key at " + st.DocsURL}
+			}
+		}
+		e := Errorf(CodeUnavailable, "%s is not loaded in this server", name)
+		e.Retryable = false
+		return e
+	}
+	b, err := json.Marshal(args)
+	if err != nil {
+		return Errorf(CodeInternal, "%s: %v", name, err)
+	}
+	res, err := f(ctx, b)
+	if err != nil || out == nil {
+		return err
+	}
+	if b, err = json.Marshal(res); err == nil {
+		err = json.Unmarshal(b, out)
+	}
+	if err != nil {
+		return Errorf(CodeInternal, "%s: decode output: %v", name, err)
+	}
+	return nil
+}
+
 var (
 	idPattern       = regexp.MustCompile(`^[a-z0-9]+$`)
 	toolNamePattern = regexp.MustCompile(`^[a-z0-9]+(_[a-z0-9]+)+$`)
@@ -130,6 +167,21 @@ func AddTool[In, Out any](r *Registrar, t *mcp.Tool, h func(ctx context.Context,
 
 	logger := r.Logger().With("tool", t.Name)
 	providerID := r.info.ID
+	r.hub.tools[t.Name] = func(ctx context.Context, args []byte) (any, error) {
+		var in In
+		if err := json.Unmarshal(args, &in); err != nil {
+			return nil, Errorf(CodeInvalidArgument, "%s: %v", t.Name, err)
+		}
+		out, err := h(ctx, in)
+		if err != nil {
+			he := AsError(err)
+			if he.Provider == "" {
+				he.Provider = providerID
+			}
+			return nil, he
+		}
+		return out, nil
+	}
 	mcp.AddTool(r.hub.server, t, func(ctx context.Context, _ *mcp.CallToolRequest, in In) (*mcp.CallToolResult, Out, error) {
 		start := time.Now()
 		out, err := h(ctx, in)

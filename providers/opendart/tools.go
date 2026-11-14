@@ -21,7 +21,8 @@ func registerTools(r *hub.Registrar, c *client) {
 		Name: "opendart_search_companies",
 		Description: "Find a Korean company's corp_code (고유번호), the 8-digit ID that every other opendart tool needs. " +
 			"Matches Korean or English company names, stock codes (종목코드), or corp_codes. " +
-			"Exact matches and listed companies come first. The first call downloads DART's full company list and can take a few seconds.",
+			"Exact matches and companies with a stock code come first. listed and market are checked with each company's profile: " +
+			"DART keeps the stock code of a delisted company. The first call downloads DART's full company list and can take a few seconds.",
 	}, c.searchCompanies)
 
 	hub.AddTool(r, &mcp.Tool{
@@ -101,10 +102,15 @@ type Company struct {
 	CorpCode     string `json:"corp_code"`
 	CorpName     string `json:"corp_name"`
 	CorpEngName  string `json:"corp_eng_name,omitempty"`
-	StockCode    string `json:"stock_code,omitempty"`
+	StockCode    string `json:"stock_code,omitempty" jsonschema:"kept after delisting; listed tells whether it trades now"`
 	Listed       bool   `json:"listed"`
+	Market       string `json:"market,omitempty" jsonschema:"KOSPI, KOSDAQ or KONEX when listed, OTHER for a delisted company with a stock code"`
 	ModifiedDate string `json:"modified_date,omitempty"`
 }
+
+// maxListedChecks bounds the profile calls one listed_only search makes.
+// "바이오" matches 116 companies with a stock code.
+const maxListedChecks = 200
 
 func (c *client) searchCompanies(ctx context.Context, in searchCompaniesInput) (hub.List[Company], error) {
 	page, size, err := in.Resolve(10, 50)
@@ -118,14 +124,33 @@ func (c *client) searchCompanies(ctx context.Context, in searchCompaniesInput) (
 	if err != nil {
 		return hub.List[Company]{}, err
 	}
+	var classes map[string]string
+	if in.ListedOnly {
+		if len(matches) > maxListedChecks {
+			return hub.List[Company]{}, hub.Errorf(hub.CodeInvalidArgument, "%d companies with a stock code match %q; listed_only checks at most %d", len(matches), in.Query, maxListedChecks).
+				WithHint("use a longer name")
+		}
+		if classes, err = c.corpClasses(ctx, matches); err != nil {
+			return hub.List[Company]{}, err
+		}
+		matches = slices.DeleteFunc(matches, func(m corp) bool { return !listed(classes[m.Code]) })
+	}
+	items := pageOf(matches, page, size)
+	if classes == nil {
+		if classes, err = c.corpClasses(ctx, items); err != nil {
+			return hub.List[Company]{}, err
+		}
+	}
 	out := hub.List[Company]{Items: []Company{}, PageInfo: hub.NewPageInfo(page, size, len(matches))}
-	for _, m := range pageOf(matches, page, size) {
+	for _, m := range items {
+		cls := classes[m.Code]
 		out.Items = append(out.Items, Company{
 			CorpCode:     m.Code,
 			CorpName:     m.Name,
 			CorpEngName:  m.EngName,
 			StockCode:    m.StockCode,
-			Listed:       m.StockCode != "",
+			Listed:       listed(cls),
+			Market:       market(cls),
 			ModifiedDate: m.ModifyDate,
 		})
 	}
@@ -171,8 +196,8 @@ type CompanyProfile struct {
 	CorpName              string `json:"corp_name"`
 	CorpNameEng           string `json:"corp_name_eng,omitempty"`
 	StockName             string `json:"stock_name,omitempty" jsonschema:"ticker name for listed companies, short name otherwise"`
-	StockCode             string `json:"stock_code,omitempty"`
-	Market                string `json:"market" jsonschema:"KOSPI, KOSDAQ, KONEX, or OTHER (unlisted)"`
+	StockCode             string `json:"stock_code,omitempty" jsonschema:"kept after delisting; market tells whether it trades now"`
+	Market                string `json:"market" jsonschema:"KOSPI, KOSDAQ, KONEX, or OTHER (unlisted or delisted)"`
 	CEO                   string `json:"ceo,omitempty"`
 	CorporateRegistration string `json:"corporate_registration_no,omitempty" jsonschema:"법인등록번호"`
 	BusinessRegistration  string `json:"business_registration_no,omitempty" jsonschema:"사업자등록번호"`
@@ -195,6 +220,7 @@ func (c *client) getCompany(ctx context.Context, in corpCodeInput) (CompanyProfi
 	if err := c.getJSON(ctx, "company.json", url.Values{"corp_code": {code}}, &r); err != nil {
 		return CompanyProfile{}, err
 	}
+	c.rememberClass(code, r.CorpCls)
 	month, _ := strconv.Atoi(r.AccMt)
 	return CompanyProfile{
 		CorpCode:              code,

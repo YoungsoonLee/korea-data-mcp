@@ -103,11 +103,11 @@ To try the build locally without publishing: `goreleaser release --snapshot --cl
 
 | Path | Purpose |
 |---|---|
-| `hub/` | Provider registration, tool naming rules, standard errors, pagination |
+| `hub/` | Provider registration, tool naming rules, standard errors, pagination, in-process tool calls (`Registrar.Call`) |
 | `httpx/` | Upstream HTTP client (retries, caching, error mapping, API key redaction) |
 | `normalize/` | Normalization of dates, amounts, company names and HTML text |
 | `cache/` | In-memory TTL cache |
-| `providers/` | One package per data source; `providers.go` lists them |
+| `providers/` | One package per data source; `providers.go` lists them. `entity` has no source of its own: it combines the opendart and datagokr tools |
 | `store/` | History database (SQLite): company list changes, ownership reports, runs |
 | `collect/` | Fills the store by calling the tools in process |
 | `cmd/korea-data-mcp/` | The MCP server |

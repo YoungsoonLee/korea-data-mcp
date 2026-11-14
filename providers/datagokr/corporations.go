@@ -38,10 +38,10 @@ func registerCorporations(r *hub.Registrar, c *client) {
 
 	hub.AddTool(r, &mcp.Tool{
 		Name: "datagokr_get_corporation",
-		Description: "Get the current profile of a Korean corporation by corporate registration number (법인등록번호, crno): " +
-			"name, CEO, market, business registration number, founding and listing dates, address, industry, " +
+		Description: "Get the current profile of a Korean corporation by corporate registration number (법인등록번호, crno) " +
+			"or business registration number (사업자등록번호): name and former names, CEO, market, both numbers, founding and listing dates, address, industry, " +
 			"employees, average tenure and salary, auditor and audit opinion. as_of tells how recent the record is; " +
-			"some companies were last updated years ago.",
+			"some companies were last updated years ago. Former names go back to about 2020.",
 	}, c.getCorporation)
 }
 
@@ -208,51 +208,80 @@ func compareBool(a, b bool) int {
 // ---- datagokr_get_corporation ----
 
 type getCorporationInput struct {
-	Crno string `json:"crno" jsonschema:"corporate registration number (법인등록번호), 13 digits; hyphens allowed, e.g. 130111-0006246"`
+	Crno           string `json:"crno,omitempty" jsonschema:"corporate registration number (법인등록번호), 13 digits; hyphens allowed, e.g. 130111-0006246"`
+	BusinessNumber string `json:"business_number,omitempty" jsonschema:"business registration number (사업자등록번호), 10 digits, instead of crno; hyphens allowed, e.g. 124-81-00998"`
+}
+
+type FormerName struct {
+	Name  string `json:"name"`
+	Until string `json:"until,omitempty" jsonschema:"last date a record had this name, YYYY-MM-DD"`
 }
 
 type CorporationProfile struct {
 	Corporation
-	ShortName          string   `json:"short_name,omitempty" jsonschema:"name used in disclosures"`
-	CorporateForm      string   `json:"corporate_form,omitempty" jsonschema:"e.g. 주식회사, 유한회사"`
-	IsSME              *bool    `json:"is_sme,omitempty" jsonschema:"small or medium-sized enterprise (중소기업)"`
-	EstablishedDate    string   `json:"established_date,omitempty"`
-	ListedDate         string   `json:"listed_date,omitempty"`
-	DelistedDate       string   `json:"delisted_date,omitempty"`
-	FiscalYearEndMonth *int     `json:"fiscal_year_end_month,omitempty"`
-	Address            string   `json:"address,omitempty"`
-	PostalCode         string   `json:"postal_code,omitempty"`
-	Phone              string   `json:"phone,omitempty"`
-	Fax                string   `json:"fax,omitempty"`
-	Homepage           string   `json:"homepage,omitempty"`
-	Industry           string   `json:"industry,omitempty" jsonschema:"industry classification (표준산업분류)"`
-	MainBusiness       string   `json:"main_business,omitempty"`
-	Employees          *int64   `json:"employees,omitempty"`
-	AvgTenureYears     *float64 `json:"avg_tenure_years,omitempty"`
-	AvgSalary          *int64   `json:"avg_salary,omitempty" jsonschema:"average annual salary per employee, KRW"`
-	MainBank           string   `json:"main_bank,omitempty"`
-	Auditor            string   `json:"auditor,omitempty"`
-	AuditOpinion       string   `json:"audit_opinion,omitempty"`
+	FormerNames        []FormerName `json:"former_names,omitempty" jsonschema:"earlier names, oldest first, from records since about 2020"`
+	ShortName          string       `json:"short_name,omitempty" jsonschema:"name used in disclosures"`
+	CorporateForm      string       `json:"corporate_form,omitempty" jsonschema:"e.g. 주식회사, 유한회사"`
+	IsSME              *bool        `json:"is_sme,omitempty" jsonschema:"small or medium-sized enterprise (중소기업)"`
+	EstablishedDate    string       `json:"established_date,omitempty"`
+	ListedDate         string       `json:"listed_date,omitempty"`
+	DelistedDate       string       `json:"delisted_date,omitempty"`
+	FiscalYearEndMonth *int         `json:"fiscal_year_end_month,omitempty"`
+	Address            string       `json:"address,omitempty"`
+	PostalCode         string       `json:"postal_code,omitempty"`
+	Phone              string       `json:"phone,omitempty"`
+	Fax                string       `json:"fax,omitempty"`
+	Homepage           string       `json:"homepage,omitempty"`
+	Industry           string       `json:"industry,omitempty" jsonschema:"industry classification (표준산업분류)"`
+	MainBusiness       string       `json:"main_business,omitempty"`
+	Employees          *int64       `json:"employees,omitempty"`
+	AvgTenureYears     *float64     `json:"avg_tenure_years,omitempty"`
+	AvgSalary          *int64       `json:"avg_salary,omitempty" jsonschema:"average annual salary per employee, KRW"`
+	MainBank           string       `json:"main_bank,omitempty"`
+	Auditor            string       `json:"auditor,omitempty"`
+	AuditOpinion       string       `json:"audit_opinion,omitempty"`
 }
 
-var crnoPattern = regexp.MustCompile(`^\d{13}$`)
+var (
+	crnoPattern = regexp.MustCompile(`^\d{13}$`)
+	bznoPattern = regexp.MustCompile(`^\d{10}$`)
+)
 
 func (c *client) getCorporation(ctx context.Context, in getCorporationInput) (CorporationProfile, error) {
 	crno := strings.ReplaceAll(strings.TrimSpace(in.Crno), "-", "")
-	if !crnoPattern.MatchString(crno) {
+	bzno := strings.ReplaceAll(strings.TrimSpace(in.BusinessNumber), "-", "")
+	q := url.Values{}
+	switch {
+	case (crno == "") == (bzno == ""):
+		return CorporationProfile{}, hub.Errorf(hub.CodeInvalidArgument, "give either crno or business_number").
+			WithHint("find them with datagokr_search_corporations")
+	case crno != "" && !crnoPattern.MatchString(crno):
 		return CorporationProfile{}, hub.Errorf(hub.CodeInvalidArgument, "crno must be a 13-digit corporate registration number, got %q", in.Crno).
-			WithHint("find it with datagokr_search_corporations")
+			WithHint("a 10-digit number is a business registration number: pass it as business_number")
+	case crno != "":
+		q.Set("crno", crno)
+	case !bznoPattern.MatchString(bzno):
+		return CorporationProfile{}, hub.Errorf(hub.CodeInvalidArgument, "business_number must be a 10-digit business registration number, got %q", in.BusinessNumber)
+	default:
+		q.Set("bzno", bzno)
 	}
 	// One company has a few dozen history records at most.
-	records, _, err := getList[corpOutline](ctx, c, corpOutlinePath, url.Values{"crno": {crno}}, 1, 100)
+	records, _, err := getList[corpOutline](ctx, c, corpOutlinePath, q, 1, 100)
 	if err != nil {
 		return CorporationProfile{}, err
 	}
 	all := latest(records)
 	if len(all) == 0 {
-		return CorporationProfile{}, hub.Errorf(hub.CodeNotFound, "no corporation with crno %s", crno).
+		by := "crno " + crno
+		if bzno != "" {
+			by = "business_number " + bzno
+		}
+		return CorporationProfile{}, hub.Errorf(hub.CodeNotFound, "no corporation with %s", by).
 			WithHint("check the number, or find it with datagokr_search_corporations")
 	}
+	// A business number can have belonged to two corporations; take the
+	// one with the newest record.
+	slices.SortStableFunc(all, func(a, b corpOutline) int { return cmp.Compare(b.LastOpegDt, a.LastOpegDt) })
 	r := all[0]
 
 	p := CorporationProfile{
@@ -283,6 +312,7 @@ func (c *client) getCorporation(ctx context.Context, in getCorporationInput) (Co
 		Auditor:         text(r.ActnAudpnNm),
 		AuditOpinion:    text(r.AudtRptOpnnCtt),
 	}
+	p.FormerNames = formerNames(records, r)
 	p.Address = text(r.EnpBsadr)
 	if dt := text(r.EnpDtadr); dt != "" && !strings.Contains(p.Address, dt) {
 		p.Address = strings.TrimSpace(p.Address + " " + dt)
@@ -300,6 +330,60 @@ func (c *client) getCorporation(ctx context.Context, in getCorporationInput) (Co
 		p.AvgTenureYears = &f
 	}
 	return p, nil
+}
+
+// formerNames lists the names a corporation had before its current one,
+// oldest first. Records are read in date order as runs of one name. A run
+// between two runs of the same name is a glitch, not a rename: one batch of
+// October 2025 records spells S-Oil(주) 에쓰-오일(주) and calls KR모터스(주)
+// 효성기계공업(주), a name from decades earlier. (주) and 주식회사 also come
+// and go, so names are compared normalized.
+func formerNames(records []corpOutline, cur corpOutline) []FormerName {
+	var rs []corpOutline
+	for _, r := range records {
+		if r.Crno == cur.Crno {
+			rs = append(rs, r)
+		}
+	}
+	slices.SortFunc(rs, func(a, b corpOutline) int {
+		return cmp.Or(cmp.Compare(a.FstOpegDt, b.FstOpegDt), cmp.Compare(a.LastOpegDt, b.LastOpegDt))
+	})
+	type run struct{ key, name, until string }
+	collapse := func(in []run) []run {
+		var out []run
+		for _, r := range in {
+			if n := len(out); n > 0 && out[n-1].key == r.key {
+				out[n-1].name, out[n-1].until = r.name, max(out[n-1].until, r.until)
+				continue
+			}
+			out = append(out, r)
+		}
+		return out
+	}
+	var runs []run
+	for _, r := range rs {
+		runs = append(runs, run{normalize.CompanyName(r.CorpNm), text(r.CorpNm), r.LastOpegDt})
+	}
+	runs = collapse(runs)
+	var kept []run
+	for i, r := range runs {
+		if i > 0 && i < len(runs)-1 && runs[i-1].key == runs[i+1].key {
+			continue
+		}
+		kept = append(kept, r)
+	}
+	last := map[string]run{}
+	for _, r := range collapse(kept) {
+		if r.key != normalize.CompanyName(cur.CorpNm) {
+			last[r.key] = r
+		}
+	}
+	var out []FormerName
+	for _, r := range last {
+		out = append(out, FormerName{Name: r.name, Until: date(r.until)})
+	}
+	slices.SortFunc(out, func(a, b FormerName) int { return cmp.Compare(a.Until, b.Until) })
+	return out
 }
 
 // text trims and collapses whitespace; data.go.kr pads empty fields with

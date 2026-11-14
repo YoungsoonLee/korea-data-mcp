@@ -15,6 +15,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/YoungsoonLee/korea-data-mcp/httpx"
 	"github.com/YoungsoonLee/korea-data-mcp/hub"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
@@ -50,6 +51,11 @@ func (f *fakeDART) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Write(zipFixture(f.t, "CORPCODE.xml"))
 	default:
 		b, err := os.ReadFile("testdata/" + ep)
+		if ep == "company.json" {
+			if bc, errc := os.ReadFile("testdata/company_" + q.Get("corp_code") + ".json"); errc == nil {
+				b, err = bc, nil
+			}
+		}
 		if err != nil {
 			http.NotFound(w, r)
 			return
@@ -167,9 +173,28 @@ func TestSearchCompanies(t *testing.T) {
 		t.Fatalf("blank stock_code must be trimmed: %+v", got.Items[1])
 	}
 
+	// Five have a stock code; the old 삼성물산 and 삼성수산 are delisted.
 	mustOK(t, call(t, cs, "opendart_search_companies", map[string]any{"query": "삼성", "listed_only": true}, &got))
-	if len(got.Items) != 2 || got.PageInfo.TotalCount != 2 {
+	names = names[:0]
+	for _, c := range got.Items {
+		names = append(names, c.CorpCode)
+	}
+	if strings.Join(names, ",") != "00149655,00126380,00126186" || got.PageInfo.TotalCount != 3 {
 		t.Fatalf("listed_only: %+v", got)
+	}
+
+	mustOK(t, call(t, cs, "opendart_search_companies", map[string]any{"query": "삼성물산"}, &got))
+	if got.Items[0].CorpCode != "00149655" || !got.Items[0].Listed || got.Items[1].Listed || got.Items[1].StockCode != "000830" {
+		t.Fatalf("same name: %+v", got.Items)
+	}
+
+	mustOK(t, call(t, cs, "opendart_search_companies", map[string]any{"query": "삼성수산"}, &got))
+	if c := got.Items[0]; c.StockCode != "052560" || c.Listed || c.Market != "OTHER" {
+		t.Fatalf("delisted: %+v", c)
+	}
+	// Profiles are cached by company: 삼성수산 was checked for listed_only.
+	if n := f.count("company.json"); n != 5 {
+		t.Fatalf("company.json calls: %d", n)
 	}
 
 	for _, q := range []string{"005930", "00126380", "samsung electronics"} {
@@ -203,9 +228,48 @@ func TestGetCompanyByStockCode(t *testing.T) {
 		t.Fatalf("got %+v", got)
 	}
 
+	// DART lists common shares only.
+	for _, code := range []string{"005935", "00593K"} {
+		mustOK(t, call(t, cs, "opendart_get_company", map[string]any{"corp_code": code}, &got))
+		if got.CorpCode != "00126380" {
+			t.Fatalf("%s: %+v", code, got)
+		}
+	}
+
 	e := call(t, cs, "opendart_get_company", map[string]any{"corp_code": "삼성"}, nil)
 	if e == nil || e.Code != hub.CodeInvalidArgument || e.Hint == "" {
 		t.Fatalf("got %+v", e)
+	}
+	// A new listing can lack its stock code in DART's list.
+	e = call(t, cs, "opendart_get_company", map[string]any{"corp_code": "0153R0"}, nil)
+	if e == nil || e.Code != hub.CodeNotFound || !strings.Contains(e.Hint, "by name") {
+		t.Fatalf("got %+v", e)
+	}
+}
+
+func TestByName(t *testing.T) {
+	f := &fakeDART{t: t, hits: map[string]int{}, last: map[string]url.Values{}, override: map[string]string{}}
+	srv := httptest.NewServer(f)
+	t.Cleanup(srv.Close)
+	c := &client{base: srv.URL, key: testKey, api: httpx.New(), raw: httpx.New(), now: time.Now}
+	c.corps = newCorpIndex(c.downloadCorps, time.Hour)
+
+	for name, want := range map[string]string{
+		"삼성물산㈜":    "00149655", // two have a stock code; one is listed
+		"SK플래닛(주)": "00888736",
+		"삼성":       "",
+	} {
+		got, err := c.byName(context.Background(), name)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var code string
+		if got != nil {
+			code = got.Code
+		}
+		if code != want {
+			t.Errorf("%s: %q, want %q", name, code, want)
+		}
 	}
 }
 
@@ -413,8 +477,8 @@ func TestCompanies(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(list) != 7 {
-		t.Fatalf("got %d companies, want 7", len(list))
+	if len(list) != 10 {
+		t.Fatalf("got %d companies, want 10", len(list))
 	}
 	want := CorpEntry{CorpCode: "00126380", Name: "삼성전자", EngName: "SAMSUNG ELECTRONICS CO,.LTD", StockCode: "005930", ModifyDate: "2025-12-01"}
 	if list[0] != want {

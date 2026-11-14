@@ -103,11 +103,11 @@ git tag v0.1.0 && git push origin v0.1.0
 
 | 경로 | 역할 |
 |---|---|
-| `hub/` | Provider 등록, tool 이름 규칙, 표준 에러, 페이지네이션 |
+| `hub/` | Provider 등록, tool 이름 규칙, 표준 에러, 페이지네이션, 프로세스 내 tool 호출(`Registrar.Call`) |
 | `httpx/` | upstream HTTP 클라이언트 (재시도, 캐시, 에러 매핑, API 키 마스킹) |
 | `normalize/` | 날짜, 금액, 회사명, HTML 텍스트 정규화 |
 | `cache/` | TTL 메모리 캐시 |
-| `providers/` | 데이터 소스마다 패키지 하나. `providers.go`에 목록이 있습니다 |
+| `providers/` | 데이터 소스마다 패키지 하나. `providers.go`에 목록이 있습니다. `entity`는 자체 소스 없이 opendart와 datagokr tool을 조합합니다 |
 | `store/` | 이력 DB(SQLite): 회사 목록 변경, 지분 보고서, 실행 기록 |
 | `collect/` | tool을 프로세스 안에서 호출해 store를 채움 |
 | `cmd/korea-data-mcp/` | MCP 서버 |

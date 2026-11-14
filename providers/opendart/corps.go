@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"slices"
 	"sort"
 	"strings"
 	"sync"
@@ -95,31 +96,46 @@ func (ix *corpIndex) byCorpCode(ctx context.Context, code string) (*corp, error)
 	return &corps[i], nil
 }
 
-// byName finds the one company a name in a filing refers to: the only
-// company with that name, or else the only listed one. Names are matched
-// with normalize.CompanyKey, so SK플래닛 finds 에스케이플래닛.
-func (ix *corpIndex) byName(ctx context.Context, name string) (*corp, error) {
+// named returns the companies whose name has the same normalize.CompanyKey,
+// so SK플래닛 finds 에스케이플래닛.
+func (ix *corpIndex) named(ctx context.Context, name string) ([]corp, error) {
 	ix.mu.Lock()
 	defer ix.mu.Unlock()
 	corps, _, err := ix.getLocked(ctx)
 	if err != nil {
 		return nil, err
 	}
-	hits := ix.byKey[normalize.CompanyKey(name)]
+	var out []corp
+	for _, i := range ix.byKey[normalize.CompanyKey(name)] {
+		out = append(out, corps[i])
+	}
+	return out, nil
+}
+
+// byName finds the one company a name in a filing refers to: the only
+// company with that name, else the only one with a stock code, else the only
+// one listed now. Two 삼성물산 have a stock code; the one merged in 2015 is
+// delisted.
+func (c *client) byName(ctx context.Context, name string) (*corp, error) {
+	hits, err := c.corps.named(ctx, name)
+	if err != nil || len(hits) == 0 {
+		return nil, err
+	}
 	if len(hits) == 1 {
-		return &corps[hits[0]], nil
+		return &hits[0], nil
 	}
-	var listed *corp
-	for _, i := range hits {
-		if corps[i].StockCode == "" {
-			continue
+	hits = slices.DeleteFunc(hits, func(h corp) bool { return h.StockCode == "" })
+	if len(hits) > 1 {
+		classes, err := c.corpClasses(ctx, hits)
+		if err != nil {
+			return nil, err
 		}
-		if listed != nil {
-			return nil, nil
-		}
-		listed = &corps[i]
+		hits = slices.DeleteFunc(hits, func(h corp) bool { return !listed(classes[h.Code]) })
 	}
-	return listed, nil
+	if len(hits) != 1 {
+		return nil, nil
+	}
+	return &hits[0], nil
 }
 
 func (ix *corpIndex) byStockCode(ctx context.Context, code string) (*corp, error) {
@@ -134,7 +150,9 @@ func (ix *corpIndex) byStockCode(ctx context.Context, code string) (*corp, error
 }
 
 // search ranks matches: exact code or name first, then name prefix, then
-// substring, then English name; listed companies and shorter names first.
+// substring, then English name; companies with a stock code (listed now or
+// before), shorter names and recently updated entries first. listedOnly
+// keeps those with a stock code.
 func (ix *corpIndex) search(ctx context.Context, query string, listedOnly bool) ([]corp, error) {
 	corps, _, err := ix.get(ctx)
 	if err != nil {
@@ -178,7 +196,12 @@ func (ix *corpIndex) search(ctx context.Context, query string, listedOnly bool) 
 		if len(ca.Name) != len(cb.Name) {
 			return len(ca.Name) < len(cb.Name)
 		}
-		return ca.Name < cb.Name
+		if ca.Name != cb.Name {
+			return ca.Name < cb.Name
+		}
+		// Of two companies with one name, the recently updated one is more
+		// likely current: the delisted 삼성물산 was last updated in 2017.
+		return ca.ModifyDate > cb.ModifyDate
 	})
 	out := make([]corp, len(hits))
 	for i, h := range hits {

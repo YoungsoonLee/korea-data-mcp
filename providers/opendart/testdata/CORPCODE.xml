@@ -49,4 +49,25 @@
         <stock_code>950200</stock_code>
         <modify_date>20230403</modify_date>
     </list>
+    <list>
+        <corp_code>00126229</corp_code>
+        <corp_name>삼성물산</corp_name>
+        <corp_eng_name>Samsung C&amp;T Corporation</corp_eng_name>
+        <stock_code>000830</stock_code>
+        <modify_date>20170630</modify_date>
+    </list>
+    <list>
+        <corp_code>00149655</corp_code>
+        <corp_name>삼성물산</corp_name>
+        <corp_eng_name>SAMSUNG C&amp;T CORPORATION</corp_eng_name>
+        <stock_code>028260</stock_code>
+        <modify_date>20260323</modify_date>
+    </list>
+    <list>
+        <corp_code>00339063</corp_code>
+        <corp_name>삼성수산</corp_name>
+        <corp_eng_name>Samsung Fisheries co., Ltd.</corp_eng_name>
+        <stock_code>052560</stock_code>
+        <modify_date>20170630</modify_date>
+    </list>
 </result>
