@@ -142,3 +142,21 @@ func TestSearchCorporationsTooBroad(t *testing.T) {
 		t.Errorf("empty query: %+v", e)
 	}
 }
+
+func TestSalary(t *testing.T) {
+	for in, want := range map[string]int64{
+		"109000000":   109000000, // KRW, most records
+		"78":          78000000,  // millions: 삼성디스플레이
+		"40268":       40268000,  // thousands: 일신방직
+		"5294000":     0,         // monthly? 동아일보사
+		"84744540000": 0,         // 동양건설산업, 204 employees
+		"1500":        0,
+		"0":           0,
+		"":            0,
+	} {
+		got := salary(in)
+		if (got == nil) != (want == 0) || got != nil && *got != want {
+			t.Errorf("%q: got %v, want %d", in, got, want)
+		}
+	}
+}

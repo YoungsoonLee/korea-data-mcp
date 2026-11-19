@@ -4,7 +4,7 @@
 
 Korean public APIs work, but each one has its own surprises. An agent that calls them directly has to discover every one of these by failing, and some of them do not fail at all: they return a plausible but wrong answer.
 
-Everything below was **observed on the live APIs** (last checked 2026-11-12), and the real responses are kept in each provider's `testdata/` so the handling is tested.
+Everything below was **observed on the live APIs** (last checked 2026-11-17), and the real responses are kept in each provider's `testdata/` so the handling is tested.
 
 Status: ✅ handled · 🚧 handled when the tool that needs it ships
 
@@ -52,6 +52,8 @@ These are the most dangerous ones: nothing fails, the agent simply gets the wron
 | data.go.kr (company info) | Unknown employee counts and salaries are `0`, not empty. | `0` is treated as unknown and omitted, never shown as "0 employees". | ✅ |
 | data.go.kr (company info) | A search by a **former name** returns only that company's old records: `대우조선해양` gives a company named 대우조선해양(주) with its 2023 CEO, not 한화오션. | `datagokr_get_corporation` lists `former_names` and takes a business registration number too; `entity_resolve_company` resolves a former name to the current company. | ✅ |
 | data.go.kr (company info) | One batch of records from October 2025 has **other names**: S-Oil(주) is 에쓰-오일(주), and KR모터스(주) is 효성기계공업(주), a name from decades earlier. | A name found only between records of another name is not counted as a former name. | ✅ |
+| data.go.kr (company info) | The average salary is in **KRW for most companies but another unit for about 1 in 70**: Kakao's is `109000000`, Samsung Display's `78` (millions), 일신방직's `40268` (thousands), 동아일보사's `5294000` (apparently monthly), and 동양건설산업's `84744540000` for 204 employees. Read as KRW, Samsung Display pays ₩78 a year. | Millions and thousands are converted to KRW; values whose unit cannot be told are left out. | ✅ |
+| data.go.kr (company info) | A **dissolved company keeps its last figures** with a current date: the 삼성물산 merged away in 2015 still has 8,663 employees, and its record is dated 2026-11-16. | `entity_get_profile` checks the business with the National Tax Service and notes when it closed (2015-09-02) and that the overview can predate it. | ✅ |
 | data.go.kr (stock prices) | Querying by name (`itmsNm`) matches the name **on each day**, so a renamed company's history is cut at the rename: `POSCO홀딩스` returns 1,127 of 1,671 days. | Prices are always queried by code; days before a rename carry their old `name`. | ✅ |
 | data.go.kr (stock prices) | The exact-code parameter `srtnCd` is **silently ignored** and returns every stock (4.5 million rows). `likeSrtnCd` is a substring match (`00593` also matches 삼성전자우). | A full 6-character code with `likeSrtnCd`, which is then exact. | ✅ |
 | data.go.kr (stock prices) | Name search is case- and space-sensitive: `naver` and `삼성 전자` return nothing. | Names are matched against the latest day's listing, ignoring case and spaces; an ambiguous name lists the candidates with codes. | ✅ |
@@ -123,6 +125,7 @@ These are the most dangerous ones: nothing fails, the agent simply gets the wron
 | OpenDART (investments) | Investees have only a name, and only **29% of names match DART's company list**: filings write 에스케이하이닉스 and SK플래닛 where DART lists SK하이닉스 and 에스케이플래닛 (원익아이피에스 and 원익IPS, too). | Names are matched with Latin letters read as Korean letter names; each investee that identifies one company gets its `corp_code` and `stock_code`. | ✅ |
 | OpenDART (investments) | Quarterly reports have no investment table: the first quarter returns the `-` rows, the third quarter "no data". | The tool takes `annual` or `half`, and says why for the others. | ✅ |
 | OpenDART (full statements) | Consolidated and separate statements are separate calls (the key accounts API returns both), a company without subsidiaries returns "no data" for consolidated, and half and quarterly reports start in 2016, annual reports in 2015. | The "no data" error says to try the other statement or an earlier year. | ✅ |
+| OpenDART (financials) | The financial statement APIs read **annual and quarterly reports (사업보고서) only**. Most unlisted companies file audit reports (감사보고서) instead, so Samsung Display, with 24,985 employees, has no financials at all: just "no data". | `entity_get_profile` says why and links the latest audit report. | ✅ |
 | data.go.kr (company info) | Company name search is a substring match with no ranking: `삼성전자` returns `삼성전자잠실판매` first, as one of 108 records for 37 companies. `삼성 전자` or `(주)삼성전자` finds nothing useful. | Spacing and corporate forms are stripped before searching, records are merged per company, and the exact match comes first, then listed companies. | ✅ |
 | data.go.kr (company info) | A broad name like `삼성` matches 3,158 records (5.8 MB). | Rejected with a hint to use a more specific name, instead of returning an arbitrary slice. | ✅ |
 | law.go.kr | Official abbreviations are not searched: `중대재해처벌법` finds nothing, although it is the official short name of 「중대재해 처벌 등에 관한 법률」. | Names and abbreviations are matched here, ignoring spaces. | ✅ |

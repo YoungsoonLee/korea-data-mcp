@@ -10,10 +10,10 @@
 
 An MCP server for Korean corporate filings, financials, dividends and major shareholders, stock prices, apartment sale prices and rents, business registration status, public holidays, statutes and court rulings, and Bank of Korea economic statistics, from the official free APIs of OpenDART, data.go.kr, law.go.kr and ECOS.
 
-- **Correct, with evidence.** 101 traps found on the live APIs (wrong half-year revenue, laws not in force yet, cancelled deals, district codes that changed in 2026, and more) are handled, each covered by a test that uses the real response. The full list is public: [What korea-data-mcp handles for you](docs/QUIRKS.md). In a [small evaluation](eval/RESULTS.md), agents with korea-data-mcp answered 10 of 10 questions with one call each; with the raw APIs they hit the traps, needed about 3x the calls, and missed one.
+- **Correct, with evidence.** 104 traps found on the live APIs (wrong half-year revenue, laws not in force yet, cancelled deals, district codes that changed in 2026, and more) are handled, each covered by a test that uses the real response. The full list is public: [What korea-data-mcp handles for you](docs/QUIRKS.md). In a [small evaluation](eval/RESULTS.md), agents with korea-data-mcp answered 10 of 10 questions with one call each; with the raw APIs they hit the traps, needed about 3x the calls, and missed one.
 - **Installs in one click.** A single binary with nothing else to install. In Claude Desktop, open [korea-data-mcp.mcpb](https://github.com/YoungsoonLee/korea-data-mcp/releases/latest/download/korea-data-mcp.mcpb) and enter your keys. Also in the [official MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.YoungsoonLee/korea-data-mcp).
 - **Private.** It runs on your machine. Your keys and questions go only to the government APIs, never through a third-party server, and there is no telemetry.
-- **Focused.** 25 tools with clear descriptions, so an agent picks the right one without filling its context with dozens of others.
+- **Focused.** 26 tools with clear descriptions, so an agent picks the right one without filling its context with dozens of others.
 
 ## News
 
@@ -58,7 +58,7 @@ Three more traps, each of which silently produces a wrong answer:
 - **Deals that never happened.** Apartment trade data keeps cancelled deals, marked only by a flag: 12 of 233 Gangnam trades in September 2025, including a ₩7.5 billion one. Averages that include them are wrong. korea-data-mcp leaves them out.
 - **Codes that quietly stop working.** In 2026, 광주광역시 and 전라남도 merged, 화성시 was split into four 구, and 인천 reorganized its districts. The old district codes, which most code tables still list, now return zero trades, **even for past months**. With korea-data-mcp, an agent just says `광주 북구` or `화성시`.
 
-There is more: errors returned as HTTP 200, stale records mixed with current ones, business numbers that fail when written with hyphens, stock history split by a company rename, and a TLS handshake that fails from Go. See all 101: **[What korea-data-mcp handles for you](docs/QUIRKS.md)**.
+There is more: errors returned as HTTP 200, stale records mixed with current ones, business numbers that fail when written with hyphens, stock history split by a company rename, and a TLS handshake that fails from Go. See all 104: **[What korea-data-mcp handles for you](docs/QUIRKS.md)**.
 
 ## What you can ask
 
@@ -72,6 +72,7 @@ Connect korea-data-mcp to Claude (or any MCP client) and ask in English or Korea
 - "Which listed companies does Samsung Electronics hold stakes in, and how did their shares move last month?"
 - "Check whether our supplier Kakao Games is still in business, with its latest results and largest shareholder."
 - "Which company is 대우조선해양 now, and is it the same company as before?"
+- "Give me a one-page profile of 삼성디스플레이: what it does, how many people work there, and its latest audit report."
 - "What was the median apartment sale price in 분당구 in September 2025?"
 - "What was the median jeonse deposit for new contracts in 강남구 in September 2025?"
 - "Is 제44조의4 of the Labor Standards Act (근로기준법) in force yet?"
@@ -223,11 +224,12 @@ Every OpenDART tool that takes `corp_code` also accepts a 6-character stock code
 | `ecos_get_series` | A time series by named indicator (`base_rate`, `usd_krw`, `jpy_krw`, `eur_krw`, `cny_krw`, `treasury_3y`, `treasury_10y`, `cd_91d`, `corporate_bond_3y`, `kospi`, `kosdaq`, `cpi`, `gdp_growth`, `gdp_growth_yoy`, `gdp`, `gdp_per_capita_usd`, `unemployment_rate`, `employment_rate`, `current_account`, `house_price_index`) or by any table's code, daily to annual. Each series says whether a period's value is an average, the end-of-period level or a total; amounts are in KRW or USD; index series add the change from a year earlier (in points for rates) |
 | `ecos_search_series` | Find tables by Korean or English words (`수출물가`, `housing price`), or list a table's items with their frequencies and date ranges |
 
-**Company resolution** (no key of its own: uses `OPENDART_API_KEY`, `DATAGOKR_SERVICE_KEY`, or both)
+**Company resolution and profiles** (no key of its own: uses `OPENDART_API_KEY`, `DATAGOKR_SERVICE_KEY`, or both)
 
 | Tool | What it does |
 |---|---|
 | `entity_resolve_company` | Identify a company from a name, DART corp_code, corporate or business registration number, stock code (preferred shares too) or ISIN. Returns every identifier the other tools take, the current and former names, whether it is listed now, and whether the business is active or closed. Every company with the name is returned, best match first: two `(주)카카오` file with DART, and one closed in 2014 |
+| `entity_get_profile` | One company in one call: identifiers and status, an overview (address, industry, listing date, employees, auditor), key figures from the latest annual report, the latest stock price and market cap, 5% holders, major decisions of the last 12 months, filings of the last 30 days and National Pension Service subscribers. Every section names its source tool, and filings carry their receipt number. Companies that file audit reports only get a link to the latest one; a dissolved company's stale registry figures are flagged |
 
 **Hub**: `hub_list_providers` lists the enabled providers and the keys that are missing.
 
@@ -244,7 +246,7 @@ Every OpenDART tool that takes `corp_code` also accepts a 6-character stock code
 - [x] data.go.kr: holidays, corporation info, business status, apartment trades and rents, stock prices
 - [x] law.go.kr: statutes, court rulings
 - [x] Bank of Korea ECOS: rates, prices, GDP, employment and any other ECOS table
-- [x] Company resolution across OpenDART and data.go.kr: one company from any name or number
+- [x] Company resolution across OpenDART and data.go.kr: one company from any name or number, and its profile in one call
 - [ ] KOSIS (Korean Statistical Information Service)
 - [ ] A sibling server for Japan, starting with EDINET (corporate disclosures)
 

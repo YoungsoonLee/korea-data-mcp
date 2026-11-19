@@ -20,6 +20,7 @@ import (
 	"slices"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/YoungsoonLee/korea-data-mcp/hub"
 	"github.com/YoungsoonLee/korea-data-mcp/normalize"
@@ -52,12 +53,26 @@ func (p *Provider) Register(r *hub.Registrar) error {
 			"and DART keeps stock codes of delisted companies. A name returns every company with that exact name, best match first. " +
 			"Works with OPENDART_API_KEY, DATAGOKR_SERVICE_KEY or both; with one, the other's fields are missing and incomplete says so.",
 	}, res.resolve)
+	hub.AddTool(r, &mcp.Tool{
+		Name: "entity_get_profile",
+		Description: "Get one Korean company's profile in a single call: identifiers, former names, listing and business status, " +
+			"overview (address, industry, founding and listing dates, employees, auditor), key figures from the latest annual report, " +
+			"the latest stock price and market cap, holders of 5% or more, major decisions (주요사항보고) of the last 12 months, " +
+			"filings of the last 30 days, and National Pension Service subscribers. Every section names the tool it came from, " +
+			"and filings carry their receipt number and DART link. " +
+			"Pass an entity_id from entity_resolve_company, or a name or number it accepts. When several companies match a name, " +
+			"the best match is profiled and the others are listed in other_matches. " +
+			"Works with OPENDART_API_KEY, DATAGOKR_SERVICE_KEY or both; sections a missing key would fill are left out and incomplete says so.",
+	}, res.profile)
 	return nil
 }
 
 type caller func(ctx context.Context, name string, args, out any) error
 
-type resolver struct{ call caller }
+type resolver struct {
+	call caller
+	now  func() time.Time // for tests; time.Now if nil
+}
 
 type resolveInput struct {
 	Query string `json:"query" jsonschema:"company name (삼성전자, 카카오, 대우조선해양), corp_code, crno, business number, stock code or ISIN; hyphens allowed"`
@@ -98,11 +113,25 @@ var (
 const maxCompanies = 10
 
 func (rs *resolver) resolve(ctx context.Context, in resolveInput) (Resolution, error) {
-	q := strings.TrimSpace(in.Query)
-	if normalize.CompanyName(q) == "" {
-		return Resolution{}, hub.Errorf(hub.CodeInvalidArgument, "query is required")
-	}
 	x := &run{ctx: ctx, call: rs.call}
+	out, found, err := x.find(in.Query)
+	if err != nil {
+		return Resolution{}, err
+	}
+	if n := countShared(found); n > 1 {
+		out.Note = strings.TrimSpace(out.Note + " " + fmt.Sprintf("%d companies have this name; check corp_code, business_status and listed before using one.", n))
+	}
+	out.Incomplete = x.incomplete()
+	return out, nil
+}
+
+// find resolves a query to companies, best match first, with the candidates
+// they came from.
+func (x *run) find(q string) (Resolution, []*cand, error) {
+	q = strings.TrimSpace(q)
+	if normalize.CompanyName(q) == "" {
+		return Resolution{}, nil, hub.Errorf(hub.CodeInvalidArgument, "query is required")
+	}
 	out := Resolution{Query: q, Companies: []Company{}}
 	id := strings.ToUpper(strings.NewReplacer("-", "", " ", "").Replace(q))
 	var (
@@ -132,7 +161,7 @@ func (rs *resolver) resolve(ctx context.Context, in resolveInput) (Resolution, e
 		cands, out.Note, err = x.seedName(q)
 	}
 	if err != nil {
-		return Resolution{}, err
+		return Resolution{}, nil, err
 	}
 
 	x.enrich(cands)
@@ -141,10 +170,11 @@ func (rs *resolver) resolve(ctx context.Context, in resolveInput) (Resolution, e
 		cands = slices.DeleteFunc(cands, func(c *cand) bool { return !c.found })
 	}
 	if len(cands) == 0 {
-		return Resolution{}, x.notFound(q)
+		return Resolution{}, nil, x.notFound(q)
 	}
 	slices.SortStableFunc(cands, compareCands)
 	seen := map[string]bool{}
+	var found []*cand
 	for _, c := range cands {
 		// A search by a former name and one by the current name can find
 		// the same company.
@@ -152,16 +182,13 @@ func (rs *resolver) resolve(ctx context.Context, in resolveInput) (Resolution, e
 			continue
 		}
 		seen[c.EntityID] = true
+		found = append(found, c)
 		out.Companies = append(out.Companies, c.Company)
 	}
 	if out.MatchedBy == "business_number" && out.Companies[0].Name == "" {
 		out.Note = "Only the National Tax Service knows this number, without a name: a sole proprietor's, or a corporation missing from the FSC registry."
 	}
-	if out.MatchedBy == "name" && len(out.Companies) > 1 && cands[1].exact {
-		out.Note = strings.TrimSpace(out.Note + " " + fmt.Sprintf("%d companies have this name; check corp_code, business_status and listed before using one.", countExact(cands)))
-	}
-	out.Incomplete = x.incomplete()
-	return out, nil
+	return out, found, nil
 }
 
 // cand is a company being resolved.
@@ -170,6 +197,9 @@ type cand struct {
 	exact bool // the query is its name
 	found bool // some source knows it
 	order int  // position in the search results
+
+	dart *opendart.CompanyProfile
+	fsc  *datagokr.CorporationProfile
 }
 
 func entityID(c Company) string {
@@ -204,9 +234,14 @@ func compareBool(a, b bool) int {
 	return 1
 }
 
-func countExact(cands []*cand) int {
+// countShared counts the companies found by their exact name, when more
+// than one is.
+func countShared(found []*cand) int {
+	if len(found) < 2 || !found[1].exact {
+		return 0
+	}
 	n := 0
-	for _, c := range cands {
+	for _, c := range found {
 		if c.exact {
 			n++
 		}
@@ -470,10 +505,13 @@ func (x *run) enrichOne(c *cand) {
 			c.found = true
 		}
 	}
-	if c.CorpCode == "" && c.Crno != "" {
+	if c.fsc != nil {
+		fscDone = true
+	}
+	if !fscDone && c.CorpCode == "" && c.Crno != "" {
 		fsc()
 	}
-	if c.CorpCode != "" {
+	if c.CorpCode != "" && c.dart == nil {
 		var p opendart.CompanyProfile
 		if x.do("opendart_get_company", map[string]any{"corp_code": c.CorpCode}, &p) == nil {
 			c.fromDART(p)
@@ -494,6 +532,7 @@ func (c *cand) fromDART(p opendart.CompanyProfile) {
 	if c.Name != "" && !sameName(c.Name, p.CorpName) && c.MatchedName == "" && c.exact {
 		c.MatchedName = c.Name
 	}
+	c.dart = &p
 	c.CorpCode, c.Name = p.CorpCode, p.CorpName
 	c.NameEn = cmp.Or(p.CorpNameEng, c.NameEn)
 	c.StockCode, c.StockName = cmp.Or(p.StockCode, c.StockCode), p.StockName
@@ -512,6 +551,7 @@ func (c *cand) fromDART(p opendart.CompanyProfile) {
 
 // fromFSC fills what DART lacks from the FSC registry, and the former names.
 func (c *cand) fromFSC(p datagokr.CorporationProfile) {
+	c.fsc = &p
 	c.Crno = p.Crno
 	c.CorpCode = cmp.Or(c.CorpCode, p.DartCorpCode)
 	c.Name = cmp.Or(c.Name, p.Name)

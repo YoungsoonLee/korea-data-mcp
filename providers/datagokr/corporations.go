@@ -236,7 +236,7 @@ type CorporationProfile struct {
 	MainBusiness       string       `json:"main_business,omitempty"`
 	Employees          *int64       `json:"employees,omitempty"`
 	AvgTenureYears     *float64     `json:"avg_tenure_years,omitempty"`
-	AvgSalary          *int64       `json:"avg_salary,omitempty" jsonschema:"average annual salary per employee, KRW"`
+	AvgSalary          *int64       `json:"avg_salary,omitempty" jsonschema:"average annual salary per employee, KRW; left out when the registry's unit is unclear"`
 	MainBank           string       `json:"main_bank,omitempty"`
 	Auditor            string       `json:"auditor,omitempty"`
 	AuditOpinion       string       `json:"audit_opinion,omitempty"`
@@ -307,7 +307,7 @@ func (c *client) getCorporation(ctx context.Context, in getCorporationInput) (Co
 		Industry:        text(r.SicNm),
 		MainBusiness:    text(r.EnpMainBizNm),
 		Employees:       positive(r.EnpEmpeCnt),
-		AvgSalary:       positive(r.EnpPn1AvgSlryAmt),
+		AvgSalary:       salary(r.EnpPn1AvgSlryAmt),
 		MainBank:        text(r.EnpMntrBnkNm),
 		Auditor:         text(r.ActnAudpnNm),
 		AuditOpinion:    text(r.AudtRptOpnnCtt),
@@ -402,6 +402,27 @@ func date(s string) string {
 }
 
 // positive parses a count or amount where the service uses 0 for "unknown".
+// salary converts the average salary to KRW. Most records give it in KRW
+// (카카오 109000000), but about 1 in 70 use another unit: millions
+// (삼성디스플레이 78, 우리은행 95), thousands (일신방직 40268), what looks
+// like a monthly figure (동아일보사 5294000), or a number far too large for
+// one person (동양건설산업 84744540000, 204 employees). The first two are
+// converted; values whose unit cannot be told are left out.
+func salary(s string) *int64 {
+	n := positive(s)
+	switch {
+	case n == nil:
+		return nil
+	case *n < 1_000:
+		*n *= 1_000_000
+	case *n >= 10_000 && *n < 1_000_000:
+		*n *= 1_000
+	case *n < 10_000_000 || *n >= 1_000_000_000:
+		return nil
+	}
+	return n
+}
+
 func positive(s string) *int64 {
 	if n := normalize.Int(s); n != nil && *n > 0 {
 		return n

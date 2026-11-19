@@ -91,7 +91,8 @@
     { "name": "lawgokr_get_precedent", "description": "A ruling's issues, holding, cited statutes and full text" },
     { "name": "ecos_get_series", "description": "Bank of Korea time series: base rate, FX, yields, CPI, GDP, jobs, or any table" },
     { "name": "ecos_search_series", "description": "Find Bank of Korea statistics tables and their items" },
-    { "name": "entity_resolve_company", "description": "One company from any name or number: all IDs, former names, listed, active or closed" }
+    { "name": "entity_resolve_company", "description": "One company from any name or number: all IDs, former names, listed, active or closed" },
+    { "name": "entity_get_profile", "description": "One company in one call: overview, key figures, stock, 5% holders, recent filings, employees, with sources" }
   ],
   "compatibility": {
     "platforms": ["darwin", "win32", "linux"]

@@ -3,6 +3,7 @@ package entity
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"slices"
 	"strings"
 	"sync"
@@ -75,6 +76,8 @@ var (
 		"2208162517": {Registered: true, Status: "active"}, // not in the FSC registry here
 	}
 	stocks = map[string]datagokr.Stock{
+		"035720":       {Code: "035720", Name: "카카오", Market: "KOSPI"},
+		"042660":       {Code: "042660", Name: "한화오션", Market: "KOSPI"},
 		"0153R0":       {Code: "0153R0", Name: "바로팜", Market: "KOSDAQ"},
 		"KR8840150005": {Code: "950200", Name: "소마젠", Market: "KOSDAQ"},
 	}
@@ -131,7 +134,29 @@ func (f *fake) call(_ context.Context, name string, args, out any) error {
 		if !ok {
 			return notFound
 		}
-		res = datagokr.StockPrices{Stock: s}
+		res = datagokr.StockPrices{Stock: s, Items: prices[s.Code]}
+	case "opendart_get_financials":
+		k := fmt.Sprintf("%s/%v/%s", str("corp_code"), a["year"], str("statement"))
+		if e, ok := financialsErr[k]; ok {
+			return e
+		}
+		f, ok := financials[k]
+		if !ok {
+			return hub.Errorf(hub.CodeNotFound, "OpenDART: 조회된 데이타가 없습니다.")
+		}
+		res = f
+	case "opendart_search_disclosures":
+		l := disclosures[str("corp_code")+"/"+str("type")]
+		l.PageInfo.TotalCount = max(l.PageInfo.TotalCount, len(l.Items))
+		res = l
+	case "opendart_get_ownership_reports":
+		r, ok := ownership[str("corp_code")]
+		if !ok {
+			return notFound
+		}
+		res = r
+	case "datagokr_get_pension_workplaces":
+		res = pension[str("business_number")]
 	default:
 		panic(name)
 	}
